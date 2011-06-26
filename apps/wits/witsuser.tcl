@@ -480,7 +480,7 @@ proc wits::app::user::changeaccountstatus {sids newstate viewer} {
                                   -icon question \
                                   -parent $viewer \
                                   -type yesno]
-                if {$go_ahead} {
+                if {$go_ahead eq "yes"} {
                     ::twapi::unlock_user $user
                     set userstatus($user) [lindex [::twapi::get_user_account_info $user -status] 1]
                 } else {

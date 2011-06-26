@@ -1855,7 +1855,7 @@ proc ::wits::app::main {} {
                                 -type yesno \
                                 -title "$::wits::app::name: Raise privileges?" \
                                ]
-                if {$answer} {
+                if {$answer eq "yes"} {
                     restart_elevated
                 }
             }

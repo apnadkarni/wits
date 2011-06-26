@@ -463,7 +463,7 @@ proc wits::app::process::terminate_processes {pids parentwin} {
                       -type yesno
                  ]
 
-    if {! $response} {
+    if {$response ne "yes"} {
         return
     }
 
