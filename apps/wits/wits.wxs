@@ -1,0 +1,232 @@
+<?xml version='1.0' encoding='windows-1252'?>
+<!-- Variable WitsPlatform should be defined on command line as either -->
+<!-- x86 or x64 otherwise the build will fail. Intentionally no default. -->
+<?define WitsName = "$(env.PRODUCT_LONG_NAME)" ?>
+<?define WitsVersion = "$(env.PRODUCT_VERSION)" ?>
+<?define WitsManufacturer = "Ashok P. Nadkarni" ?>
+<?define WitsSKUName= "$(env.APP_SHORT_NAME)" ?>
+<?define WitsReleaseName= $(env.PRODUCT_RELEASE_NAME) ?>
+
+<!-- Define plaform specific GUIDS and values. These are named as -->
+<!-- "Wits" followed by the corresponding Wix name -->
+<?if $(var.WitsPlatform)=x86 ?>
+  <?define WitsProductId =  '579F898C-0D43-4b92-9F97-F1815DD0F0E3' ?>
+  <?define WitsUpgradeCode = 'FD746785-3486-487D-83FD-D917EF67AA45' ?>
+  <?define WitsProgramFilesFolder = 'ProgramFilesFolder'?>
+  <?define WitsWin64 = 'no' ?>
+  <?define WitsGuidMainExecutable = 'CB45E67A-FF01-4032-99BE-643D02F6E8AD' ?>
+  <?define WitsGuidSettings = 'D56B484A-6587-4b75-A319-794A5E1420E9' ?>
+  <?define WitsGuidIconSources = '3286BED3-22EC-4539-82DD-B7F953F6D798' ?>
+  <?define WitsGuidProgramMenuDir = 'B0967DC0-5DCF-4b61-BD03-DB796313816F' ?>
+<?elseif $(var.WitsPlatform)=x64 ?>
+  <?define WitsProductId =  'C492D78D-C0B4-437B-A899-F021BE661A1B' ?>
+  <?define WitsUpgradeCode = '3640464D-8664-4A5C-921E-C0A89663F7A8' ?>
+  <?define WitsProgramFilesFolder = 'ProgramFiles64Folder'?>
+  <?define WitsWin64 = 'yes' ?>
+  <?define WitsGuidMainExecutable = '6A75DDF3-6655-4559-ADBE-DD3D20E20222' ?>
+  <?define WitsGuidSettings = 'A89467A9-2EB9-4665-9C3F-E90711020C14' ?>
+  <?define WitsGuidIconSources = 'FB5CE192-9055-4C07-A5B8-CAFC58901C22' ?>
+  <?define WitsGuidProgramMenuDir = '4E79F6FF-4AED-4D0A-9BFC-DA4AB0CFFFDB' ?>
+<?else ?>
+  <?error Variable WitsPlatform must be defined as x86 or x64 on the command line. ?>
+<?endif ?>
+
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+  <Product Name='$(var.WitsReleaseName)'
+           Id='$(var.WitsProductId)'
+           UpgradeCode='$(var.WitsUpgradeCode)'
+           Language='1033'
+           Codepage='1252'
+           Version='$(var.WitsVersion)'
+           Manufacturer='$(var.WitsManufacturer)'>
+
+    <Package Id='*' Keywords='Installer'
+             Description='$(var.WitsReleaseName) Installer'
+             AdminImage='no'
+             Comments='Installation package for $(var.WitsReleaseName) - a utility for inspecting Windows components.'
+             Platform='$(var.WitsPlatform)'
+             Manufacturer='$(var.WitsManufacturer)'
+             InstallerVersion='300'
+             Languages='1033'
+             Compressed='yes'
+             SummaryCodepage='1252' />
+
+    <!-- UPGRADE INFORMATION -->
+
+    <Upgrade Id='$(var.WitsUpgradeCode)'>
+      <UpgradeVersion  Property='NEWERVERSIONDETECTED'
+	  Minimum='$(var.WitsVersion)' IncludeMinimum='yes'
+	  OnlyDetect='yes' />
+      <UpgradeVersion Property='OLDERVERSIONBEINGUPGRADED'
+	  Minimum='1.0.0'  IncludeMinimum='yes'
+	  Maximum='$(var.WitsVersion)'  IncludeMaximum='no'
+	  OnlyDetect='no' />
+    </Upgrade>
+
+    <!-- MEDIA DEFINITIONS -->
+
+    <Media Id='1'
+           Cabinet='$(var.WitsSKUName).cab'
+           CompressionLevel='high'
+           EmbedCab='yes'
+           DiskPrompt="CD-ROM #1" />
+    <Property Id='DiskPrompt' Value="$(var.WitsReleaseName) Installation [1]" />
+
+    
+    <!-- PROPERTIES SHOWN IN ADD/REMOVE PROGRAMS --> 
+
+    <Property Id='ARPURLINFOABOUT' Value='http://wits.magicsplat.com' />
+    <Property Id='ARPHELPLINK' Value='http://wits.magicsplat.com/support.html' />
+    <Property Id='ARPCOMMENTS' Value='Utility for inspecting Windows components' />
+    <Property Id='ARPPRODUCTICON' Value='wits.ico' />
+    <Property Id="ALLUSERS">1</Property>
+
+    <Property Id="LAUNCHPRODUCT">1</Property>
+
+    <!-- LAUNCH CONDITIONS -->
+
+    <Condition
+       Message='This program is only supported on Windows XP and later versions of Windows.'>VersionNT &gt;= 501
+    </Condition>
+
+    <?if $(var.WitsPlatform)=x86 ?>
+      <Condition Message="You are running a 64-bit version of Windows and this installation package only supports 32-bit versions. Please install the 64-bit version of this package instead.">NOT  VersionNT64</Condition>
+    <?else ?>
+      <Condition Message="You are running a 64-bit version of Windows and this installation package only supports 32-bit versions. Please install the 64-bit version of this package instead.">VersionNT64</Condition>
+    <?endif ?>
+
+
+    <!--  CUSTOM ACTIONS -->
+
+    <!-- Prevent downgrading -->
+    <CustomAction Id="PreventDowngrading"
+                  Error="Newer version of this product is already installed." />
+    <!-- Command to launch the program after completion of setup -->
+    <CustomAction Id='LaunchFile' FileKey='WitsEXE' ExeCommand='' Return="asyncNoWait" />
+
+    <!-- Terminate any existing copies of the program -->
+    <CustomAction Id="KillWiTS" ExeCommand='"[INSTALLDIR]wits.exe" -killall' Directory='INSTALLDIR' Return="ignore" />
+
+
+    <Directory Id='TARGETDIR' Name='SourceDir'>
+      <Directory Id='$(var.WitsProgramFilesFolder)' Name='PFiles'>
+        <Directory Id='INSTALLDIR' ShortName='WiTS' Name='$(var.WitsName)'>
+          <Component Id='MainExecutable'
+		     Guid='$(var.WitsGuidMainExecutable)'
+		     Win64='$(var.WitsWin64)'>
+            <File Id='WitsEXE'
+                  Name='wits.exe'
+                  DiskId='1'
+                  Source='wits.exe'
+		  KeyPath='yes'
+                  Vital='yes'>
+              <Shortcut Id="startmenuWits"
+                        Directory="ProgramMenuDir"
+                        Name="WiTS"
+                        WorkingDirectory='INSTALLDIR'
+			Advertise='yes'
+                        Icon="wits.ico"
+                        IconIndex="0" />
+              <Shortcut Id="desktopWits"
+                        Directory="DesktopFolder"
+                        Name="WiTS"
+                        WorkingDirectory='INSTALLDIR'
+			Advertise='yes'
+                        Icon="wits.ico"
+                        IconIndex="0" />
+            </File>
+            <File Id='LICENSE'
+                  Name='License.rtf'
+                  DiskId='1'
+                  Source='License.rtf'>
+            </File>
+	  </Component>
+	  <Component Id='Settings'
+		     Guid='$(var.WitsGuidSettings)'
+		     Win64='$(var.WitsWin64)'>
+	    <RegistryKey Root="HKCU"
+			 Key="Software\Microsoft\Windows\CurrentVersion\Run"
+			 Action='none'>
+	      <RegistryValue
+		  Name="WiTS"
+		  Type="string"
+		  Value='"[INSTALLDIR]wits.exe" -iconify'/>
+	    </RegistryKey>
+            <RegistryKey Root="HKCU"
+			 Key="Software\$(var.WitsName)"
+			 Action="createAndRemoveOnUninstall">
+	      <RegistryKey Key="General" Action="create">
+		<RegistryValue Name='InstallDir' Type='string' Value='[INSTALLDIR]' />
+		<RegistryValue Name="RunAtLogon" Type="integer" Value='1' />
+	      </RegistryKey>
+	      <RegistryKey Key="Software Updates" Action='create'>
+		<RegistryValue Name="CheckUpdates" Type="integer" Value='1' />
+	      </RegistryKey>
+	    </RegistryKey>
+          </Component>
+          <Component Id='IconSources'
+		     Guid='$(var.WitsGuidIconSources)'
+		     Win64='$(var.WitsWin64)'>
+            <File Id='NuvolaZIP'
+                  Name='nuvola.zip'
+                  DiskId='1'
+                  Source='nuvola.zip'
+		  KeyPath='yes'
+                  Vital='no'>
+            </File>
+          </Component>
+        </Directory>
+      </Directory>
+
+      <Directory Id='ProgramMenuFolder' Name='Programs'>
+        <Directory Id='ProgramMenuDir' ShortName='WiTS' Name='$(var.WitsName)'>
+	  <Component Id='ProgramMenuDir'
+		     Guid='$(var.WitsGuidProgramMenuDir)'
+		     Win64='$(var.WitsWin64)'>
+	    <RemoveFolder Id='ProgramMenuDir' On='uninstall'/>
+	    <RegistryValue Root='HKCU' Key='Software\$(var.WitsSKUName)' Type='string' Value='' KeyPath='yes' />
+	  </Component>
+	</Directory>
+      </Directory>
+      
+      <Directory Id='DesktopFolder' Name='Desktop' />
+      <Directory Id='StartupFolder' Name='Startup' />
+    </Directory>
+
+    <Feature Id='Complete' Title='$(var.WitsName)' Description='Complete package.'
+      Display='expand' Level='1' ConfigurableDirectory='INSTALLDIR'>
+      <Feature Id='MainProgram' Title='Program' Description='The main executable.' Level='1'>
+        <ComponentRef Id='MainExecutable' />
+        <ComponentRef Id='Settings' />
+        <ComponentRef Id='IconSources' />
+        <ComponentRef Id='ProgramMenuDir' />
+      </Feature>
+    </Feature>
+
+    <!-- USER INTERFACE -->
+
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.WitsName)]" />
+    <CustomAction Id="LaunchApplication" FileKey="WitsEXE" ExeCommand='' Return='asyncNoWait' Impersonate="yes" />
+
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    <UI>
+      <Publish Dialog="ExitDialog"
+	       Control="Finish" 
+	       Event="DoAction" 
+	       Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
+      <InstallUISequence>
+         <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWERVERSIONDETECTED</Custom>
+       </InstallUISequence>
+    </UI>
+    <UIRef Id="WixUI_Minimal" />
+
+    <Icon Id="wits.ico" SourceFile="wits.ico" />
+
+    <InstallExecuteSequence>
+      <Custom Action='KillWiTS' Before='InstallValidate'>Installed</Custom>
+      <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWERVERSIONDETECTED</Custom>
+      <RemoveExistingProducts After="InstallInitialize" />
+    </InstallExecuteSequence>
+
+  </Product>
+</Wix>

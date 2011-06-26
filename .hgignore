@@ -1,0 +1,18 @@
+syntax: glob
+
+# Emacs backups
+*~
+
+# SyncToy state
+SyncToy*.dat
+
+Thumbs.db
+*.log
+*.orig
+*.pdb
+temp
+
+\#*#
+
+build
+
