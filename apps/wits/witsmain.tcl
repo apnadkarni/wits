@@ -1853,7 +1853,7 @@ proc ::wits::app::main {} {
                                 -detail "Click Yes to run with elevated privileges. Click No to continue with existing privileges." \
                                 -icon question \
                                 -type yesno \
-                                -title "$::wits::app::name: Raise privileges?" \
+                                -title "$::wits::app::long_name: Raise privileges?" \
                                ]
                 if {$answer eq "yes"} {
                     restart_elevated
