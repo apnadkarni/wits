@@ -17,6 +17,7 @@ package require tooltip 1.1;    # Used when labels are truncated
 package require widget::dialog
 package require widget::scrolledwindow
 
+
 namespace eval wits::widget {
     # Array indexed by WITS class, part
     # Contains corresponding Tile style
@@ -181,7 +182,12 @@ proc wits::widget::_init_styles {{force false}} {
 
     ttk::style layout Highlighted.Toolbutton {Toolbutton.border -sticky nswe -children {Button.focus -sticky nswe -children {Toolbutton.padding -sticky nswe -children {Toolbutton.label -sticky nswe}}}}
 
-    ttk::style layout Highlighted.Menubutton {Menubutton.dropdown -side right -sticky ns Menubutton.button -expand 1 -sticky nswe -children {Menubutton.padding -expand 1 -sticky we -children {Button.focus -sticky nswe -children {Menubutton.label -sticky {}}}}}
+    if {[ttk::style theme use] eq "winnative"} {
+        ttk::style configure WitsMenubutton.TMenubutton -relief flat
+    } else {
+        # Need a focus highlight around the menubutton
+        ttk::style layout WitsMenubutton.TMenubutton {Menubutton.dropdown -side right -sticky ns Menubutton.button -expand 1 -sticky nswe -children {Menubutton.padding -expand 1 -sticky we -children {Button.focus -sticky nswe -children {Menubutton.label -sticky {}}}}}
+    }
 }
 
 
@@ -5819,7 +5825,7 @@ snit::widgetadaptor wits::widget::listframe {
                                    -command [mymethod _setdisplaymode]]
         } else {
             set _displaymode "highlighted"
-            set mbdisplaymode [::ttk::menubutton $_statusframe.mbdisplaymode -text [dict get $_displaymodelabels $_displaymode] -style Highlighted.Menubutton]
+            set mbdisplaymode [::ttk::menubutton $_statusframe.mbdisplaymode -text [dict get $_displaymodelabels $_displaymode] -style WitsMenubutton.TMenubutton]
             set m [menu $mbdisplaymode.menu -tearoff 0]
             $mbdisplaymode configure -menu $m
             foreach tok {standard highlighted changes} {
