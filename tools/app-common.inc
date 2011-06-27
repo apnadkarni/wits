@@ -161,6 +161,22 @@ $(APPTARGET): "$(BUILDDIR)\$(APPTARGET).exe"
 	copy << $(VFSDIR)\main.tcl
 package require starkit
 starkit::startup
+# Redefine load to load from outside starkit if dll is present
+# This is to get around proliferation of temp dll files that are not
+# cleaned up on exit
+rename ::load ::__$(APPNAME)_original_load
+proc ::load {fn args} {
+    # fn == "" means static package
+    if {$$fn ne ""} {
+        set tail [file tail $$fn]
+    	set exedir [file dirname [info nameofexecutable]]
+	if {[file exists [file join $$exedir $$tail]]} {
+    	    set fn [file join $$exedir $$tail]
+	}
+    }
+    uplevel 1 [list __$(APPNAME)_original_load $$fn] $$args
+}
+
 # Reset tm paths - do not want to automatically pick up libs from outside kit
 ::tcl::tm::remove {*}[::tcl::tm::path list]
 ::tcl::tm::path add [file join $$starkit::topdir lib]
