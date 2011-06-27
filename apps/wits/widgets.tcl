@@ -5210,7 +5210,7 @@ snit::widgetadaptor wits::widget::listframe {
                 $_treectrl item configure $items -visible 1
             }
         } else {
-            $_treectrl item delete $items
+            $_treectrl item delete [list "list" $items]
         }
     }
 
