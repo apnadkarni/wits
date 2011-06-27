@@ -140,6 +140,13 @@
                   DiskId='1'
                   Source='License.rtf'>
             </File>
+            <File Id='TreectrlDLL'
+                  Name='treectrl24.dll'
+                  DiskId='1'
+                  Source='treectrl24.dll'
+		  KeyPath='no'
+                  Vital='yes'>
+	    </File>
 	  </Component>
 	  <Component Id='Settings'
 		     Guid='$(var.WitsGuidSettings)'
@@ -205,7 +212,7 @@
 
     <!-- USER INTERFACE -->
 
-    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.WitsName)]" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.WitsName)" />
     <CustomAction Id="LaunchApplication" FileKey="WitsEXE" ExeCommand='' Return='asyncNoWait' Impersonate="yes" />
 
     <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />

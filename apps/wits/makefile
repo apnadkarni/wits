@@ -100,9 +100,9 @@ TREECTRLDIR=$(THIRDPARTYDIR)\treectrl-2.4-beta\$(PLATFORM)
 "$(VFSDIR)\lib\treectrl": 
 	-mkdir $@
 	copy "$(TREECTRLDIR)\pkgIndex.tcl" $@
-	copy "$(TREECTRLDIR)\treectrl24.dll" $@
 	copy "$(TREECTRLDIR)\treectrl.tcl" $@
 	copy "$(TREECTRLDIR)\filelist-bindings.tcl" $@
+#	copy "$(TREECTRLDIR)\treectrl24.dll" $@
 
 "$(VFSDIR)\lib\widget": 
 	-mkdir $@
@@ -135,9 +135,10 @@ nuvolazip: $(IMAGEFILES)
 # product guid changes.
 
 MSIPATH="$(DISTBUILDDIR)\$(APPNAME)-$(APPVERSIONMAJOR).$(APPVERSIONMINOR)($(PLATFORM)).msi"
-installer: nuvolazip wits.wxs images\nuvola\wits.ico binary-license.rtf
+installer: nuvolazip wits.wxs images\nuvola\wits.ico binary-license.rtf $(TREECTRLDIR)\treectrl24.dll
 	-mkdir "$(DISTBUILDDIR)"
 	copy /b /y "$(BUILDDIR)\$(APPTARGET).exe" "$(DISTBUILDDIR)\$(APPNAME).exe"
+	copy "$(TREECTRLDIR)\treectrl24.dll" "$(DISTBUILDDIR)"
         copy /y images\nuvola\wits.ico "$(DISTBUILDDIR)"
         copy /y binary-license.rtf "$(DISTBUILDDIR)\License.rtf"
         set PRODUCT_LONG_NAME=$(UILONGNAME)
