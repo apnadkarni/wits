@@ -152,6 +152,9 @@ ZIP="$(TOOLDIR)\zip.exe"
 WIXDIR=$(PROGRAMFILES)\Windows Installer XML v3.5
 !endif
 
+!ifndef MT
+MT="$(PROGRAMFILES)\Microsoft SDKs\Windows\v7.0\bin\mt.exe"
+!endif
 
 # Define standard targets
 
@@ -197,11 +200,29 @@ if {[llength [info commands $(APPNAME)::app::main]]} {
 	copy /Y/B $(KIT_RUNTIME) "$(BUILDDIR)\$(APPTARGET)-runtime.exe"
 	cd "$(BUILDDIR)" && $(CTCL) $(SDX) wrap $(APPTARGET).exe -runtime $(APPTARGET)-runtime.exe
 	cd "$(BUILDDIR)" && $(CTCL) $(SDX) mksplit $(APPTARGET).exe
+	$(CTCL) "$(TOOLDIR)\makemanifest.tcl" "$(BUILDDIR)\$(APPTARGET)-runtime.exe" "$(APPNAME)" "$(APPVERSION).0" "$(UILONGNAME)" > "$(BUILDDIR)\$(APPTARGET)-runtime.manifest"
+	copy << "$(BUILDDIR)\$(APPTARGET)-trust.manifest"
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <ms_asmv2:trustInfo xmlns:ms_asmv2="urn:schemas-microsoft-com:asm.v2">
+    <ms_asmv2:security>
+      <ms_asmv2:requestedPrivileges>
+        <ms_asmv2:requestedExecutionLevel level="asInvoker" uiAccess="false"/>
+      </ms_asmv2:requestedPrivileges>
+    </ms_asmv2:security>
+  </ms_asmv2:trustInfo>
+</assembly>
+<<KEEP
+	cd "$(BUILDDIR)" && $(MT) -manifest $(APPTARGET)-runtime.manifest $(APPTARGET)-trust.manifest -out:$(APPTARGET).manifest
+	cd "$(BUILDDIR)" && $(MT) -manifest $(APPTARGET).manifest -validate_manifest
+	cd "$(BUILDDIR)" && $(MT) -manifest $(APPTARGET).manifest -outputresource:$(APPTARGET).head
 	$(CTCL) write_version_resource "$(BUILDDIR)\$(APPTARGET).head" -copyright "$(COPYRIGHT)" -timestamp now -version $(APPVERSION) -productversion $(PRODUCTVERSION) ProductName "$(UILONGNAME)" FileDescription "$(APPDESC)" CompanyName "$(APPAUTHOR)" FileVersion "$(APPVERSIONSTR)" ProductVersion "$(PRODUCTVERSIONSTR)"
-!if "$(APPICO)" != ""
+!ifdef APPICO
 	$(CTCL) write_icon_resource "$(BUILDDIR)\$(APPTARGET).head" $(APPICO) -name TK
 !endif
 	cd "$(BUILDDIR)" && copy /b /y $(APPTARGET).head+$(APPTARGET).tail $(APPTARGET).exe
+
+
 
 "$(BUILDDIR)":
 	if not exist "$(BUILDDIR)" mkdir "$(BUILDDIR)"
