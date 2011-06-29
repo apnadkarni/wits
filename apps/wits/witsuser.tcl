@@ -182,11 +182,12 @@ oo::class create wits::app::user::Objects {
 
     method _retrieve1 {sid propnames} {
         set result [get_sid_info $sid]
+        set system [wits::app::account::get_defining_system_for_account $sid]
         set get_user_info_opts {}
         foreach propname $propnames {
             switch -exact -- $propname {
                 -rights {
-                    dict set result -rights [twapi::get_account_rights $sid]
+                    dict set result -rights [twapi::get_account_rights $sid -system $system]
                 }
                 name -
                 -domain -
@@ -205,7 +206,7 @@ oo::class create wits::app::user::Objects {
             }
         }
         if {[dict size $get_user_info_opts]} {
-            set userinfo [twapi::get_user_account_info [sid_to_name $sid] {*}[dict values $get_user_info_opts]]
+            set userinfo [twapi::get_user_account_info [sid_to_name $sid] -system $system {*}[dict values $get_user_info_opts]]
             foreach propname [dict keys $get_user_info_opts] {
                 dict set result $propname [dict get $userinfo [dict get $get_user_info_opts $propname]]
             }

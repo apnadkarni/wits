@@ -44,7 +44,7 @@ namespace eval wits::app::account {
     proc get_defining_system_for_account {sid} {
         # TBD - revisit this code
 
-        array set accinfo [twapi::lookup_account_sid $sid -all]
+        array set accinfo [::wits::app::get_sid_info $sid]
         # If type is not "user" or "group" (which means domain group)
         # then just indicate local system
         if {$accinfo(-type) ne "user" && $accinfo(-type) ne "group"} {
