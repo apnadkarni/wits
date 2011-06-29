@@ -156,6 +156,10 @@ WIXDIR=$(PROGRAMFILES)\Windows Installer XML v3.5
 MT="$(PROGRAMFILES)\Microsoft SDKs\Windows\v7.0\bin\mt.exe"
 !endif
 
+!ifndef 7ZIPDIR
+7ZIPDIR=$(PROGRAMFILES)\7-zip
+!endif
+
 # Define standard targets
 
 $(APPTARGET): "$(BUILDDIR)\$(APPTARGET).exe"
@@ -223,8 +227,6 @@ if {[llength [info commands $(APPNAME)::app::main]]} {
 	cd "$(BUILDDIR)" && copy /b /y $(APPTARGET).head+$(APPTARGET).tail $(APPTARGET).exe
 	cd "$(BUILDDIR)" && $(MT) -inputresource:$(APPTARGET).exe -validate_manifest
 
-
-
 "$(BUILDDIR)":
 	if not exist "$(BUILDDIR)" mkdir "$(BUILDDIR)"
 
@@ -244,7 +246,8 @@ $(APPNAME)version.tcl: makefile
 
 release: makefile
 	-rmdir/s/q "$(BUILDROOT)\release\$(APPNAME)"
-	$(MAKE) $(MAKEFLAGS) BUILDROOT=$(BUILDROOT)\release
-	$(MAKE) $(MAKEFLAGS) BUILDROOT=$(BUILDROOT)\release installer
+	$(MAKE) MAKEFLAGS=$(MAKEFLAGS) BUILDROOT=$(BUILDROOT)\release
+	echo XXX
+	$(MAKE) /d installer MAKEFLAGS=$(MAKEFLAGS) BUILDROOT=$(BUILDROOT)\release
 
 

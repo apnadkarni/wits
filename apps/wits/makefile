@@ -120,12 +120,6 @@ imagedata.tcl: makefile
 	cd "$(BUILDDIR)" && $(CTCL) "$(TOOLDIR)\createimagedatafile.tcl" "$(MAKEDIR)/imagedata.tcl" images::image_data $(IMAGEDIRS)
 
 
-nuvolazip: $(IMAGEFILES)
-        -rmdir /s/q $(DISTBUILDDIR)\nuvola
-        mkdir $(DISTBUILDDIR)\nuvola
-        xcopy /S /I /EXCLUDE:excludepatterns images\nuvola $(DISTBUILDDIR)\nuvola
-        cd $(DISTBUILDDIR) && $(ZIP) -r nuvola.zip nuvola
-
 
 # MSI is VERY sensitive to the name of the MSI. In particular, when shipping
 # updates, the file name must be EXACTLY what the original product was 
@@ -135,8 +129,17 @@ nuvolazip: $(IMAGEFILES)
 # Note this is not a issue when the MSI is a "major" upgrade meaning the
 # product guid changes.
 
-MSIPATH="$(DISTBUILDDIR)\$(APPNAME)-$(APPVERSIONMAJOR).$(APPVERSIONMINOR)($(PLATFORM)).msi"
-installer: nuvolazip wits.wxs images\nuvola\wits.ico binary-license.rtf $(TREECTRLDIR)\treectrl24.dll
+MSINAME=$(APPNAME)-$(APPVERSIONMAJOR).$(APPVERSIONMINOR)($(PLATFORM)).msi
+MSIPATH="$(DISTBUILDDIR)\$(MSINAME)"
+
+"$(DISTBUILDDIR)\nuvola.zip": $(IMAGEFILES)
+        -rmdir /s/q $(DISTBUILDDIR)\nuvola
+        mkdir $(DISTBUILDDIR)\nuvola
+        xcopy /S /I /EXCLUDE:excludepatterns images\nuvola $(DISTBUILDDIR)\nuvola
+        cd $(DISTBUILDDIR) && $(ZIP) -r nuvola.zip nuvola
+
+
+$(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" "$(DISTBUILDDIR)\nuvola.zip" wits.wxs images\nuvola\wits.ico binary-license.rtf "$(TREECTRLDIR)\treectrl24.dll"
 	-mkdir "$(DISTBUILDDIR)"
 	copy /b /y "$(BUILDDIR)\$(APPTARGET).exe" "$(DISTBUILDDIR)\$(APPNAME).exe"
 	copy "$(TREECTRLDIR)\treectrl24.dll" "$(DISTBUILDDIR)"
@@ -149,5 +152,30 @@ installer: nuvolazip wits.wxs images\nuvola\wits.ico binary-license.rtf $(TREECT
         set APP_SHORT_NAME=$(UISHORTNAME)
         "$(WIXDIR)\bin\candle.exe" wits.wxs -out "$(DISTBUILDDIR)\wits-$(PLATFORM).wixobj" -dWitsPlatform=$(PLATFORM)
 	"$(WIXDIR)\bin\light.exe" -ext WixUIExtension -cultures:en-us "$(DISTBUILDDIR)\wits-$(PLATFORM).wixobj" -out $(MSIPATH)
-	copy $(MSIPATH) "$(DISTDIR)"
 #        cd "$(DISTDIR)" && del license.rtf wits.wixobj license.rtf nuvola.zip wits.ico *.wixobj *.wixpdb
+
+"$(DISTDIR)\$(MSINAME)": $(MSIPATH)
+	copy $(MSIPATH) "$(DISTDIR)"
+
+SETUPEXE=setup-$(APPNAME)-$(APPVERSIONMAJOR).$(APPVERSIONMINOR)($(PLATFORM)).exe
+"$(DISTDIR)\$(SETUPEXE)": "$(DISTDIR)\$(MSINAME)"
+        copy /y $(THIRDPARTYDIR)\ms-sdk\setup.exe "$(DISTBUILDDIR)"
+        copy /y $(THIRDPARTYDIR)\ms-sdk\msistuff.exe "$(DISTBUILDDIR)"
+        cd $(DISTBUILDDIR) && msistuff.exe setup.exe -d $(MSINAME) -v 300 -o INSTALLUPD -n "$(UILONGNAME)"
+	cd $(DISTBUILDDIR) && "$(7ZIPDIR)\7z.exe" a $(APPTARGET).7z $(MSINAME) setup.exe
+	copy /y /b "$(7ZIPDIR)\7zS.sfx" "$(DISTBUILDDIR)"
+	$(CTCL) write_version_resource "$(DISTBUILDDIR)\7zS.sfx" -copyright "$(COPYRIGHT)" -timestamp now -version $(APPVERSION) -productversion $(PRODUCTVERSION) ProductName "$(UILONGNAME) Setup" FileDescription "$(APPDESC) Setup" CompanyName "$(APPAUTHOR)" FileVersion "$(APPVERSIONSTR)" ProductVersion "$(PRODUCTVERSIONSTR)"
+	copy << $(DISTBUILDDIR)\sfxconfig.txt
+;!@Install@!UTF-8!
+Title="$(UILONGNAME) Setup"
+BeginPrompt="The setup program will extract and install $(UILONGNAME) on your computer. Do you want to continue?"
+Progress="yes"
+Directory=""
+Skip="no"
+RunProgram="setup.exe"
+;!@InstallEnd@!
+<<KEEP
+	cd $(DISTBUILDDIR) && copy /y /b 7zS.sfx+sfxconfig.txt+$(APPTARGET).7z $(DISTDIR)\$(SETUPEXE)
+
+
+installer: "$(DISTDIR)\$(SETUPEXE)"
