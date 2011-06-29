@@ -221,6 +221,7 @@ if {[llength [info commands $(APPNAME)::app::main]]} {
 	$(CTCL) write_icon_resource "$(BUILDDIR)\$(APPTARGET).head" $(APPICO) -name TK
 !endif
 	cd "$(BUILDDIR)" && copy /b /y $(APPTARGET).head+$(APPTARGET).tail $(APPTARGET).exe
+	cd "$(BUILDDIR)" && $(MT) -inputresource:$(APPTARGET).exe -validate_manifest
 
 
 
