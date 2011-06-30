@@ -768,7 +768,7 @@ proc ::wits::app::remove_from_taskbar {} {
         twapi::systemtray removeicon $taskbarIconId
         unset taskbarIconId
         if {[info exists savedUnmapBinding]} {
-            bind $mainWin <Unmap> $savedUnmapBinding
+            bind Snit::wits::app::mainview.mv <Unmap> $savedUnmapBinding
         }
     }
 }
@@ -805,8 +805,8 @@ proc ::wits::app::add_to_taskbar {} {
         set taskbarIconId [twapi::systemtray addicon $taskbarIconH [namespace current]::taskbar_handler]
 
         # Bind so when we deiconify, we remove ourselves from the taskbar
-        set savedUnmapBinding [bind $mainWin <Unmap>]
-        bind $mainWin <Unmap> "+::wits::app::minimize %W"
+        set savedUnmapBinding [bind Snit::wits::app::mainview.mv <Unmap>]
+        bind Snit::wits::app::mainview.mv <Unmap> "+::wits::app::minimize %W"
     }
 }
 
@@ -1035,15 +1035,22 @@ proc ::wits::app::taskbar_handler {id msg msgpos ticks} {
 
 # Either minimizes window or withdraws so it does not show up as icon
 # depending on whether taskbar tray support is enabled
-proc ::wits::app::minimize {win} {
-    # Ignore unless it is for the top window
+proc ::wits::app::minimize {win args} {
+
+    # Ignore unless it is for the top window (should not happen
+    # since we now bind to the window class tag but...)
     if {$win ne $::wits::app::mainWin} return
 
+    # A second binding can fire when we withdraw below so ignore that
+    if {[wm state $win] eq "withdrawn"} return
+
     variable taskbarIconId
+    variable long_name
     if {[info exists taskbarIconId]} {
         # Only want to show up in taskbar tray. Withdraw window so icon
         # does not show up
         wm withdraw $::wits::app::mainWin
+        taskbar_balloon "$long_name is running in the background. Click the icon to restore." "" info
     }
 }
 
