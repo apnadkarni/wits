@@ -127,16 +127,22 @@ proc wits::widget::_init_styles {{force false}} {
     catch {font delete WitsTableHeaderFont}
     catch {font delete WitsDialogFont}
 
-    # TBD - use system setting based or Tk default fonts
-    font create WitsDefaultFont -family Tahoma -size 8
+    if {0} {
+        font create WitsDefaultFont {*}[font configure defaultgui]
+        font create WitsCaptionFont {*}[font configure WitsDefaultFont] -weight bold
+    } else {
+        font create WitsDefaultFont {*}[font configure TkDefaultFont]
+        font create WitsCaptionFont {*}[font configure TkSmallCaptionFont]
+    }
     font create WitsDefaultItalicFont {*}[font configure WitsDefaultFont] -slant italic
-    font create WitsTooltipFont -family Tahoma -size 8
+    font create WitsTooltipFont {*}[font configure TkTooltipFont]
     font create WitsLinkFont {*}[font configure WitsDefaultFont] -underline 1
-    font create WitsCaptionFont {*}[font configure WitsDefaultFont] -weight bold
-    font create WitsDialogFont -family Tahoma -size 10
+    font create WitsDialogFont {*}[font configure TkDefaultFont]
+    font create WitsStatusFont {*}[font configure TkDefaultFont]
     font create WitsTitleFont -family Arial -size 12
-    font create WitsTableFont {*}[font configure WitsDefaultFont]
-    font create WitsTableHeaderFont {*}[font configure WitsDefaultFont] -size 9
+    font create WitsTableFont {*}[font configure defaultgui]
+    font configure WitsTableFont -family {MS Shell Dlg 2}
+    font create WitsTableHeaderFont {*}[font configure WitsTableFont] -size [expr {[font configure WitsTableFont -size] + 1}]
 
     set themesettings(-,link,-,font) WitsLinkFont
 
@@ -1984,10 +1990,13 @@ snit::widgetadaptor wits::widget::collapsibleactionframe {
 
         # Now pack/grid the widgets
 
-        $_panemanager add $frame -weight 1
+        $_panemanager add $frame -weight 0
         $_panemanager add $_clientframe -weight 1
         pack $_panemanager -fill both -expand true
 
+        # Do not allow sash to be moved. TBD - any better way to do this
+        # than disable the mouse binding ?
+        bind $_panemanager <Button-1> {break}
     }
 
     destructor {

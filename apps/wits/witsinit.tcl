@@ -92,11 +92,6 @@ namespace eval ::wits::app {
 # system if running as a starpack.
 
 package require Tk
-# There seems to be a bug in the ActiveTcl 8.5 basekit that sets the
-# default font to Tahoma 10, instead of Tahoma 8. Fix that. The catch
-# is because under 8.4 this font does not exist and is only defined
-# after tile is loaded.
-catch {font configure TkDefaultFont -size 8}; # TBD
 
 package require msgcat;         # TBD - needed for some of the ::widget ?
 if {[catch {

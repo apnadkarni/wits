@@ -169,10 +169,9 @@ snit::widgetadaptor ::wits::app::mainview {
             [list \
                  [list help "Help" [images::get_icon16 help]] \
                  [list tip  "Tip of the day" [images::get_icon16 tip]] \
-                 [list checkupdates "Check for updates" [images::get_icon16 update]] \
                  [list support  "Ask a question" [images::get_icon16 support]] \
-                 [list bug  "Report bugs" [images::get_icon16 bug]] \
-                 [list rfe  "Request feature enhancements" [images::get_icon16 rfe]] \
+                 [list bugrfe  "Bugs and feature requests" [images::get_icon16 bug]] \
+                 [list checkupdates "Check for updates" [images::get_icon16 update]] \
                  [list about "About $::wits::app::name" [images::get_icon16 about]] \
                 ]
 
@@ -193,7 +192,7 @@ snit::widgetadaptor ::wits::app::mainview {
 
         set action_width 45
         set heading_font WitsTitleFont
-        set action_font WitsCaptionFont
+        set action_font WitsDefaultFont
         set action_color [::wits::widget::get_theme_setting actionframe link normal fg]
 
         # System links
@@ -324,7 +323,7 @@ snit::widgetadaptor ::wits::app::mainview {
         # System status
         set lstatus [::wits::widget::fittedlabel $statusf.lstatus \
                          -textvariable [myvar _system_status_summary] \
-                         -justify left -anchor w]
+                         -justify left -anchor w -font WitsStatusFont]
 
         # Schedule the system status text to be updated
         $self _updateStatusBar
@@ -467,13 +466,10 @@ snit::widgetadaptor ::wits::app::mainview {
                 ::wits::app::die
             }
             support {
-                ::wits::app::log_sourceforge_tracker 592544
+                ::wits::app::goto_sourceforge_tracker discussion
             }
-            bug {
-                ::wits::app::log_sourceforge_tracker 592543
-            }
-            rfe {
-                ::wits::app::log_sourceforge_tracker 592546
+            bugrfe {
+                ::wits::app::goto_sourceforge_tracker tickets
             }
             tip {
                 ::wits::app::show_tipoftheday
@@ -503,7 +499,7 @@ snit::widgetadaptor ::wits::app::mainview {
             set _system_status_summary "A new version of the software is available. Update from the Help and Support menu."
         } else {
             set _system_status_summary \
-                "Processes: $systemstatus(-processcount), Threads: $systemstatus(-threadcount), Memory: $usedphysical/$totalphysical MB, Swap:  $usedcommit/$totalcommit MB"
+                "Processes: $systemstatus(-processcount), Memory: $usedphysical/$totalphysical MB, Swap:  $usedcommit/$totalcommit MB"
         }
 
         # Reschedule ourselves every 5 seconds
@@ -1346,8 +1342,8 @@ proc ::wits::app::showpackages {} {
 
 #
 # Go to a sourceforge tracker page
-proc ::wits::app::log_sourceforge_tracker {pageid} {
-    goto_url "http://sourceforge.net/tracker/?func=add&group_id=90123&atid=$pageid"
+proc ::wits::app::goto_sourceforge_tracker {pageid} {
+    goto_url "http://sourceforge.net/p/windowstoolset/$pageid/"
 }
 
 #
