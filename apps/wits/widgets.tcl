@@ -3732,7 +3732,7 @@ snit::widgetadaptor wits::widget::balloon {
             
 
 # Shows a swapbox dialog. Extends the tklib swaplist::swaplist package
-# to include an additional checkbox
+# to include two additional checkboxes
 snit::widgetadaptor wits::widget::swaplist {
 
     typeconstructor {
@@ -3759,10 +3759,16 @@ snit::widgetadaptor wits::widget::swaplist {
     ### Option definitions
 
     # Text of checkbox
-    option -cbtext -default "" -configuremethod _setcbtext
+    option -cbtext -default "" -readonly 1
 
     # Value of checkbox
-    option -cbvalue -default 0
+    option -cbvalue -default 0 -readonly 1
+
+    # Text of button
+    option -btext -default "" -readonly 1
+
+    # Command for button
+    option -bcommand -default "" -readonly 1
 
     delegate option -llabel to _swapw
     delegate option -rlabel to _swapw
@@ -3779,28 +3785,42 @@ snit::widgetadaptor wits::widget::swaplist {
     # Swaplist widget
     component _swapw
 
-    # Checkbox
+    # Caller owned checkbox
     component _cbw
+
+    # Caller owned button
+    component _bw
 
     ### Methods
 
     constructor {selvar availlist selectedlist args} {
+
         installhull using [namespace parent]::dialogx -type okcancel
         set f [$hull getframe]
 
         install _swapw using ::swaplist::swaplist $f.swap $selvar $availlist $selectedlist -embed
         install _cbw using ::ttk::checkbutton $f.cb -variable [myvar options(-cbvalue)]
-        pack $_swapw
+        install _bw using ::ttk::button $f.b
+
         $self configurelist $args
+        $self _layout
     }
 
-    method _setcbtext {opt val} {
-        set options($opt) $val
-        if {$options(-cbtext) eq ""} {
-            pack forget $_cbw
-        } else {
+
+    method _layout {} {
+        pack forget $_swapw
+        pack forget $_cbw
+        pack forget $_bw
+
+        pack $_swapw
+        if {$options(-cbtext) ne ""} {
             $_cbw configure -text $options(-cbtext)
-            pack $_cbw -expand false -fill x -side left -padx 5 -pady 5
+            pack $_cbw -expand false -fill x -padx 5 -pady 5
+        }
+
+        if {$options(-btext) ne ""} {
+            $_bw configure -text $options(-btext) -command $options(-bcommand)
+            pack $_bw -expand false -fill none -side left -padx 5 -pady 5
         }
     }
 
@@ -5733,6 +5753,8 @@ snit::widgetadaptor wits::widget::listframe {
 
     variable _sashpos;          # Position of sash before shrinking
 
+    variable _original_display_columns
+
     constructor {witstype records_provider args} {
         set _witstype $witstype
 
@@ -5956,6 +5978,8 @@ snit::widgetadaptor wits::widget::listframe {
         if {[llength $options(-displaycolumns)] == 0} {
             $self configure -displaycolumns $options(-availablecolumns)
         }
+
+        set _original_display_columns $options(-displaycolumns)
 
         # Show all fields if none specified
         if {[llength $options(-detailfields)] == 0} {
@@ -6560,7 +6584,7 @@ snit::widgetadaptor wits::widget::listframe {
     # slightly easier to do that here since tablelist does not really
     # know about "available" columns versus displayed/hidden ones
     variable _swaplist_selected;
-    method edittablecolumns {} {
+    method edittablecolumns {args} {
         set avail    [list ]
         array set namemap {};           # Description->name map needed later
         foreach propname $options(-availablecolumns) {
@@ -6576,14 +6600,26 @@ snit::widgetadaptor wits::widget::listframe {
         }
         # Note we do not sort $selected since display order is maintained
 
-        # Note dialog is modal local - see bug 1815935
-        set swapw [swaplist $win.swaplist [myvar _swaplist_selected] $avail $_swaplist_selected -title "Configure column layout" -cbtext "Save as default layout" -modal local]
-        wm deiconify $swapw
-        set ret [$swapw display]
-        if {$ret ne "ok"} {
+        set ret "reset"
+        set selected $_swaplist_selected
+        while {$ret eq "reset"} {
+            # Note dialog is modal local - see bug 1815935
+            set swapw [swaplist $win.swaplist [myvar _swaplist_selected] $avail $_swaplist_selected -title "Configure column layout" -cbtext "Save as default layout" -btext "Reset to defaults" -bcommand [mymethod _resetdisplayedcolumns $win.swaplist] -modal local]
+            wm deiconify $swapw
+            set ret [$swapw display]
+            if {$ret eq "ok"} break
             destroy $swapw
-            return;                     # User canceled
+            if {$ret ne "reset"} {
+                return;                     # User canceled
+            }
+            # Reset to original and redisplay
+            set _swaplist_selected [list ]
+            foreach propname $_original_display_columns {
+                lappend _swaplist_selected [dict get $_properties $propname shortdesc]
+            }
         }
+
+        # Display the new configuration
         set save_columns [$swapw cget -cbvalue]
         destroy $swapw
 
@@ -6599,6 +6635,10 @@ snit::widgetadaptor wits::widget::listframe {
         }
 
         $self configure -displaycolumns $selnames
+    }
+
+    method _resetdisplayedcolumns {swaplist} {
+        $swaplist close reset
     }
 
     method getlistframepath {} {
