@@ -129,7 +129,7 @@ imagedata.tcl: makefile
 # Note this is not a issue when the MSI is a "major" upgrade meaning the
 # product guid changes.
 
-MSINAME=$(APPNAME)-$(APPVERSIONMAJOR).$(APPVERSIONMINOR)($(PLATFORM)).msi
+MSINAME=$(APPNAME)-$(APPVERSIONMAJOR).$(APPVERSIONMINOR)$(UIPLATFORM).msi
 MSIPATH="$(DISTBUILDDIR)\$(MSINAME)"
 
 "$(DISTBUILDDIR)\nuvola.zip": $(IMAGEFILES)
@@ -157,12 +157,12 @@ $(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" "$(DISTBUILDDIR)\nuvola.zip" wits.wxs
 "$(DISTDIR)\$(MSINAME)": $(MSIPATH)
 	copy $(MSIPATH) "$(DISTDIR)"
 
-SETUPEXE=setup-$(APPNAME)-$(APPVERSIONMAJOR).$(APPVERSIONMINOR)($(PLATFORM)).exe
+SETUPEXE=setup-$(APPNAME)-$(APPVERSIONMAJOR).$(APPVERSIONMINOR)$(UIPLATFORM).exe
 "$(DISTDIR)\$(SETUPEXE)": "$(DISTDIR)\$(MSINAME)"
         copy /y $(THIRDPARTYDIR)\ms-sdk\setup.exe "$(DISTBUILDDIR)"
         copy /y $(THIRDPARTYDIR)\ms-sdk\msistuff.exe "$(DISTBUILDDIR)"
-        cd $(DISTBUILDDIR) && msistuff.exe setup.exe -d $(MSINAME) -v 300 -o INSTALLUPD -n "$(UILONGNAME)"
-	cd $(DISTBUILDDIR) && "$(7ZIPDIR)\7z.exe" a $(APPTARGET).7z $(MSINAME) setup.exe
+        cd $(DISTBUILDDIR) && msistuff.exe setup.exe -d "$(MSINAME)" -v 300 -o INSTALLUPD -n "$(UILONGNAME)"
+	cd $(DISTBUILDDIR) && "$(7ZIPDIR)\7z.exe" a $(APPTARGET).7z "$(MSINAME)" setup.exe
 	copy /y /b "$(7ZIPDIR)\7zS.sfx" "$(DISTBUILDDIR)"
 	$(CTCL) write_version_resource "$(DISTBUILDDIR)\7zS.sfx" -copyright "$(COPYRIGHT)" -timestamp now -version $(APPVERSION) -productversion $(PRODUCTVERSION) ProductName "$(UILONGNAME) Setup" FileDescription "$(APPDESC) Setup" CompanyName "$(APPAUTHOR)" FileVersion "$(APPVERSIONSTR)" ProductVersion "$(PRODUCTVERSIONSTR)"
 	copy << $(DISTBUILDDIR)\sfxconfig.txt
@@ -175,7 +175,7 @@ Skip="no"
 RunProgram="setup.exe"
 ;!@InstallEnd@!
 <<KEEP
-	cd $(DISTBUILDDIR) && copy /y /b 7zS.sfx+sfxconfig.txt+$(APPTARGET).7z $(DISTDIR)\$(SETUPEXE)
+	cd $(DISTBUILDDIR) && copy /y /b 7zS.sfx+sfxconfig.txt+$(APPTARGET).7z "$(DISTDIR)\$(SETUPEXE)"
 
 
 installer: "$(DISTDIR)\$(SETUPEXE)"

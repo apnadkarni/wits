@@ -248,6 +248,6 @@ release: makefile
 	-rmdir/s/q "$(BUILDROOT)\release\$(APPNAME)"
 	$(MAKE) MAKEFLAGS=$(MAKEFLAGS) BUILDROOT=$(BUILDROOT)\release
 	echo XXX
-	$(MAKE) /d installer MAKEFLAGS=$(MAKEFLAGS) BUILDROOT=$(BUILDROOT)\release
+	$(MAKE) installer MAKEFLAGS=$(MAKEFLAGS) BUILDROOT=$(BUILDROOT)\release
 
 

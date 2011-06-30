@@ -86,7 +86,11 @@
     <!-- LAUNCH CONDITIONS -->
 
     <Condition
-       Message='This program is only supported on Windows XP and later versions of Windows.'>VersionNT &gt;= 501
+       Message='This program is only supported on Windows XP and later versions of Windows.'><![CDATA[VersionNT >= 501]]>
+    </Condition>
+
+    <Condition
+       Message='This program is requires at least Service Pack 2 on Windows XP.'><![CDATA[VersionNT > 501 OR ServicePackLevel >= 2]]>
     </Condition>
 
     <?if $(var.WitsPlatform)=x86 ?>
