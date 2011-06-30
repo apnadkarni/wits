@@ -16,7 +16,7 @@ package require treectrl 2.4
 package require tooltip 1.1;    # Used when labels are truncated
 package require widget::dialog
 package require widget::scrolledwindow
-
+package require swaplist
 
 namespace eval wits::widget {
     # Array indexed by WITS class, part
@@ -140,8 +140,7 @@ proc wits::widget::_init_styles {{force false}} {
     font create WitsDialogFont {*}[font configure TkDefaultFont]
     font create WitsStatusFont {*}[font configure TkDefaultFont]
     font create WitsTitleFont -family Arial -size 12
-    font create WitsTableFont {*}[font configure defaultgui]
-    font configure WitsTableFont -family {MS Shell Dlg 2}
+    font create WitsTableFont {*}[font configure WitsDefaultFont]
     font create WitsTableHeaderFont {*}[font configure WitsTableFont] -size [expr {[font configure WitsTableFont -size] + 1}]
 
     set themesettings(-,link,-,font) WitsLinkFont
@@ -3734,10 +3733,32 @@ snit::widgetadaptor wits::widget::balloon {
 }
 
 
+            
 
 # Shows a swapbox dialog. Extends the tklib swaplist::swaplist package
 # to include an additional checkbox
 snit::widgetadaptor wits::widget::swaplist {
+
+    typeconstructor {
+        # Workarounds for swaplist bugs/features
+
+        # Redefine some Tk commands within the swaplist space as
+        # we want it to use ttk widgets, not Tk widgets
+        proc ::swaplist::button args {eval ::ttk::button $args}
+        proc ::swaplist::label args {eval ::ttk::label $args}
+        proc ::swaplist::listbox args {eval ::listbox $args [list -font WitsDefaultFont]}
+        # Workaround a double-click handling bug in swaplist 
+        # which assumes the swaplist is at a toplevel
+        proc ::swaplist::Double {w} {
+            set top [winfo parent [winfo parent $w]]
+            if {[string match *.list1.* $w]} {
+                $top.lr.right invoke
+            } elseif {[string match *.list2.* $w]} {
+                $top.lr.left invoke
+            }
+        }
+
+    }
 
     ### Option definitions
 
@@ -3759,9 +3780,6 @@ snit::widgetadaptor wits::widget::swaplist {
 
     ### Variables
 
-    # Whether listbox package has been initialized
-    variable _swaplist_inited false
-
     # Swaplist widget
     component _swapw
 
@@ -3774,14 +3792,6 @@ snit::widgetadaptor wits::widget::swaplist {
         installhull using [namespace parent]::dialogx -type okcancel
         set f [$hull getframe]
 
-        if {! $_swaplist_inited} {
-            package require swaplist
-            # Redefine some Tk commands within the swaplist space as
-            # we want it to use ttk widgets, not Tk widgets
-            proc ::swaplist::button args {eval ::ttk::button $args}
-            proc ::swaplist::label args {eval ::ttk::label $args}
-            proc ::swaplist::listbox args {eval ::listbox $args [list -font WitsDefaultFont]}
-        }
         install _swapw using ::swaplist::swaplist $f.swap $selvar $availlist $selectedlist -embed
         install _cbw using ::ttk::checkbutton $f.cb -variable [myvar options(-cbvalue)]
         pack $_swapw
@@ -6532,15 +6542,12 @@ snit::widgetadaptor wits::widget::listframe {
         $self configure -displaycolumns $neworder
     }
 
-
-
     # Show table column editor. This code could have been part of the
     # listframe widget making it more usable. However, it is here because
     # when the columns are edited, we do not just want to hide columns
     # but actually not even retrieve the data (for efficiency sake). It's
     # slightly easier to do that here since tablelist does not really
     # know about "available" columns versus displayed/hidden ones
-    variable _swaplist_inited false
     variable _swaplist_selected;
     method edittablecolumns {} {
         set avail    [list ]
