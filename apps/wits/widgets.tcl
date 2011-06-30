@@ -114,18 +114,11 @@ proc wits::widget::_init_styles {{force false}} {
 
     # Set up the fonts
 
-    # Create the font for the link styles.
-    # Unfortunately, there is no way of changing
-    # to an underlined font without creating a new font
-    catch {font delete WitsDefaultFont}
-    catch {font delete WitsDefaultItalicFont}
-    catch {font delete WitsTooltipFont}
-    catch {font delete WitsLinkFont}
-    catch {font delete WitsCaptionFont}
-    catch {font delete WitsTitleFont}
-    catch {font delete WitsTableFont}
-    catch {font delete WitsTableHeaderFont}
-    catch {font delete WitsDialogFont}
+    foreach font [font names] {
+        if {[string match Wits* $font]} {
+            font delete $font
+        }
+    }
 
     if {0} {
         font create WitsDefaultFont {*}[font configure defaultgui]
@@ -143,10 +136,13 @@ proc wits::widget::_init_styles {{force false}} {
     font create WitsTableFont {*}[font configure WitsDefaultFont]
     font create WitsTableHeaderFont {*}[font configure WitsTableFont] -size [expr {[font configure WitsTableFont -size] + 1}]
 
+    # The dropdowns are always in a small font or the layout gets screwed up
+    font create WitsDropdownFont -family Tahoma -size 8
+
     set themesettings(-,link,-,font) WitsLinkFont
 
     # Font for dropdowns
-    set themesettings(dropdown,-,-,font) WitsDefaultFont
+    set themesettings(dropdown,-,-,font) WitsDropdownFont
     set themesettings(dropdown,header,-,font) WitsCaptionFont
 
     # Font of last resort
@@ -4942,10 +4938,12 @@ snit::widgetadaptor wits::widget::listframe {
         }
     }
 
-    method _schedule_tooltip {item column} {
+    method _schedule_tooltip {item column winx winy} {
         $self _cancel_tooltip;  # Cancel pending tooltip if any
         set _tooltip_state(item) $item
         set _tooltip_state(column) $column
+        set _tooltip_state(winx) $winx
+        set _tooltip_state(winy) $winy
         set _tooltip_state(schedule_id) [$_scheduler after1 200 [mymethod _show_tooltip]]
     }
 
@@ -4974,7 +4972,6 @@ snit::widgetadaptor wits::widget::listframe {
             return;             # Whole text is displayed, no need for tooltip
         }
 
-
         incr xpos [winfo rootx $_treectrl]
         incr ypos [winfo rooty $_treectrl]
 
@@ -4990,6 +4987,7 @@ snit::widgetadaptor wits::widget::listframe {
                 Button
                 Shift-Button
                 Control-Button
+                Double-Button
             } {
                 bind $win.tooltip <$event> [mymethod _proxymouse $event %b %X %Y]
             }
@@ -5011,15 +5009,24 @@ snit::widgetadaptor wits::widget::listframe {
         if {$_tooltip_state(item) == -1} {
             return;             # Cannot happen, can it ?
         }
+
         set item $_tooltip_state(item); # Save before cancel
         set col  $_tooltip_state(column); # Save before cancel
+        set winx  $_tooltip_state(winx); # Save before cancel
+        set winy  $_tooltip_state(winy); # Save before cancel
+
         $self _cancel_tooltip
         focus $_treectrl
         switch -exact -- "$event-$button" {
             Button-1 {
-                $_treectrl selection clear
-                $_treectrl selection add $item
-                $_treectrl selection anchor $item
+                if {0} {
+                    # Instead,  event generate below so any other actions 
+                    # will also be taken (just in case)
+                    $_treectrl selection clear
+                    $_treectrl selection add $item
+                    $_treectrl selection anchor $item
+                }
+                event generate $_treectrl <Button> -when mark -button 1 -x $winx -y $winy
             }
             Shift-Button-1 {
                 if {[llength [$_treectrl selection get]]} {
@@ -5056,7 +5063,7 @@ snit::widgetadaptor wits::widget::listframe {
         # the request
         if {$pos(item) != $_tooltip_state(item) ||
             $pos(column) != $_tooltip_state(column)} {
-            $self _schedule_tooltip $pos(item) $pos(column)
+            $self _schedule_tooltip $pos(item) $pos(column) $x $y
             return
         }
 
@@ -5442,6 +5449,10 @@ snit::widgetadaptor wits::widget::listframe {
         }
 
         ttk::style configure $_panedstyle -background [get_theme_setting bar frame normal bg]
+
+        # Event when system has larger fonts, we want details pane to
+        # have smaller font
+        option add *Propertyrecordslistview*propertyframe*TLabel.Font WitsDropdownFont
     }
 
     proc _balloonpopup {targetwin {force 0}} {
