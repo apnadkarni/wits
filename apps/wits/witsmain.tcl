@@ -155,11 +155,12 @@ snit::widgetadaptor ::wits::app::mainview {
         }
 
         set actiontitle "Tools and Options"
+#      [list witscloseall "Close all views" $witscloseallimg] \
+
         set actionlist \
             [list \
-                 [list witscloseall "Close all WiTS views" $witscloseallimg] \
-                 [list witsiconifyall "Hide all WiTS views" $witsiconifyallimg] \
-                 [list witsopenall "Restore all WiTS views" $witsopenallimg] \
+                 [list witsiconifyall "Hide all views" $witsiconifyallimg] \
+                 [list witsopenall "Restore all views" $witsopenallimg] \
                  [list console "WiTS Console" $consoleimg] \
                  [list options "Preferences" $optionsimg] \
                  [list die "Exit" $exitimg] \
