@@ -3815,12 +3815,12 @@ snit::widgetadaptor wits::widget::swaplist {
         pack $_swapw
         if {$options(-cbtext) ne ""} {
             $_cbw configure -text $options(-cbtext)
-            pack $_cbw -expand false -fill x -padx 5 -pady 5
+            pack $_cbw -expand false -fill x -side left -padx 5 -pady 5
         }
 
         if {$options(-btext) ne ""} {
             $_bw configure -text $options(-btext) -command $options(-bcommand)
-            pack $_bw -expand false -fill none -side left -padx 5 -pady 5
+            pack $_bw -expand false -fill none -side right -padx 5 -pady 5
         }
     }
 
