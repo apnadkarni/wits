@@ -209,9 +209,10 @@ proc util::hide_window_and_redraw {win precommands postcommands args} {
     if {$restorey > ($workbottom-10)} {
         set restorey $worktop
     }
+
     set newgeom "${newwidth}x${newheight}+$restorex+$restorey"
 
-    # Restore old geometry. For reasons I do not understand, this
+    # Restore geometry. For reasons I do not understand, this
     # needs an "after 0" to work correctly
     after 0 [list wm geometry $win $newgeom]
 }

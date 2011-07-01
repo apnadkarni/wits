@@ -618,10 +618,10 @@ snit::widget wits::widget::buttonbox {
 
     ### Variables
 
-    # Contains the ordered list of buttons
-    variable _buttons ""
+    # Contains the ordered list of widgets
+    variable _items ""
 
-    variable _buttonindex 0
+    variable _itemindex 0
 
     ### Methods
 
@@ -629,8 +629,51 @@ snit::widget wits::widget::buttonbox {
         $self configurelist $args
     }
 
-    # Add a button with the specified text and image
-    method add {text image {tooltip ""} {pos end}} {
+    method add {wtype args} {
+        return [lindex [$self addL [list $wtype $args]] 0]
+    }
+
+    method addL {specs} {
+        set widgets {}
+        foreach {wtype opts} $specs {
+            set tip ""
+            set pos end
+            foreach opt {tip pos} {
+                if {[dict exists $opts -$opt]} {
+                    set $opt [dict get $opts -$opt]
+                    dict unset opts -$opt
+                }
+            }
+
+            switch -exact -- $wtype {
+                separator {
+                    set w [ttk::separator $win.s[incr _itemindex] -orient vertical]
+                } 
+                button {
+                    set w [::ttk::button $win.b[incr _itemindex] -style Toolbutton -compound $options(-compound) {*}$opts]
+                    # TBD - tooltip bug - if the text begins with "-" it
+                    # interprets it as an option
+                    set tip [string trimleft $tip -]
+                    if {$tip ne ""} {
+                        tooltip::tooltip $w $tip
+                    }
+                }
+                default {
+                    # For future enhancements
+                    error "Type $wtype not supported."
+                }
+            }
+
+            set _items [linsert $_items $pos $w]
+            lappend widgets $w
+        }
+
+        $self _arrange
+        return $widgets
+    }
+
+
+    method OBSOLETEadd {text image {tooltip ""} {pos end}} {
         set b [::ttk::button $win.b[incr _buttonindex] -style Toolbutton -text $text -image $image -compound $options(-compound)]
         set _buttons [linsert $_buttons $pos $b]
         if {$tooltip ne ""} {
@@ -654,17 +697,17 @@ snit::widget wits::widget::buttonbox {
         }
     }
 
-    method remove {b} {
-        tooltip::clear $b
-        destroy $b
-        set i [lsearch -exact $_buttons $b]
+    method remove {w} {
+        tooltip::clear $w
+        destroy $w
+        set i [lsearch -exact $_items $w]
         if {$i >= 0} {
-            set _buttons [lreplace $_buttons $i $i]
+            set _items [lreplace $_items $i $i]
         }
     }
 
-    method itemconfigure {b args} {
-        if {![winfo exists $b]} {
+    method itemconfigure {w args} {
+        if {![winfo exists $w]} {
             return
         }
         set opts [list ]
@@ -673,25 +716,29 @@ snit::widget wits::widget::buttonbox {
                 # TBD - tooltip bug - if the text begins with "-" it interprets
                 # it as an option
                 if {[string index $val 0] ne "-"} {
-                    tooltip::tooltip $b $val
+                    tooltip::tooltip $w $val
                 }
             } else {
                 lappend opts $opt $val
             }
         }
 
-        eval [list $b configure] $opts
+        $w configure {*}$opts
     }
 
     # Arrange the buttons
     method _arrange {} {
         # Forget all existing buttons
-        set buttons [pack slaves $win]
-        if {[llength $buttons]} {
-            eval pack forget $buttons
+        set items [pack slaves $win]
+        if {[llength $items]} {
+            pack forget {*}$items
         }
-        foreach b $_buttons {
-            pack $b -side left -fill none -expand no
+        foreach w $_items {
+            if {[winfo class $w] eq "TSeparator"} {
+                pack $w -side left -fill y -expand no -padx 4
+            } else {
+                pack $w -side left -fill none -expand no
+            }
         }
     }
 }
@@ -4425,7 +4472,8 @@ snit::widget wits::widget::unmanagedtoplevel  {
         # Layout the action frame
         foreach elem $actionlist {
             lassign  $elem  token label image tooltip
-            set b [$_toolbar add $label $image $tooltip]
+            set b [$_toolbar add button -text $label -image $image -tip $tooltip]
+            # TBD - can move into above command ? why separate ?
             $_toolbar itemconfigure $b -command [mymethod _actioncallback $token]
         }
 
@@ -5634,11 +5682,11 @@ snit::widgetadaptor wits::widget::listframe {
     option -filtericon -default ""
 
     # Actions for the actions dropdown
-    delegate option -actions to _actionframe as -items
+#TBD    delegate option -actions to _actionframe as -items
     option -actiontitle -readonly true -default "Tasks"
 
     # Tool links for the tool dropdown
-    delegate option -tools to _toolframe as -items
+#TBD    delegate option -tools to _toolframe as -items
     option -tooltitle -readonly true -default "Tools"
 
     # Properties to dissplay in details dropdown
@@ -5743,6 +5791,8 @@ snit::widgetadaptor wits::widget::listframe {
 
     component _statusframe;             # Contains item count and refresh stuff
 
+    component _toolbar
+
     variable _refreshentryw;            # Widget used to display/enter refresh
 
     variable _popupw;                   # Popup menu
@@ -5771,8 +5821,30 @@ snit::widgetadaptor wits::widget::listframe {
         set _properties [$records_provider get_property_defs]
 
         # Set up all the widgets BEFORE calling configurelist
+
+        set _toolbar ""
+        set options(-tools)    [from args -tools {}]
+        set options(-actions)  [from args -actions {}]
+        if {[llength $options(-tools)] || [llength $options(-actions)]} {
+            install _toolbar using [namespace parent]::buttonbox $win.tb -compound image
+            set tbwidgets {}
+            foreach elem $options(-actions) {
+                lassign $elem token tip image text
+                lappend tbwidgets button [dict create -image $image -text $text -tip $tip -command [mymethod _actioncallback $token]]
+            }
+            if {[llength $tbwidgets] && [llength $options(-tools)]} {
+                lappend tbwidgets separator {}
+            }
+            foreach elem $options(-tools) {
+                lassign $elem token tip image text
+                lappend tbwidgets button [dict create -image $image -text $text -tip $tip -command [mymethod _toolcallback $token]]
+            }
+            $_toolbar addL $tbwidgets
+        }
+
         install _panemanager using \
-            ttk::panedwindow $win.pw -orient horizontal -style $_panedstyle -width 0
+            ttk::panedwindow $win.pw -orient horizontal \
+            -style $_panedstyle -width 0
 
         install _listframe using \
             [namespace parent]::listframe $win.listframe \
@@ -5998,23 +6070,29 @@ snit::widgetadaptor wits::widget::listframe {
         $_panemanager add $win.f -weight $panemanager_weight
         $_panemanager add $_listframe -weight 3
 
-        # Note statusframe is packed first so on shrinking window it
+        # Note toolbar is packed first so on shrinking window it
         # does not disappear
+        if {$_toolbar ne ""} {
+            pack $_toolbar -fill x -expand false -side top
+            pack [::ttk::separator $win.tbsep -orient horizontal] -side top -fill x -expand no -padx 0 -pady 0
+        }
         pack $_statusframe -fill x -expand false -side bottom
         pack $_panemanager -fill both -expand true -padx $pw_pad -pady $pw_pad
 
         # Get data
         # TBD - Window is not sized to hold all columns properly unless
         # we schedule a [after 0 update] before calling hide_....
-        # Calling update directly works but causes a flash. Need
+        # Calling display directly works but causes a flash. Need
         # to play with updates and update idletasks for figure out why.
         # The current code is very sensitive even to debug calls to puts
         # in tkcon (which calls update)
 
         $self schedule_display_update immediate -highlight 0 -forcerefresh 1
+
         $_records_provider subscribe [mymethod _provider_notification_handler]
 
-        # In order to minimize flashing, draw off screen and open collapsible
+        # In order to minimize flashing when opening the dropdowns,
+        # draw off screen and open collapsible
         # frames. Also position the sash to allow room for a scrollbar
         # TBD - does not seem right to do this before the scheduled update
         # above
@@ -6803,7 +6881,6 @@ snit::widgetadaptor wits::widget::listframe {
         $_listframe configure -headerfont $_table_header_font
 
     }
-
 }
 
 #
