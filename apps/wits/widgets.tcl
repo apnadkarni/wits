@@ -777,7 +777,7 @@ snit::widgetadaptor wits::widget::collapsibleframeheader {
     option -state -default closed -configuremethod _setopt
 
     # Command to call when pushbutton is clicked
-    option -command -default ""
+    option -command -default "" -configuremethod _setopt
 
     # Delegate unknown to the canvas
     # Client code should set -bg to match the back ground color of the
@@ -1148,6 +1148,9 @@ snit::widget wits::widget::collapsibleframe {
     # Background for whole widget
     option -background -configuremethod _setbackground
 
+    # Whether under user control
+    option -usercontrolled -default 1 -configuremethod _setusercontrolled
+
     # The title for the frame
     delegate option -title to _headerw
 
@@ -1184,7 +1187,16 @@ snit::widget wits::widget::collapsibleframe {
     constructor args {
         $hull configure -bg [getcolor border]
         set hframe [frame $win.hf]
-        install _headerw using [namespace parent]::collapsibleframeheader $hframe.cfh -command [mymethod _toggleclientframe]
+puts args:$args
+        set options(-usercontrolled) [from args -usercontrolled 1]
+        puts u:$options(-usercontrolled)
+        if {$options(-usercontrolled)} {
+            install _headerw using [namespace parent]::collapsibleframeheader $hframe.cfh -command [mymethod _toggleclientframe]
+        } else {
+            # EMpty command so no toggling of frame based on mouse
+            # actions
+            install _headerw using [namespace parent]::collapsibleframeheader $hframe.cfh -command ""
+        }
         install _clientf using frame $win.cf -border 0
 
         $self configurelist $args
@@ -1209,6 +1221,15 @@ snit::widget wits::widget::collapsibleframe {
     method _toggleclientframe {} {
         $self _manageclientframe \
             [expr {[$_headerw cget -state] == "open" ? "closed" : "open"}]
+    }
+
+    method _setusercontrolled {opt val} {
+        set options($opt) $val
+        if {$val} {
+            $_headerw configure -command [mymethod _toggleclientframe]
+        } else {
+            $_headerw configure -command ""
+        }
     }
 
     method _setbackground {opt val} {
@@ -1290,6 +1311,10 @@ snit::widgetadaptor wits::widget::collapsiblepropertyframe {
 
     # Header width
     delegate option -headerwidth to hull
+
+    # Whether user can open/close frame
+    delegate option -usercontrolled to hull
+
 
     ### Variables
 
@@ -1515,6 +1540,7 @@ snit::widgetadaptor wits::widget::collapsiblepropertyframe {
     }
 
     delegate method open to hull
+    delegate method close to hull
 
 }
 
@@ -5806,7 +5832,7 @@ snit::widgetadaptor wits::widget::listframe {
         $_toolbar add button tableconfigure -image [images::get_icon16 tableconfigure] -command [mymethod edittablecolumns]
         tooltip::tooltip [$_toolbar itemid tableconfigure] "Select table columns"
         set _splitwindowbuttonvar 1; # Since we start with window open
-        $_toolbar add checkbutton splitwindow -image [images::get_icon16 splitwindow] -command [mymethod _resizeleftpane] -variable [myvar _splitwindowbuttonvar]
+        $_toolbar add checkbutton splitwindow -image [images::get_icon16 splitwindow] -command [mymethod _setleftpanevisibility] -variable [myvar _splitwindowbuttonvar]
 
         install _panemanager using \
             ttk::panedwindow $win.pw -orient horizontal \
@@ -5871,6 +5897,7 @@ snit::widgetadaptor wits::widget::listframe {
             [namespace parent]::collapsiblepropertyframe $frame.propertyframe \
             -headerwidth $caf_width \
             -cornercolor $bgcolor \
+            -usercontrolled 0 \
             -title $detailtitle
 
         $_detailsframe open
@@ -6192,7 +6219,7 @@ snit::widgetadaptor wits::widget::listframe {
         return $_records_provider
     }
 
-    method _resizeleftpane {} {
+    method _setleftpanevisibility {} {
         if {! $_splitwindowbuttonvar} {
             set _sashpos [$win.pw sashpos 0]
             $win.pw forget 0
@@ -6210,15 +6237,16 @@ snit::widgetadaptor wits::widget::listframe {
         if {[winfo ismapped $_scroller.sc.vscroll]} {
             incr width -[twapi::GetSystemMetrics 2]
         }
-        if {$width < 50} {
+        if {$width < 120} {
             # We would like to close the pane, but the panedwindow
             # drag code throws an error if the sash disappears while
             # dragging. So we just try to not allow it to get smaller.
+            # TBD
             if {1} {
-                $win.pw sashpos 0 50
+                $win.pw sashpos 0 120
             } else {
                 set _splitwindowbuttonvar 0
-                after idle [mymethod _resizeleftpane]
+                after idle [mymethod _setleftpanevisibility]
             }
         } else {
             $_detailsframe configure -headerwidth $width
@@ -6398,10 +6426,12 @@ snit::widgetadaptor wits::widget::listframe {
         if {[llength $sel] == 1} {
             set _details_recid [lindex $sel 0]
             set proplist [$_records_provider get_formatted_record $_details_recid $options(-detailfields) $_refreshinterval]
+            $_detailsframe open
         } else {
             set _details_recid ""
             # Pass in an empty property values record
             set proplist [dict create values {} definitions [$_records_provider get_property_defs]]
+            $_detailsframe close
         }
 
         # Presuming string compare is sufficient. Worst case, we will
