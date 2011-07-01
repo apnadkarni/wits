@@ -4996,7 +4996,7 @@ snit::widgetadaptor wits::widget::listframe {
         set _tooltip_state(column) $column
         set _tooltip_state(winx) $winx
         set _tooltip_state(winy) $winy
-        set _tooltip_state(schedule_id) [$_scheduler after1 200 [mymethod _show_tooltip]]
+        set _tooltip_state(schedule_id) [$_scheduler after1 100 [mymethod _show_tooltip]]
     }
 
     method _show_tooltip {} {
@@ -5616,7 +5616,7 @@ snit::widgetadaptor wits::widget::listframe {
     option -availablecolumns -default "" -readonly true
 
     # Ordered list of properties to be actually displayed in columns
-    option -displaycolumns -default "" -configuremethod _setdisplaycolumns
+    option -displaycolumns -default "" -configuremethod _setdisplaycolumns
 
     # Additional column attributes - dict indexed by property name
     option -colattrs ""

@@ -512,7 +512,6 @@ proc wits::app::system::viewlist {args} {
                               [list view "View properties of selected processors" $viewdetailimg] \
                               [list wintool "Windows Device Manager" $winlogoimg] \
                              ] \
-                -toolcommand [list [namespace which widget::propertyrecordslistview] standardfilteractionhandler] \
                 -displaycolumns {cpuid CPUPercent KernelPercent UserPercent} \
                 -detailfields {-processorspeed -processormodel} \
                 -nameproperty "-processorname" \

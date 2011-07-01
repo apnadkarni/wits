@@ -248,7 +248,6 @@ proc wits::app::service::viewlist {args} {
                            [list view "View properties of selected services" $viewdetailimg] \
                            [list wintool "Windows services administration tool" $winlogoimg] \
                           ] \
-             -tools [linsert [widget::propertyrecordslistview standardfilteractions] 0 [list running "Show running services" $servicefilterimg]] \
              -popupmenu [concat [list {start Start} {stop Stop} {pause Pause} -] [widget::propertyrecordslistview standardpopupitems]] \
              -displaycolumns {displayname state} \
              -colattrs {displayname {-squeeze 1} -description {-squeeze 1} -dependencies {-squeeze 1} -dependents {-squeeze 1}} \
