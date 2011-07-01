@@ -1254,19 +1254,16 @@ snit::type ::wits::app::eventmanager {
         $self _configure_eventmanager
         # Tell prefs package to let us know when event monitor prefs change
         ::wits::app::prefs subscribe [mymethod _prefs_handler] "Event Monitor"
-
+        set butdefs {}
         foreach {token label imagename tooltip} {
             save "Save" filesave "Save current display to file"
             clear "Clear" cancel "Clear event monitor window"
             toggle "Stop" vcrstop "Stop event monitoring"
             options "Options" options "Configure event monitor"
         } {
-            set b [$_toolbar add $label [images::get_icon16 $imagename] $tooltip]
-            $_toolbar itemconfigure $b -command [mymethod _tbcallback $token]
-            if {$token eq "toggle"} {
-                set _tbstartid $b
-            }
+            lappend butdefs button [list -image [images::get_icon16 $imagename] -tip $tooltip -text $label -command [mymethod _tbcallback $token]]
         }
+        set _tbstartid [lindex [$_toolbar addL $butdefs] 2]
 
         pack $_logfile_statusl -side left -expand no -fill none
 
