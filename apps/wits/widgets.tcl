@@ -1028,6 +1028,10 @@ snit::widgetadaptor wits::widget::collapsibleframeheader {
         # Redraw button
         $self delete pushbutton
 
+        if {$options(-command) eq ""} {
+            return
+        }
+
         # Make button size consistent with font size
         array set metrics [font metrics [$self cget -font]]
         set radius [expr {($metrics(-linespace)+1)/2}]
@@ -1510,6 +1514,8 @@ snit::widgetadaptor wits::widget::collapsiblepropertyframe {
         return
     }
 
+    delegate method open to hull
+
 }
 
 
@@ -1965,7 +1971,7 @@ snit::widgetadaptor wits::widget::collapsibleactionframe {
             set tooltitle "Tools"
         }
 
-        set headerfont [collapsibleactionframe::getheaderfont]
+        set headerfont [collapsibleframe::getheaderfont]
         set caf_width [font measure $headerfont -displayof $win $actiontitle]
         set width [font measure $headerfont -displayof $win $tooltitle]
         if {$width > $caf_width} {
@@ -5616,7 +5622,7 @@ snit::widgetadaptor wits::widget::listframe {
     option -availablecolumns -default "" -readonly true
 
     # Ordered list of properties to be actually displayed in columns
-    option -displaycolumns -default "" -configuremethod _setdisplaycolumns
+    option -displaycolumns -default "" -configuremethod _setdisplaycolumns
 
     # Additional column attributes - dict indexed by property name
     option -colattrs ""
@@ -5752,6 +5758,8 @@ snit::widgetadaptor wits::widget::listframe {
 
     variable _filterbuttonvar;  # Attached to the filtering checkbutton
 
+    variable _splitwindowbuttonvar; # Attached to split window checkbutton
+
     variable _nullfilter;       # Const def of a null filter
 
     variable _sashpos;          # Position of sash before shrinking
@@ -5797,6 +5805,8 @@ snit::widgetadaptor wits::widget::listframe {
         tooltip::tooltip [$_toolbar itemid clearfilter] "Clear filters"
         $_toolbar add button tableconfigure -image [images::get_icon16 tableconfigure] -command [mymethod edittablecolumns]
         tooltip::tooltip [$_toolbar itemid tableconfigure] "Select table columns"
+        set _splitwindowbuttonvar 1; # Since we start with window open
+        $_toolbar add checkbutton splitwindow -image [images::get_icon16 splitwindow] -command [mymethod _resizeleftpane] -variable [myvar _splitwindowbuttonvar]
 
         install _panemanager using \
             ttk::panedwindow $win.pw -orient horizontal \
@@ -5818,20 +5828,16 @@ snit::widgetadaptor wits::widget::listframe {
 
         set bgcolor [get_theme_setting bar frame normal bg]
 
-        labelframe $win.f -background $bgcolor -labelanchor ne -borderwidth 0 -padx 0 -pady 0
-        # TBD - replace Unicode text arrow with icon
-        label $win.f.lhide -background $bgcolor -font TkSmallCaptionFont -foreground [get_theme_setting dropdown frame normal border] -text \u00ab
-        bind $win.f.lhide <Button-1> [mymethod _toggleleftpane]
-
-        $win.f configure -labelwidget $win.f.lhide
-
+# APN        frame $win.f -background $bgcolor -borderwidth 0 -padx 0 -pady 0 
 
         set use_scrollableframe 1
         if {$use_scrollableframe} {
-            install _scroller using [namespace parent]::scrolledframe $win.f.sf -background $bgcolor -scrollsides e -autohide true
+            install _scroller using [namespace parent]::scrolledframe $win.f -background $bgcolor -scrollsides e -autohide true
             set frame [$_scroller getframe]
             $frame configure -background $bgcolor
         } else {
+            # APN set frame $win.f
+            frame $win.f -background $bgcolor -borderwidth 0 -padx 0 -pady 0 
             set frame $win.f
         }
 
@@ -5840,20 +5846,11 @@ snit::widgetadaptor wits::widget::listframe {
         # Calculate the width of the left pane based on the titles
         # for each collapsible dropdown
         set actiontitle [from args -actiontitle]
-        set tooltitle [from args -tooltitle]
         set detailtitle [from args -detailtitle]
 
         # Figure out the widest header width
         set headerfont [collapsibleactionframe::getheaderfont]
-        set caf_width [font measure $headerfont -displayof $win $actiontitle]
-        set width [font measure $headerfont -displayof $win $tooltitle]
-        if {$width > $caf_width} {
-            set caf_width $width
-        }
-        set width [font measure $headerfont -displayof $win $detailtitle]
-        if {$width > $caf_width} {
-            set caf_width $width
-        }
+        set caf_width [font measure $headerfont -displayof $win $detailtitle]
 
         # Need to leave room for dropdown symbol and some padding
         incr caf_width 40
@@ -5876,6 +5873,8 @@ snit::widgetadaptor wits::widget::listframe {
             -cornercolor $bgcolor \
             -title $detailtitle
 
+        $_detailsframe open
+
         # Status frame and its content
         install _statusframe using frame $win.statusf
         $_statusframe configure -relief groove -pady 1 -border 2
@@ -5885,22 +5884,15 @@ snit::widgetadaptor wits::widget::listframe {
                          -textvariable [myvar _itemcounttext] \
                          -justify left -anchor w]
 
-        if {0} {
-            # Checkbox for display mode
-            set cbdisplaymode [::ttk::checkbutton $_statusframe.cbdisplaymode \
-                                   -text "Changes only" \
-                                   -variable [myvar _showchangesonly] \
-                                   -command [mymethod _setdisplaymode]]
-        } else {
-            set _displaymode "highlighted"
-            set mbdisplaymode [::ttk::menubutton $_statusframe.mbdisplaymode -text [dict get $_displaymodelabels $_displaymode] -style WitsMenubutton.TMenubutton]
-            set m [menu $mbdisplaymode.menu -tearoff 0]
-            $mbdisplaymode configure -menu $m
-            foreach tok {standard highlighted changes} {
-                $m add radiobutton -value $tok -label [dict get $_displaymodelabels $tok] -variable [myvar _displaymode] -command [mymethod _setdisplaymode $mbdisplaymode]
-            }
 
+        set _displaymode "highlighted"
+        set mbdisplaymode [::ttk::menubutton $_statusframe.mbdisplaymode -text [dict get $_displaymodelabels $_displaymode] -style WitsMenubutton.TMenubutton]
+        set m [menu $mbdisplaymode.menu -tearoff 0]
+        $mbdisplaymode configure -menu $m
+        foreach tok {standard highlighted changes} {
+            $m add radiobutton -value $tok -label [dict get $_displaymodelabels $tok] -variable [myvar _displaymode] -command [mymethod _setdisplaymode $mbdisplaymode]
         }
+
 
         # Refresh interval button and entry
         set refreshl [::ttk::label $_statusframe.refreshl -text "Refresh interval (s):"]
@@ -5928,28 +5920,13 @@ snit::widgetadaptor wits::widget::listframe {
         pack $_refreshentryw -expand no -fill x -padx 1 -side right
         pack $refreshl -expand no -fill x -padx 1 -side right
         pack [::ttk::separator $_statusframe.sep1 -orient vertical] -expand no -fill y -padx 1 -side right
-        if {0} {
-            pack $cbdisplaymode -side right -expand no -fill none -padx 1
-        } else {
-            pack $mbdisplaymode -side right -expand no -fill none -padx 1
-#            pack [ttk::label $_statusframe.model -text "Mode:"] -side right -expand no -fill x -padx 1
-        }
+        pack $mbdisplaymode -side right -expand no -fill none -padx 1
 
         set padx 10
         set pady 10
         set expand false
         set fill x
-        if {$use_scrollableframe} {
-            set panemanager_weight 0; # Else too much extra space
-        } else {
-            set panemanager_weight 1
-        }
-        # Because we already have padding at top using a label frame,
-        # _actionframe is given a top padding of 0 instead of $pady
-        if {0} {
-            pack $_actionframe -side top  -fill $fill -expand $expand -padx $padx -pady [list 0 $pady]
-            pack $_toolframe -side top  -fill $fill -expand $expand -padx $padx -pady $pady
-        }
+
         pack $_detailsframe -side top  -fill $fill -expand $expand -padx $padx -pady $pady
 
         # Now configure options
@@ -6009,11 +5986,11 @@ snit::widgetadaptor wits::widget::listframe {
 
         # Now pack/grid the widgets
 
-        pack $win.f.sf -expand yes -fill both
+        pack $frame -expand yes -fill both
 
         set pw_pad 0
 
-        $_panemanager add $win.f -weight $panemanager_weight
+        $_panemanager add $_scroller -weight 0
         $_panemanager add $_listframe -weight 3
 
         # Note toolbar is packed first so on shrinking window it
@@ -6040,9 +6017,9 @@ snit::widgetadaptor wits::widget::listframe {
         util::hide_window_and_redraw $win "" "$_panemanager sashpos 0 [expr {$caf_width + 20}]"
 
         # Bind to resize left pane
-        bind $win.f.sf <Configure> [mymethod _resizeleftpane %W %T]
-        bind $win.f.sf.sc.vscroll <Map> [mymethod _resizeleftpane %W %T]
-        bind $win.f.sf.sc.vscroll <Unmap> [mymethod _resizeleftpane %W %T]
+        bind $_scroller <Configure> [mymethod _relayoutleftpane %W %T]
+        bind $_scroller.sc.vscroll <Map> [mymethod _relayoutleftpane %W %T]
+        bind $_scroller.sc.vscroll <Unmap> [mymethod _relayoutleftpane %W %T]
 
         if {0} {
             # If we bind to a tag, font bindings will not fire once you
@@ -6215,35 +6192,35 @@ snit::widgetadaptor wits::widget::listframe {
         return $_records_provider
     }
 
-    method _toggleleftpane {} {
-        if {[$win.pw sashpos 0] > 10} {
-            pack forget $win.f.sf
+    method _resizeleftpane {} {
+        if {! $_splitwindowbuttonvar} {
             set _sashpos [$win.pw sashpos 0]
-            $win.f.lhide configure -text \u00bb
-            $win.pw sashpos 0 10
+            $win.pw forget 0
         } else {
-            pack $win.f.sf -expand yes -fill both
-            $win.f.lhide configure -text \u00ab
-            $win.pw sashpos 0 $_sashpos
+            $win.pw insert 0 $_scroller -weight 0
         }
     }
 
-    method _resizeleftpane {w eventtype} {
+    method _relayoutleftpane {w eventtype} {
         if {[catch {$win.pw sashpos 0} width]} {
             # The window is in the process of being destroyed. Ignore
             return
         }
         incr width -20
-        if {[winfo ismapped $win.f.sf.sc.vscroll]} {
+        if {[winfo ismapped $_scroller.sc.vscroll]} {
             incr width -[twapi::GetSystemMetrics 2]
         }
-        if {$width < 20} {
-            $self _toggleleftpane
-        } else {
-            if {0} {
-                $_actionframe configure -headerwidth $width
-                $_toolframe configure -headerwidth $width
+        if {$width < 50} {
+            # We would like to close the pane, but the panedwindow
+            # drag code throws an error if the sash disappears while
+            # dragging. So we just try to not allow it to get smaller.
+            if {1} {
+                $win.pw sashpos 0 50
+            } else {
+                set _splitwindowbuttonvar 0
+                after idle [mymethod _resizeleftpane]
             }
+        } else {
             $_detailsframe configure -headerwidth $width
         }
     }

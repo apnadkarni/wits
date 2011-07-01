@@ -276,6 +276,7 @@ proc images::use_external_images {} {
         route route.png wits png
         service kcmsystem.png nuvola png
         servicefilter kcmsystem+filter.png nuvola png
+        splitwindow view_left_right.png nuvola png
         statusbar  kcmkwm-statusbar.png nuvola png
         support chat.png nuvola png
         system mycomputer.png nuvola png
