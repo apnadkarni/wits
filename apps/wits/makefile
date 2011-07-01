@@ -108,6 +108,7 @@ TREECTRLDIR=$(THIRDPARTYDIR)\treectrl-2.4-beta\$(PLATFORM)
 "$(VFSDIR)\lib\widget": 
 	-mkdir $@
 	copy "$(THIRDPARTYDIR)\widget\pkgIndex.tcl" $@
+	copy "$(THIRDPARTYDIR)\widget\toolbar.tcl" $@
 	copy "$(THIRDPARTYDIR)\widget\widget.tcl" $@
 	copy "$(THIRDPARTYDIR)\widget\dialog.tcl" $@
 	copy "$(THIRDPARTYDIR)\widget\scrollw.tcl" $@

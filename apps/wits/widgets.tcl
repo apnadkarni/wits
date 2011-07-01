@@ -5598,11 +5598,11 @@ snit::widgetadaptor wits::widget::listframe {
         }
     }
 
-    typemethod standardfiltertitle {} {
+    typemethod OBSOLETEstandardfiltertitle {} {
         return "Filters and Views"
     }
 
-    typemethod standardfilteractionhandler {viewer action objkeys} {
+    typemethod OBSOLETEstandardfilteractionhandler {viewer action objkeys} {
         switch -exact -- $action {
             enablefilter {
                 $viewer configure -disablefilter 0
@@ -5625,7 +5625,7 @@ snit::widgetadaptor wits::widget::listframe {
 
 
 
-    typemethod standardfilteractions {} {
+    typemethod OBSOLETEstandardfilteractions {} {
 
         return [list \
                     [list enablefilter "Enable filter" [images::get_icon16 filterenable]] \
@@ -5645,7 +5645,7 @@ snit::widgetadaptor wits::widget::listframe {
     # Command to invoke when a tool from the tool pane is clicked.
     # Two parameters are appended - the tool token and a list containing
     # the keys for the selected rows (or empty if none selected)
-    option -toolcommand -default ""
+    option -OBSOLETEtoolcommand -default ""
 
     # Command to invoke when a list frame item is doubleclicked
     option -pickcommand -default ""
@@ -5682,11 +5682,9 @@ snit::widgetadaptor wits::widget::listframe {
     option -filtericon -default ""
 
     # Actions for the actions dropdown
-#TBD    delegate option -actions to _actionframe as -items
     option -actiontitle -readonly true -default "Tasks"
 
     # Tool links for the tool dropdown
-#TBD    delegate option -tools to _toolframe as -items
     option -tooltitle -readonly true -default "Tools"
 
     # Properties to dissplay in details dropdown
@@ -5786,7 +5784,8 @@ snit::widgetadaptor wits::widget::listframe {
 
     component _actionframe;             # Contains the action links
 
-    component _toolframe;               # Contains tools
+    component _OBSOLETEtoolframe;               # Contains tools
+
     component _detailsframe;            # Contains details of selected row
 
     component _statusframe;             # Contains item count and refresh stuff
@@ -5799,7 +5798,9 @@ snit::widgetadaptor wits::widget::listframe {
 
     variable _maxrefreshinterval 600000;   # Max value of refresh in ms
 
-    variable _nullfilter
+    variable _filterbuttonvar;  # Attached to the filtering checkbutton
+
+    variable _nullfilter;       # Const def of a null filter
 
     variable _sashpos;          # Position of sash before shrinking
 
@@ -5822,25 +5823,28 @@ snit::widgetadaptor wits::widget::listframe {
 
         # Set up all the widgets BEFORE calling configurelist
 
-        set _toolbar ""
         set options(-tools)    [from args -tools {}]
         set options(-actions)  [from args -actions {}]
-        if {[llength $options(-tools)] || [llength $options(-actions)]} {
-            install _toolbar using [namespace parent]::buttonbox $win.tb -compound image
-            set tbwidgets {}
-            foreach elem $options(-actions) {
-                lassign $elem token tip image text
-                lappend tbwidgets button [dict create -image $image -text $text -tip $tip -command [mymethod _actioncallback $token]]
+        install _toolbar using ::widget::toolbar $win.tb
+        foreach elem $options(-actions) {
+            lassign $elem token tip image text
+            $_toolbar add button $token -image $image -text $text -command [mymethod _actioncallback $token]
+            set tip [string trimleft $tip -]
+            if {$tip ne ""} {
+                # TBD - do we have to destroy the tooltip ?
+                tooltip::tooltip [$_toolbar itemid $token] $tip
             }
-            if {[llength $tbwidgets] && [llength $options(-tools)]} {
-                lappend tbwidgets separator {}
-            }
-            foreach elem $options(-tools) {
-                lassign $elem token tip image text
-                lappend tbwidgets button [dict create -image $image -text $text -tip $tip -command [mymethod _toolcallback $token]]
-            }
-            $_toolbar addL $tbwidgets
         }
+        if {[llength $options(-actions)]} {
+            $_toolbar add separator
+        }
+        # Add in the standard filtering actions
+        $_toolbar add checkbutton togglefilter -image [images::get_icon16 filter] -command [mymethod _filterbuttonhandler togglefilter] -variable [myvar _filterbuttonvar]
+        tooltip::tooltip [$_toolbar itemid togglefilter] "Toggle filter"
+        $_toolbar add button clearfilter -image [images::get_icon16 filterdisable] -command [mymethod _filterbuttonhandler clearfilter]
+        tooltip::tooltip [$_toolbar itemid clearfilter] "Clear filters"
+        $_toolbar add button tableconfigure -image [images::get_icon16 tableconfigure] -command [mymethod edittablecolumns]
+        tooltip::tooltip [$_toolbar itemid tableconfigure] "Select table columns"
 
         install _panemanager using \
             ttk::panedwindow $win.pw -orient horizontal \
@@ -5914,17 +5918,19 @@ snit::widgetadaptor wits::widget::listframe {
             set caf_width 160
         }
 
-        install _actionframe using \
-            [namespace parent]::collapsibleactionframe $frame.actionframe \
-            -headerwidth $caf_width \
-            -cornercolor $bgcolor \
-            -command [mymethod _actioncallback]  -title $actiontitle
+        if {0} {
+            install _actionframe using \
+                [namespace parent]::collapsibleactionframe $frame.actionframe \
+                -headerwidth $caf_width \
+                -cornercolor $bgcolor \
+                -command [mymethod _actioncallback]  -title $actiontitle
 
-        install _toolframe using \
-            [namespace parent]::collapsibleactionframe $frame.toolframe \
-            -headerwidth $caf_width \
-            -cornercolor $bgcolor \
-            -command [mymethod _toolcallback] -title $tooltitle
+            install _toolframe using \
+                [namespace parent]::collapsibleactionframe $frame.toolframe \
+                -headerwidth $caf_width \
+                -cornercolor $bgcolor \
+                -command [mymethod _toolcallback] -title $tooltitle
+        }
 
         install _detailsframe using \
             [namespace parent]::collapsiblepropertyframe $frame.propertyframe \
@@ -6002,8 +6008,10 @@ snit::widgetadaptor wits::widget::listframe {
         }
         # Because we already have padding at top using a label frame,
         # _actionframe is given a top padding of 0 instead of $pady
-        pack $_actionframe -side top  -fill $fill -expand $expand -padx $padx -pady [list 0 $pady]
-        pack $_toolframe -side top  -fill $fill -expand $expand -padx $padx -pady $pady
+        if {0} {
+            pack $_actionframe -side top  -fill $fill -expand $expand -padx $padx -pady [list 0 $pady]
+            pack $_toolframe -side top  -fill $fill -expand $expand -padx $padx -pady $pady
+        }
         pack $_detailsframe -side top  -fill $fill -expand $expand -padx $padx -pady $pady
 
         # Now configure options
@@ -6096,13 +6104,12 @@ snit::widgetadaptor wits::widget::listframe {
         # frames. Also position the sash to allow room for a scrollbar
         # TBD - does not seem right to do this before the scheduled update
         # above
-        util::hide_window_and_redraw $win "$_actionframe open; $_toolframe open" "$_actionframe close; $_toolframe close; $_panemanager sashpos 0 [expr {$caf_width + 20}]"
-
         if {0} {
-            TBD
-            $_listframe setfocus
-            $_listframe resethighlights
+            util::hide_window_and_redraw $win "$_actionframe open; $_toolframe open" "$_actionframe close; $_toolframe close; $_panemanager sashpos 0 [expr {$caf_width + 20}]"
+        } else {
+            util::hide_window_and_redraw $win "" "$_panemanager sashpos 0 [expr {$caf_width + 20}]"
         }
+
 
         # Bind to resize left pane
         bind $win.f.sf <Configure> [mymethod _resizeleftpane %W %T]
@@ -6305,8 +6312,10 @@ snit::widgetadaptor wits::widget::listframe {
         if {$width < 20} {
             $self _toggleleftpane
         } else {
-            $_actionframe configure -headerwidth $width
-            $_toolframe configure -headerwidth $width
+            if {0} {
+                $_actionframe configure -headerwidth $width
+                $_toolframe configure -headerwidth $width
+            }
             $_detailsframe configure -headerwidth $width
         }
     }
@@ -6880,6 +6889,17 @@ snit::widgetadaptor wits::widget::listframe {
         $_listframe configure -font $_table_font
         $_listframe configure -headerfont $_table_header_font
 
+    }
+
+    method _filterbuttonhandler {cmd} {
+        switch -exact -- $cmd {
+            clearfilter {
+                $self configure -disablefilter 0 -filter [util::filter null]
+            }
+            togglefilter {
+                $self configure -disablefilter [expr {! $_filterbuttonvar}]
+            }
+        }
     }
 }
 

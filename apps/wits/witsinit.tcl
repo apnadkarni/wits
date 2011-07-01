@@ -109,5 +109,6 @@ package require csv
 package require treectrl 2.4
 package require tooltip 1.1;    # TBD
 package require widget::dialog
+package require widget::toolbar
 package require widget::scrolledwindow
 package require struct::set

@@ -1621,21 +1621,16 @@ proc wits::app::viewlist {objtype args} {
     set opts(toolcommand) ${objtype}::listviewhandler
     set opts(pickcommand) [list [namespace current]::viewdetails $objtype]
     set opts(objlinkcommand) [namespace current]::view_property_page
-    set opts(tooltitle) [widget::propertyrecordslistview standardfiltertitle]
-    set opts(tools) [widget::propertyrecordslistview standardfilteractions]
     set opts(popupmenu) [widget::propertyrecordslistview standardpopupitems]
     set opts(popupcommand) ${objtype}::popuphandler
     array set opts [twapi::parseargs args {
         filter.arg
         prefscontainer.arg
         actioncommand.arg
-        toolcommand.arg
         pickcommand.arg
         objlinkcommand.arg
         itemname.arg
         actiontitle.arg
-        tooltitle.arg
-        tools.arg
         popupmenu.arg
         popupcommand.arg
     } -ignoreunknown]
@@ -1677,9 +1672,6 @@ proc wits::app::viewlist {objtype args} {
              -prefscontainer $opts(prefscontainer) \
              -actiontitle $opts(actiontitle) \
              -actioncommand $opts(actioncommand) \
-             -tools $opts(tools) \
-             -tooltitle $opts(tooltitle) \
-             -toolcommand $opts(toolcommand) \
              -pickcommand $opts(pickcommand) \
              -objlinkcommand $opts(objlinkcommand) \
              -popupcommand $opts(popupcommand) \
