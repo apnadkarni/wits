@@ -672,22 +672,6 @@ snit::widget wits::widget::buttonbox {
         return $widgets
     }
 
-
-    method OBSOLETEadd {text image {tooltip ""} {pos end}} {
-        set b [::ttk::button $win.b[incr _buttonindex] -style Toolbutton -text $text -image $image -compound $options(-compound)]
-        set _buttons [linsert $_buttons $pos $b]
-        if {$tooltip ne ""} {
-            # TBD - tooltip bug - if the text begins with "-" it interprets
-            # it as an option
-            if {[string index $tooltip 0] ne "-"} {
-                tooltip::tooltip $b $tooltip
-            }
-        }
-
-        $self _arrange
-        return $b
-    }
-
     method _setbuttonopt {opt val} {
         set options($opt) $val
         foreach b [winfo children $win] {
@@ -4843,7 +4827,7 @@ snit::widgetadaptor wits::widget::listframe {
         # The following binding is needed because we removed the one above
         # else if you exit exactly where the tooltip was displayed
         # and reenter at the same point the tooltip is not displayed.
-        bind $_treectrl <Enter> [mymethod _cancel_tooltip]
+#        bind $_treectrl <Enter> [mymethod _cancel_tooltip]
 
         # Define the filter header row
         $_treectrl element create h2Elem text -lines 1 -justify left -font WitsFilterFont -statedomain header -fill blue
@@ -5029,8 +5013,9 @@ snit::widgetadaptor wits::widget::listframe {
 
         
         # Find the cell position and add to tree control position
-        lassign [$_treectrl item bbox $_tooltip_state(item) $_tooltip_state(column)] xpos ypos width
+        lassign [$_treectrl item bbox $_tooltip_state(item) $_tooltip_state(column)] xpos ypos width height
         set width [expr {$width - $xpos}]
+        set height [expr {$height -$ypos}]
 
         # Figure out whether the cell needs a tooltip
         set text [$_treectrl item text $_tooltip_state(item) $_tooltip_state(column)]
@@ -5040,15 +5025,23 @@ snit::widgetadaptor wits::widget::listframe {
             return;             # Whole text is displayed, no need for tooltip
         }
 
-        incr xpos [winfo rootx $_treectrl]
-        incr ypos [winfo rooty $_treectrl]
+        # Position just above the row. That way we can see the 
+        # whole row of interest. More important, double clicks on
+        # the row work. Note we position with a gap of 5 vertical pixels
+        # so that when the mouse moves, it enters the preceding row
+        # thereby canceling the tooltip
+        set xpos [expr {$xpos + [winfo rootx $_treectrl] + 30}]
+        set ypos [expr {$ypos + [winfo rooty $_treectrl] - $height - 0}]
 
         # Create window if it does not exist
         if {![winfo exists $win.tooltip]} {
             toplevel $win.tooltip
             # Padding is for alignment with treectrl
             label $win.tooltip.l -background [$_treectrl cget -background] -relief solid -borderwidth 1 -padx 4 -pady 0
-            bind $win.tooltip <Leave> "wm withdraw $win.tooltip"
+            # We are showing tooltips ABOVE the row now so if mouse
+            # enters the tooltip, it means the row is not being hovered
+            #bind $win.tooltip <Enter> [mymethod _cancel_tooltip]
+            bind $win.tooltip <Enter> [mymethod _proxymouse Enter "" %X %Y]
 
             # Bind mouse clicks so they get passed on to parent frame
             foreach event {
@@ -5061,7 +5054,6 @@ snit::widgetadaptor wits::widget::listframe {
             }
             bind $win.tooltip <MouseWheel> "event generate $_treectrl <MouseWheel> -delta %D"
             
-
             pack $win.tooltip.l -side left -fill y
             wm overrideredirect $win.tooltip 1
             wm withdraw $win.tooltip
@@ -5074,6 +5066,7 @@ snit::widgetadaptor wits::widget::listframe {
     }
 
     method _proxymouse {event button screenx screeny} {
+
         if {$_tooltip_state(item) == -1} {
             return;             # Cannot happen, can it ?
         }
@@ -5086,6 +5079,11 @@ snit::widgetadaptor wits::widget::listframe {
         $self _cancel_tooltip
         focus $_treectrl
         switch -exact -- "$event-$button" {
+            Enter- {
+                set rootx [winfo rootx $_treectrl]
+                set rooty [winfo rooty $_treectrl]
+                event generate $_treectrl <Motion> -when tail -x [expr {$screenx-$rootx}] -y [expr {$screeny-$rooty}]
+            }
             Button-1 {
                 if {0} {
                     # Instead,  event generate below so any other actions 
@@ -5598,54 +5596,12 @@ snit::widgetadaptor wits::widget::listframe {
         }
     }
 
-    typemethod OBSOLETEstandardfiltertitle {} {
-        return "Filters and Views"
-    }
-
-    typemethod OBSOLETEstandardfilteractionhandler {viewer action objkeys} {
-        switch -exact -- $action {
-            enablefilter {
-                $viewer configure -disablefilter 0
-            } 
-            disablefilter {
-                $viewer configure -disablefilter 1
-            }
-            clearfilter {
-                $viewer configure -disablefilter 0 -filter [util::filter null]
-            }
-            tableconfigure {
-                $viewer edittablecolumns
-            }
-            default {
-                error "Unknown action '$action'"
-            }
-        }
-        return
-    }
-
-
-
-    typemethod OBSOLETEstandardfilteractions {} {
-
-        return [list \
-                    [list enablefilter "Enable filter" [images::get_icon16 filterenable]] \
-                    [list disablefilter "Disable filter" [images::get_icon16 filterdisable]] \
-                    [list clearfilter "Clear filters" [images::get_icon16 filter]] \
-                    [list tableconfigure "Customize view" [images::get_icon16 tableconfigure]] \
-                   ]
-    }
-
     ### Option definitions
 
     # Command to invoke when an action from the action pane is clicked.
     # Two parameters are appended - the action token and a list containing
     # the keys for the selected rows (or empty if none selected)
     option -actioncommand -default ""
-
-    # Command to invoke when a tool from the tool pane is clicked.
-    # Two parameters are appended - the tool token and a list containing
-    # the keys for the selected rows (or empty if none selected)
-    option -OBSOLETEtoolcommand -default ""
 
     # Command to invoke when a list frame item is doubleclicked
     option -pickcommand -default ""
@@ -5782,10 +5738,6 @@ snit::widgetadaptor wits::widget::listframe {
 
     component _scroller;                # Holds the left pane scroller
 
-    component _actionframe;             # Contains the action links
-
-    component _OBSOLETEtoolframe;               # Contains tools
-
     component _detailsframe;            # Contains details of selected row
 
     component _statusframe;             # Contains item count and refresh stuff
@@ -5916,20 +5868,6 @@ snit::widgetadaptor wits::widget::listframe {
         # ugly
         if {$caf_width < 160} {
             set caf_width 160
-        }
-
-        if {0} {
-            install _actionframe using \
-                [namespace parent]::collapsibleactionframe $frame.actionframe \
-                -headerwidth $caf_width \
-                -cornercolor $bgcolor \
-                -command [mymethod _actioncallback]  -title $actiontitle
-
-            install _toolframe using \
-                [namespace parent]::collapsibleactionframe $frame.toolframe \
-                -headerwidth $caf_width \
-                -cornercolor $bgcolor \
-                -command [mymethod _toolcallback] -title $tooltitle
         }
 
         install _detailsframe using \
@@ -6098,18 +6036,8 @@ snit::widgetadaptor wits::widget::listframe {
         $self schedule_display_update immediate -highlight 0 -forcerefresh 1
 
         $_records_provider subscribe [mymethod _provider_notification_handler]
-
-        # In order to minimize flashing when opening the dropdowns,
-        # draw off screen and open collapsible
-        # frames. Also position the sash to allow room for a scrollbar
-        # TBD - does not seem right to do this before the scheduled update
-        # above
-        if {0} {
-            util::hide_window_and_redraw $win "$_actionframe open; $_toolframe open" "$_actionframe close; $_toolframe close; $_panemanager sashpos 0 [expr {$caf_width + 20}]"
-        } else {
-            util::hide_window_and_redraw $win "" "$_panemanager sashpos 0 [expr {$caf_width + 20}]"
-        }
-
+        # TBD - is this still needed now that we do not have dropdowns ?
+        util::hide_window_and_redraw $win "" "$_panemanager sashpos 0 [expr {$caf_width + 20}]"
 
         # Bind to resize left pane
         bind $win.f.sf <Configure> [mymethod _resizeleftpane %W %T]
@@ -6487,11 +6415,6 @@ snit::widgetadaptor wits::widget::listframe {
     # Handler for click in the action dropdown
     method _actioncallback {action} {
         $self _selectcallback $action $options(-actioncommand)
-    }
-
-    # Handler for click in the tool dropdown
-    method _toolcallback {tool} {
-        $self _selectcallback $tool $options(-toolcommand)
     }
 
     method _updatedetails {sel {propnames_changed false}} {
