@@ -54,7 +54,8 @@ MAKESFX=$(TOOLDIR)\makesfx.exe
 IMAGEDIRS= \
         images\nuvola \
         images\wits \
-	images\oxygen
+	images\oxygen \
+	images\famfamsilk
 
 STARKITSCRIPT=starkitmain.tcl
 
