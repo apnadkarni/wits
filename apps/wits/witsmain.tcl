@@ -1297,12 +1297,14 @@ proc ::wits::app::help {} {
 
 # Shows credits dialog
 proc ::wits::app::showcredits {} {
-    set credits "WiTS uses, with many thanks to the authors, the following thirdparty packages and libraries:"
+    set credits "WiTS uses, with many thanks to the authors, the following packages and libraries:"
     append credits "\n\nTcl/Tk interpreter and libraries \u00a9 University of California, Sun Microsystems, Inc., Scriptics Corporation, ActiveState Corporation and other parties.\n"
     append credits "\nSnit package \u00a9 William H. Duquette"
     append credits "\nTkTreeCtrl package \u00a9 Tim Baker"
     append credits "\nTcl Windows API extension \u00a9 Ashok P. Nadkarni"
     append credits "\nNuvola icon library \u00a9 David Vignoni"
+    append credits "\n7-Zip compression tools \u00a9 Igor Pavlov"
+    append credits "\nWiX installer team"
 
     set dlg [::wits::widget::rotextdialog .%AUTO% -type ok \
                  -icon [images::get_icon48 witslogo] \
