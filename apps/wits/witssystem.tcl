@@ -507,6 +507,7 @@ proc wits::app::system::viewlist {args} {
 
     return [::wits::app::viewlist [namespace current] \
                 -itemname "processor" \
+                -displaymode standard \
                 -actiontitle "Processor Tasks" \
                 -actions [list \
                               [list view "View properties of selected processors" $viewdetailimg] \

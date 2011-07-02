@@ -5647,7 +5647,12 @@ snit::widgetadaptor wits::widget::listframe {
     option -availablecolumns -default "" -readonly true
 
     # Ordered list of properties to be actually displayed in columns
-    option -displaycolumns -default "" -configuremethod _setdisplaycolumns
+    option -displaycolumns -default "" -configuremethod _setdisplaycolumns
+
+    # Initial display mode. Readonly only because user should control
+    # after initial display. In other words, lazy to write the
+    # corresponding configuration method
+    option -displaymode -default "highlighted" -readonly 1
 
     # Additional column attributes - dict indexed by property name
     option -colattrs ""
@@ -5929,8 +5934,10 @@ snit::widgetadaptor wits::widget::listframe {
                          -justify left -anchor w]
 
 
-        set _displaymode "highlighted"
-        set mbdisplaymode [::ttk::menubutton $_statusframe.mbdisplaymode -text [dict get $_displaymodelabels $_displaymode] -style WitsMenubutton.TMenubutton]
+        set _displaymode [from args -displaymode "highlighted"]
+        set mbdisplaymode [::ttk::menubutton $_statusframe.mbdisplaymode -style WitsMenubutton.TMenubutton]
+        $self _setdisplaymode $mbdisplaymode
+
         set m [menu $mbdisplaymode.menu -tearoff 0]
         $mbdisplaymode configure -menu $m
         foreach tok {standard highlighted changes} {
