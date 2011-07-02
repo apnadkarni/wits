@@ -1475,7 +1475,7 @@ snit::widgetadaptor wits::widget::collapsiblepropertyframe {
             [dict exists $options(-properties) values $options(-descproperty)]} {
             set propname $options(-descproperty)
             set _valuewidgets($propname) $_clientf.desc
-            set vwin [textlabel $_valuewidgets($propname) -text [dict get $options(-properties) values $propname] -bg [get_theme_setting dropdown label normal bg] -width 10]
+            set vwin [textlabel $_valuewidgets($propname) -text [dict get $options(-properties) values $propname] -bg [get_theme_setting dropdown label normal bg] -width 10 -font [get_theme_setting dropdown label normal font]]
             grid $vwin -columnspan 2 -sticky nwe
             set need_sep 1
         }
