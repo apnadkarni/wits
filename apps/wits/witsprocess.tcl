@@ -146,14 +146,14 @@ proc wits::app::process::get_property_defs {} {
         -user "User account" "User" ::wits::app::account text 1
         UserTime "User time" "User time" "" ns100 1
         VmCounters.PageFaultCount "Page faults" "Page faults" "" int 1
-        VmCounters.PagefileUsage "Page file usage" "Page file usage" "" mb 1
-        VmCounters.PeakPagefileUsage "Peak page file usage" "Peak page file usage" "" mb 1
+        VmCounters.PagefileUsage "Swap used" "Swap used" "" mb 1
+        VmCounters.PeakPagefileUsage "Peak swap used" "Peak swap used" "" mb 1
         VmCounters.QuotaNonPagedPoolUsage "Non-paged pool" "Non-paged pool" "" xb 1
         VmCounters.QuotaPeakNonPagedPoolUsage "Peak non-paged pool" "Peak non-paged pool" "" xb 1
         VmCounters.QuotaPagedPoolUsage "Paged pool" "Paged pool" "" xb 1
         VmCounters.QuotaPeakPagedPoolUsage "Peak paged pool" "Peak paged pool" "" xb 1
-        VmCounters.VirtualSize "Virtual memory" "Virtual memory" "" mb 1
-        VmCounters.PeakVirtualSize "Peak virtual memory" "Peak virtual memory" "" mb 1
+        VmCounters.VirtualSize "Virtual memory" "VM used" "" mb 1
+        VmCounters.PeakVirtualSize "Peak virtual memory" "Peak VM" "" mb 1
         VmCounters.WorkingSetSize "Working set" "Working set" "" mb 1
         VmCounters.PeakWorkingSetSize "Peak working set" "Peak working set" "" mb 1
         -elapsedtime "Elapsed time" "Elapsed time" "" interval 0
