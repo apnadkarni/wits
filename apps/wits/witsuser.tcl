@@ -126,9 +126,9 @@ proc wits::app::user::get_property_defs {} {
             max_storage      "Disk quota" "Disk quota" "" mb true 2
             logon_server     "Logon server" "Logon server" "" text true 2
             password_age     "Password age" "Password age" "" interval true 1
-            acct_expires     "Account expiration" "Expiration" "" text true 2
-            last_logon       "Last logon time" "Last logon" "" text true 2
-            last_logoff      "Last logoff time" "Last logoff" "" text true 2
+            acct_expires     "Account expiration" "Expiration" "" secs1970 true 2
+            last_logon       "Last logon time" "Last logon" "" secs1970 true 2
+            last_logoff      "Last logoff time" "Last logoff" "" secs1970 true 2
             bad_pw_count     "Logon failures" "Logon failures" "" int true 2
             status           "Account status" "Status" "" text true 1
         } {
@@ -155,9 +155,6 @@ proc wits::app::user::get_property_defs {} {
         dict set _property_defs country_code displayformat {map {0 {System default}}}
         dict set _property_defs max_storage displayformat {map {0 {No limit}}}
         dict set _property_defs logon_server displayformat [list map [list "\\\\*" "Local system"]]
-        dict set _property_defs acct_expires displayformat {map {never Never}}
-        dict set _property_defs last_logon displayformat {map {unknown Unknown}}
-        dict set _property_defs last_logoff displayformat {map {unknown Unknown}}
 
         # TBD - property to indicate if currently logged in
     }
@@ -311,7 +308,7 @@ proc wits::app::user::viewlist {args} {
                 -popupmenu [concat [list {enable Enable} {disable Disable} -] [widget::propertyrecordslistview standardpopupitems]] \
                 -displaycolumns {name full_name comment status} \
                 -colattrs {full_name {-squeeze 1} comment {-squeeze 1}} \
-                -detailfields {name -sid comment status last_logon home_dir} \
+                -detailfields {full_name -sid status home_dir -domain last_logon password_age} \
                 -nameproperty "name" \
                 -descproperty "comment" \
                 {*}$args \
