@@ -10,7 +10,7 @@
 <!-- Define plaform specific GUIDS and values. These are named as -->
 <!-- "Wits" followed by the corresponding Wix name -->
 <?if $(var.WitsPlatform)=x86 ?>
-  <?define WitsProductId =  '579F898C-0D43-4b92-9F97-F1815DD0F0E3' ?>
+  <?define WitsProductId =  'F323099D-015C-4370-A816-7980D18F8F14' ?>
   <?define WitsUpgradeCode = 'FD746785-3486-487D-83FD-D917EF67AA45' ?>
   <?define WitsProgramFilesFolder = 'ProgramFilesFolder'?>
   <?define WitsWin64 = 'no' ?>
