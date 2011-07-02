@@ -1330,7 +1330,12 @@ namespace eval util::filter {
                 }
 
                 if {[dict exists $propertydefs $propname]} {
-                    set arg [[namespace parent]::unformat_property_value $arg [dict get $propertydefs $propname displayformat]]
+                    # Does not make sense to "unformat" a regexp
+                    # TBD - unformatting should also take into account
+                    # the property type
+                    if {$oper ni {* ~}} {
+                        set arg [[namespace parent]::unformat_property_value $arg [dict get $propertydefs $propname displayformat]]
+                    }
                 }
                 switch -exact -- $oper {
                     =  { set cmdprefix [list ::tcl::mathop::== $arg] }
