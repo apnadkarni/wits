@@ -311,9 +311,9 @@ proc util::toGB {val {suffix " GB"}} {
 # Convert to KB MB or GB as approriate
 proc util::toXB val {
     if {$val == 0} {return "0 KB"}
-    if {wide($val) < 512} {return "< 1KB"}
-    if {wide($val) < wide(10485760)} {return [toKB $val]}
-    if {wide($val) < wide(10737418240)} {return [toMB $val]}
+    if {$val < 512} {return "< 1KB"}
+    if {$val < 10485760} {return [toKB $val]}
+    if {$val < 10737418240} {return [toMB $val]}
     return [toGB $val]
 }
 
@@ -330,9 +330,9 @@ proc util::fromXB xb {
     }
 
     return [switch -exact -- [string toupper $xb] {
-        KB { expr {wide($val) * 1024} }
-        MB { expr {wide($val) * 10485760} }
-        GB { expr {$val * 10737418240} }
+        KB { expr {$val * 1024} }
+        MB { expr {$val * 1048576} }
+        GB { expr {$val * 1073741824} }
         default {incr val 0}
     }]
 }
