@@ -5579,6 +5579,7 @@ snit::widgetadaptor wits::widget::listframe {
                     <\tis less than VALUE\n\
                     <=\tis less than or equal to VALUE\n\
                     *\tmatches VALUE pattern (case-insensitive)\n\
+                    ~\tmatches VALUE regexp (case-insensitive)\n\
                     \n Examples:\n\
                     \t> 128KB (show rows if field is > 128KB)\n\
                     \t* *Service* (show rows if field conains 'Service')" \
@@ -5935,7 +5936,6 @@ snit::widgetadaptor wits::widget::listframe {
         foreach tok {standard highlighted changes} {
             $m add radiobutton -value $tok -label [dict get $_displaymodelabels $tok] -variable [myvar _displaymode] -command [mymethod _setdisplaymode $mbdisplaymode]
         }
-
 
         # Refresh interval button and entry
         set refreshl [::ttk::label $_statusframe.refreshl -text "Refresh interval (s):"]

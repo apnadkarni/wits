@@ -1323,7 +1323,7 @@ namespace eval util::filter {
                 }
 
 
-                if {![regexp {^(=|!=|>|>=|<|<=|\*)\s*([^\s].*)$} $condition _ oper arg]} {
+                if {![regexp {^(=|!=|>|>=|<|<=|\*|~)\s*([^\s].*)$} $condition _ oper arg]} {
                     set oper =
                     set arg $condition
                     dict set filter properties $propname condition "= $arg"
@@ -1340,6 +1340,11 @@ namespace eval util::filter {
                     <  { set cmdprefix [list ::tcl::mathop::> $arg] }
                     <= { set cmdprefix [list ::tcl::mathop::>= $arg] }
                     *  { set cmdprefix [list ::string match -nocase $arg] }
+                    ~  {
+                        # Validate the regexp
+                        regexp -nocase $arg abc; # Throw error if invalid
+                        set cmdprefix [list ::regexp -nocase $arg]
+                    }
                     default {
                         error "Invalid filter condition '$condition'"
                     }
