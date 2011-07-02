@@ -271,8 +271,8 @@ oo::class create util::PropertyRecordCollection {
         }
 
         set _scheduler [Scheduler new]
-        $_scheduler after1 0 [mymethod refresh_callback]
-        $_scheduler after1 60000 [mymethod housekeeping]
+        $_scheduler after1 0 [list [self] refresh_callback]
+        $_scheduler after1 60000 [list [self] housekeeping]
     }
 
     destructor {
@@ -669,7 +669,7 @@ oo::class create util::PropertyRecordCollection {
     method refresh_callback {} {
         my _refresh_cache 1
         if {$_refresh_interval} {
-            $_scheduler after1 $_refresh_interval [mymethod refresh_callback]
+            $_scheduler after1 $_refresh_interval [list [self] refresh_callback]
         }
     }
 
@@ -680,15 +680,14 @@ oo::class create util::PropertyRecordCollection {
         if {([clock milliseconds] - $_last_update) > (10*$_refresh_interval) &&
             ! [my have_subscribers]} {
             # Do not keep updating
-            $_scheduler cancel [mymethod refresh_callback]
+            $_scheduler cancel [list [self] refresh_callback]
 
             # Reset state
             my discard
         }
 
-        $_scheduler after1 60000 [mymethod housekeeping]
+        $_scheduler after1 60000 [list [self] housekeeping]
     }
-
 }
 
 
