@@ -486,25 +486,27 @@ snit::widgetadaptor ::wits::app::mainview {
 
     # Update the status bar
     method _updateStatusBar {} {
-        # TBD - optimize by opening a PDH query and keeping it open
-        # instead of using high level twapi functions
-        array set systemstatus [twapi::get_system_info -processcount -threadcount]
-        array set systemstatus [twapi::get_memory_info -availcommit -totalcommit -availphysical -totalphysical]
-        set usedphysical [expr {$systemstatus(-totalphysical) - $systemstatus(-availphysical)}]
-        set usedphysical [expr {(wide($usedphysical)+524288)/wide(1048576)}]
-        set totalphysical [expr {(wide($systemstatus(-totalphysical))+524288)/wide(1048576)}]
-        set usedcommit [expr {$systemstatus(-totalcommit) - $systemstatus(-availcommit)}]
-        set usedcommit [expr {(wide($usedcommit)+524288)/wide(1048576)}]
-        set totalcommit [expr {(wide($systemstatus(-totalcommit))+524288)/wide(1048576)}]
         if {$::wits::app::available_update ne ""} {
             set _system_status_summary "A new version of the software is available. Update from the Help and Support menu."
         } else {
+            set interval 2000
+            # TBD - optimize by opening a PDH query and keeping it open
+            # instead of using high level twapi functions
+            set cpu [[wits::app::get_objects ::wits::app::system] get_field All CPUPercent $interval 0]
+            array set systemstatus [twapi::get_system_info -processcount -threadcount]
+            array set systemstatus [twapi::get_memory_info -availcommit -totalcommit -availphysical -totalphysical]
+            set usedphysical [expr {$systemstatus(-totalphysical) - $systemstatus(-availphysical)}]
+            set usedphysical [expr {(wide($usedphysical)+524288)/wide(1048576)}]
+            set totalphysical [expr {(wide($systemstatus(-totalphysical))+524288)/wide(1048576)}]
+            set usedcommit [expr {$systemstatus(-totalcommit) - $systemstatus(-availcommit)}]
+            set usedcommit [expr {(wide($usedcommit)+524288)/wide(1048576)}]
+            set totalcommit [expr {(wide($systemstatus(-totalcommit))+524288)/wide(1048576)}]
             set _system_status_summary \
-                "Processes: $systemstatus(-processcount), Memory: $usedphysical/$totalphysical MB, Swap:  $usedcommit/$totalcommit MB"
+                "CPU: $cpu%, Processes: $systemstatus(-processcount), Memory: $usedphysical/$totalphysical MB, Swap:  $usedcommit/$totalcommit MB"
         }
 
-        # Reschedule ourselves every 5 seconds
-        $_scheduler after1 5000 [mymethod _updateStatusBar]
+        # Reschedule ourselves every 5 seconds - TBD
+        $_scheduler after1 $interval [mymethod _updateStatusBar]
     }
 
     delegate method * to hull
