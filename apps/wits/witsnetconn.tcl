@@ -27,15 +27,10 @@ namespace eval wits::app::netconn {
             {label -remotehostname}
             {label -remoteport}
             {label -remoteportname}
+            {label -pid}
+            {label -pidname}
         }
-        set process_fields {
-                {label -pid}
-                {label -pidname}
-                {label -modulename}
-                {label -modulepath}
-                {label -bindtime}
-            }
-        set nbpages [list [list "General" [list frame $common_fields]] [list "Process" [list frame $process_fields]]]
+        set nbpages [list [list "General" [list frame $common_fields]] ]
 
         set buttons {
             "Close" "destroy"
@@ -191,7 +186,7 @@ proc wits::app::netconn::viewlist {args} {
                 -availablecolumns {-pidname -protocol -remotehostname -remoteportname -localportname -state -localaddr -localhostname -localport -remoteaddr -remoteport -pid  } \
                 -displaycolumns {-pidname -protocol -remotehostname -remoteportname -localportname -state } \
                 -colattrs {-remotehostname {-squeeze 1} -localhostname {-squeeze 1}} \
-                -detailfields {-protocol -state -remotehostname -remoteportname -localhostname -localportname } \
+                -detailfields {-pid -pidname -protocol -state -remotehostname -remoteportname -localhostname -localportname } \
                 {*}$args
            ]
 }

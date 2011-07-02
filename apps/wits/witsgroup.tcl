@@ -214,7 +214,7 @@ proc wits::app::group::viewlist {args} {
                              ] \
                 -displaycolumns {name comment} \
                 -colattrs {comment {-squeeze 1}} \
-                -detailfields {name comment -sid} \
+                -detailfields {-sid -domain -type} \
                 -nameproperty "name" \
                 -descproperty "comment" \
                 {*}$args \

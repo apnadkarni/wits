@@ -397,7 +397,9 @@ proc wits::app::process::viewlist {args} {
                 -availablecolumns $_table_properties \
                 -displaycolumns {ProcessId ProcessName CPUPercent -description -user} \
                 -colattrs {-path {-squeeze 1} ProcessName {-squeeze 1} -description {-squeeze 1}} \
-                -detailfields {ProcessId -user ProcessName -path -commandline ThreadCount HandleCount -elapsedtime} \
+                -nameproperty ProcessName \
+                -descproperty -description \
+                -detailfields {ProcessId -user -path -commandline CPUPercent ThreadCount HandleCount VmCounters.VirtualSize VmCounters.WorkingSetSize -elapsedtime} \
                 {*}$args
                ]
 }

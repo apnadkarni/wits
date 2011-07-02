@@ -267,7 +267,7 @@ proc wits::app::remote_share::viewlist {args} {
                 -availablecolumns $_table_properties \
                 -displaycolumns {-remoteshare -localdevice -type -comment} \
                 -colattrs {-comment {-squeeze 1}} \
-                -detailfields {-remoteshare -comment -localdevice -status -type -opencount -size -used -freespace} \
+                -detailfields {-remoteshare -comment -localdevice -status -user -type -opencount -size -used -freespace} \
                 -nameproperty "-remoteshare" \
                 -descproperty "-comment" \
                 {*}$args \

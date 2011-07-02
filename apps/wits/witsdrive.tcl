@@ -254,7 +254,7 @@ proc wits::app::drive::viewlist {args} {
                              ] \
                 -displaycolumns {-name -status -type -size -freespace} \
                 -availablecolumns $_table_properties \
-                -detailfields {-name -label -type -fstype -serialnum -size -used -freespace} \
+                -detailfields {-name -type -label -volumename -serialnum -status -device -fstype -size -used -freespace} \
                 -nameproperty "-name" \
                 {*}$args \
                ]

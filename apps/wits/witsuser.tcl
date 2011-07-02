@@ -308,7 +308,7 @@ proc wits::app::user::viewlist {args} {
                 -popupmenu [concat [list {enable Enable} {disable Disable} -] [widget::propertyrecordslistview standardpopupitems]] \
                 -displaycolumns {name full_name comment status} \
                 -colattrs {full_name {-squeeze 1} comment {-squeeze 1}} \
-                -detailfields {full_name -sid status home_dir -domain last_logon password_age} \
+                -detailfields {full_name user_id -sid status home_dir -domain last_logon password_age} \
                 -nameproperty "name" \
                 -descproperty "comment" \
                 {*}$args \

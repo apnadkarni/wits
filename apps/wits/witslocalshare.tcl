@@ -155,7 +155,7 @@ proc wits::app::local_share::viewlist {args} {
                 -availablecolumns $_table_properties \
                 -displaycolumns {netname type remark} \
                 -colattrs {remark {-squeeze 1}} \
-                -detailfields {netname remark type path current_uses} \
+                -detailfields {netname remark type path current_uses max_uses} \
                 -nameproperty "netname" \
                 -descproperty "remark" \
                 {*}$args \

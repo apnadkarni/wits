@@ -68,7 +68,7 @@ proc wits::app::module::get_property_defs {} {
             -path   "Module path" "Path" ::wits::app::wfile path
             -base   "Module base" "Base" "" handle
             -size   "Module size" "Size" "" int
-            -entry  "Entry point" "Entry" "" int
+            -entry  "Entry point" "Entry" "" handle
         } {
             dict set _property_defs $propname \
                 [dict create \
@@ -179,7 +179,7 @@ proc wits::app::module::viewlist {args} {
                              ] \
                 -displaycolumns {-name -pid -base -size} \
                 -colattrs {-path {-squeeze 1} -name {-squeeze 1}} \
-                -detailfields {-pid -handle -name -path} \
+                -detailfields {-pid -handle -name -path -base -entry -size} \
                 -nameproperty "-name" \
                 {*}$args \
                ]

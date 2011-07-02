@@ -76,12 +76,11 @@ proc wits::app::logonsession::get_property_defs {} {
             -logonid     "Logon session id" "Session id" ::wits::app::logonsession text
             -logonserver "Logon server" "Logon server" "" text
             -logontime   "Logon time"   "Logon time" "" largetime
-            -type        "Logon session type" "Session type" "" text
+            -type        "Logon session type" "Type" "" text
             -sid         "User SID" "SID" ::wits::app::account text
             -user        "User name" "User" ::wits::app::account text
-            -tssession   "Terminal server session" "TS session" "" int
+            -tssession   "Terminal server session" "TS" "" int
             -userprincipal "User principal name" "UPN" "" text
-            -state       "State" "State" "" text
         } {
             dict set _property_defs $propname \
                 [dict create \
@@ -93,6 +92,7 @@ proc wits::app::logonsession::get_property_defs {} {
 
         dict set _property_defs -type displayformat {
             map {
+                0 ""
                 "interactive" "Interactive"
                 "network" "Network"
                 "batch" "Batch"
@@ -156,8 +156,9 @@ proc wits::app::logonsession::viewlist {args} {
                               [list processes "Show processes for selected sessions" $processimg] \
                               [list view "View properties of selected sessions" $viewdetailimg] \
                              ] \
-                -displaycolumns {-logonid -user -logontime -state} \
-                -detailfields {-logonid -user -logontime -logondomain -authpackage} \
+                -colattrs {-user {-squeeze 1}} \
+                -displaycolumns {-logonid -user -type -tssession -logontime } \
+                -detailfields {-user -logondomain -logonserver -authpackage -type -tssession -logontime} \
                 -nameproperty "-logonid" \
                 {*}$args \
                ]

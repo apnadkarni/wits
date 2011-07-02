@@ -240,22 +240,22 @@ proc wits::app::service::viewlist {args} {
         set ${name}img [images::get_icon16 $name]
     }
     return [::wits::app::viewlist [namespace current] \
-             -filtericon [images::get_icon16 servicefilter] \
-             -actions [list \
+                -filtericon [images::get_icon16 servicefilter] \
+                -actions [list \
                            [list start "Start selected services" $vcrstartimg] \
                            [list stop "Stop selected services" $vcrstopimg] \
                            [list pause "Pause selected services" $vcrpauseimg] \
                            [list view "View properties of selected services" $viewdetailimg] \
                            [list wintool "Windows services administration tool" $winlogoimg] \
                           ] \
-             -popupmenu [concat [list {start Start} {stop Stop} {pause Pause} -] [widget::propertyrecordslistview standardpopupitems]] \
-             -displaycolumns {displayname state} \
-             -colattrs {displayname {-squeeze 1} -description {-squeeze 1} -dependencies {-squeeze 1} -dependents {-squeeze 1}} \
-             -detailfields {displayname -description name state pid} \
-             -nameproperty "displayname" \
-             -descproperty "-description" \
-             {*}$args \
-            ]
+                -popupmenu [concat [list {start Start} {stop Stop} {pause Pause} -] [widget::propertyrecordslistview standardpopupitems]] \
+                -displaycolumns {displayname state -account} \
+                -colattrs {displayname {-squeeze 1} -description {-squeeze 1} -dependencies {-squeeze 1} -dependents {-squeeze 1} -account {-squeeze 1}} \
+                -detailfields {displayname -description name state pid -account -command -starttype} \
+                -nameproperty "displayname" \
+                -descproperty "-description" \
+                {*}$args \
+               ]
 }
 
 

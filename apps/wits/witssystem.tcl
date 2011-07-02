@@ -201,8 +201,8 @@ proc wits::app::system::get_property_defs {} {
         -processorlevel   "Processor level" "Processor level" "" text
         -processormodel   "Processor model" "Model" "" text
         -processorname    "Processor" "Processor" "" text
-        -processorrev     "Processor revision" "Processor Rev" "" text
-        -processorspeed   "Processor speed" "Processor speed" "" int
+        -processorrev     "Processor revision" "Revision" "" text
+        -processorspeed   "Processor speed" "Speed" "" int
         -systemlocale     "System locale" "Locale" "" text
         -windir           "System directory" "System directory" ::wits::app::wfile path
         -dnsname          "DNS name" "DNS name" "" text
@@ -514,8 +514,9 @@ proc wits::app::system::viewlist {args} {
                               [list wintool "Windows Device Manager" $winlogoimg] \
                              ] \
                 -displaycolumns {cpuid CPUPercent KernelPercent UserPercent} \
-                -detailfields {-processorspeed -processormodel} \
-                -nameproperty "-processorname" \
+                -detailfields {-processorname -processorspeed -processormodel -processorrev} \
+                -nameproperty "cpuid" \
+                -descproperty "-processorname" \
                 {*}$args \
                 ]
 }

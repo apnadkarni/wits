@@ -1,4 +1,11 @@
-namespace eval util {}
+namespace eval util {
+    variable _handle_property_format
+    if {$::tcl_platform(pointerSize) == 4} {
+        set _handle_property_format 0x%8.8x
+    } else {
+        set _handle_property_format 0x%8.8lx
+    }
+}
 
 proc util::default_property_value {formattype} {
     # Note text is at top even though covered by default case
@@ -63,10 +70,12 @@ proc util::format_property_value {val formattype} {
             return $val
         }
         handle {
+            variable _handle_property_format
+
             if {$val eq "NULL"} {
                 set val 0x0
             }
-            return [format 0x%8.8lx [lindex $val 0]]
+            return [format $_handle_property_format [lindex $val 0]]
         }
         bps { return [tobps $val "b"] }
         Bps { return [tobps $val "B"] }
@@ -119,7 +128,9 @@ proc util::format_property_value {val formattype} {
         blob {
             return [hexify $val 1 1024]
         }
-        default { return $val }
+        default {
+            return $val
+        }
     }
 }
 

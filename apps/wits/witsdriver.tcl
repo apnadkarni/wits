@@ -147,7 +147,7 @@ proc wits::app::driver::viewlist {args} {
                              ] \
                 -displaycolumns {-name -base -displayname} \
                 -colattrs {-displayname {-squeeze 1} -description {-squeeze 1} -path {-squeeze 1} -command {-squeeze 1}} \
-                -detailfields {-displayname -path -base} \
+                -detailfields {-displayname -path -command -base} \
                 -nameproperty "-name" \
                 -descproperty "-description" \
                 {*}$args \
