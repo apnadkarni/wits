@@ -175,17 +175,6 @@
 	      </RegistryKey>
 	    </RegistryKey>
           </Component>
-          <Component Id='IconSources'
-		     Guid='$(var.WitsGuidIconSources)'
-		     Win64='$(var.WitsWin64)'>
-            <File Id='NuvolaZIP'
-                  Name='nuvola.zip'
-                  DiskId='1'
-                  Source='nuvola.zip'
-		  KeyPath='yes'
-                  Vital='no'>
-            </File>
-          </Component>
         </Directory>
       </Directory>
 
@@ -209,7 +198,6 @@
       <Feature Id='MainProgram' Title='Program' Description='The main executable.' Level='1'>
         <ComponentRef Id='MainExecutable' />
         <ComponentRef Id='Settings' />
-        <ComponentRef Id='IconSources' />
         <ComponentRef Id='ProgramMenuDir' />
       </Feature>
     </Feature>

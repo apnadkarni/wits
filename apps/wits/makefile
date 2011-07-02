@@ -3,8 +3,8 @@ UILONGNAME=Windows Inspection Tool Set
 UISHORTNAME=WiTS
 APPVERSIONMAJOR=3
 APPVERSIONMINOR=0
-APPVERSIONPATCH=1
-RELEASETYPE=a
+APPVERSIONPATCH=2
+RELEASETYPE=b
 # NOTE - the order of files here is important. It must be the same order
 # as required to be stored in the concatenated .tm file
 APPFILES= \
@@ -140,7 +140,7 @@ MSIPATH="$(DISTBUILDDIR)\$(MSINAME)"
         cd $(DISTBUILDDIR) && $(ZIP) -r nuvola.zip nuvola
 
 
-$(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" "$(DISTBUILDDIR)\nuvola.zip" wits.wxs images\nuvola\wits.ico binary-license.rtf "$(TREECTRLDIR)\treectrl24.dll"
+$(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" wits.wxs images\nuvola\wits.ico binary-license.rtf "$(TREECTRLDIR)\treectrl24.dll"
 	-mkdir "$(DISTBUILDDIR)"
 	copy /b /y "$(BUILDDIR)\$(APPTARGET).exe" "$(DISTBUILDDIR)\$(APPNAME).exe"
 	copy "$(TREECTRLDIR)\treectrl24.dll" "$(DISTBUILDDIR)"
@@ -158,7 +158,7 @@ $(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" "$(DISTBUILDDIR)\nuvola.zip" wits.wxs
 "$(DISTDIR)\$(MSINAME)": $(MSIPATH)
 	copy $(MSIPATH) "$(DISTDIR)"
 
-SETUPEXE=setup-$(APPNAME)-$(APPVERSIONMAJOR).$(APPVERSIONMINOR)$(UIPLATFORM).exe
+SETUPEXE=setup-$(APPNAME)-$(PRODUCTVERSIONSTR)$(UIPLATFORM).exe
 "$(DISTDIR)\$(SETUPEXE)": "$(DISTDIR)\$(MSINAME)"
         copy /y $(THIRDPARTYDIR)\ms-sdk\setup.exe "$(DISTBUILDDIR)"
         copy /y $(THIRDPARTYDIR)\ms-sdk\msistuff.exe "$(DISTBUILDDIR)"
