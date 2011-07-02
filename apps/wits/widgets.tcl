@@ -1187,9 +1187,7 @@ snit::widget wits::widget::collapsibleframe {
     constructor args {
         $hull configure -bg [getcolor border]
         set hframe [frame $win.hf]
-puts args:$args
         set options(-usercontrolled) [from args -usercontrolled 1]
-        puts u:$options(-usercontrolled)
         if {$options(-usercontrolled)} {
             install _headerw using [namespace parent]::collapsibleframeheader $hframe.cfh -command [mymethod _toggleclientframe]
         } else {
@@ -5824,15 +5822,35 @@ snit::widgetadaptor wits::widget::listframe {
         if {[llength $options(-actions)]} {
             $_toolbar add separator
         }
+
+        # Add in the save/clipboard
+        $_toolbar add button exporttofile -image [images::get_icon16 filesave] -command [mymethod exporttofile]
+        tooltip::tooltip [$_toolbar itemid exporttofile] "Export to file"
+        $_toolbar add button clipboardcopy -image [images::get_icon16 copy] -command [mymethod copytoclipboard]
+        tooltip::tooltip [$_toolbar itemid clipboardcopy] "Copy selection to clipboard"
+
+        $_toolbar add separator
+
+
         # Add in the standard filtering actions
+        set _filterbuttonvar 1
         $_toolbar add checkbutton togglefilter -image [images::get_icon16 filter] -command [mymethod _filterbuttonhandler togglefilter] -variable [myvar _filterbuttonvar]
         tooltip::tooltip [$_toolbar itemid togglefilter] "Toggle filter"
         $_toolbar add button clearfilter -image [images::get_icon16 filterdisable] -command [mymethod _filterbuttonhandler clearfilter]
         tooltip::tooltip [$_toolbar itemid clearfilter] "Clear filters"
-        $_toolbar add button tableconfigure -image [images::get_icon16 tableconfigure] -command [mymethod edittablecolumns]
-        tooltip::tooltip [$_toolbar itemid tableconfigure] "Select table columns"
+
+        $_toolbar add separator
+
+        $_toolbar add button fontenlarge -image [images::get_icon16 fontenlarge] -command [mymethod _change_font_size 1]
+        tooltip::tooltip [$_toolbar itemid fontenlarge] "Increase font size"
+        $_toolbar add button fontreduce -image [images::get_icon16 fontreduce] -command [mymethod _change_font_size -1]
+        tooltip::tooltip [$_toolbar itemid fontreduce] "Decrease font size"
         set _splitwindowbuttonvar 1; # Since we start with window open
         $_toolbar add checkbutton splitwindow -image [images::get_icon16 splitwindow] -command [mymethod _setleftpanevisibility] -variable [myvar _splitwindowbuttonvar]
+        tooltip::tooltip [$_toolbar itemid splitwindow] "Show summary pane"
+
+        $_toolbar add button tableconfigure -image [images::get_icon16 tableconfigure] -command [mymethod edittablecolumns]
+        tooltip::tooltip [$_toolbar itemid tableconfigure] "Select table columns"
 
         install _panemanager using \
             ttk::panedwindow $win.pw -orient horizontal \
@@ -5853,8 +5871,6 @@ snit::widgetadaptor wits::widget::listframe {
         bind $_listframe <<FilterSelect>> [mymethod _editfilter %d]
 
         set bgcolor [get_theme_setting bar frame normal bg]
-
-# APN        frame $win.f -background $bgcolor -borderwidth 0 -padx 0 -pady 0 
 
         set use_scrollableframe 1
         if {$use_scrollableframe} {

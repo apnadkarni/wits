@@ -231,6 +231,7 @@ proc images::use_external_images {} {
         bug bug.png nuvola png
         cancel cancel.png nuvola png
         console konsole.png nuvola png
+        copy    editcopy.png nuvola png
         disk    hdd_unmount.png nuvola png
         diskfilter hdd_unmount+filter.png nuvola png
         disklabel 3floppy_unmount+label.png nuvola png
@@ -238,6 +239,8 @@ proc images::use_external_images {} {
         eventlog messagebox_warning.png nuvola png
         exit fileclose.png nuvola png
         filesave filesave.png nuvola png
+        fontenlarge fontenlarge.png wits png
+        fontreduce fontreduce.png wits png
         group kuser.png nuvola png
         groupadd kuser+add.png nuvola png
         groupdelete kuser+delete.png nuvola png
@@ -276,7 +279,7 @@ proc images::use_external_images {} {
         route route.png wits png
         service kcmsystem.png nuvola png
         servicefilter kcmsystem+filter.png nuvola png
-        splitwindow view_left_right.png nuvola png
+        splitwindow application-side-boxes.png famfamsilk png
         statusbar  kcmkwm-statusbar.png nuvola png
         support chat.png nuvola png
         system mycomputer.png nuvola png
