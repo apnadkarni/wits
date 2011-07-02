@@ -21,9 +21,16 @@ namespace eval ::wits::app {
 
     # Returns the WiTS version string
     proc version {} {
+        variable release_type
         set ver "$::wits::app::version"
-        if {[string length $::wits::app::release_type]} {
-            append ver " ($::wits::app::release_type)"
+        if {[string length $release_type]} {
+            if {$release_type eq "a"} {
+                append ver " Alpha"
+            } elseif {$release_type eq "b"} {
+                append ver " Beta"
+            } else {
+                append ver " release_type"
+            }
         }
         return $ver
     }
