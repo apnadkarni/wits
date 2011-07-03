@@ -5685,6 +5685,10 @@ snit::widgetadaptor wits::widget::listframe {
     delegate option -objlinkcommand to _detailsframe as -command
     option -detailtitle -readonly true -default "Summary"; # Details is really a summary of property page
 
+    # For some lists, item count does not make sense (e.g. system
+    # since rows may include totals etc.)
+    option -hideitemcount -default 0 -readonly 1
+
     # Name of item type for display purposes
     option -itemname -default "item" -configuremethod _setitemname
 
@@ -5929,9 +5933,12 @@ snit::widgetadaptor wits::widget::listframe {
         $_statusframe configure -relief groove -pady 1 -border 2
 
         # Item count label
-        set lstatus [::ttk::label $_statusframe.lstatus \
-                         -textvariable [myvar _itemcounttext] \
-                         -justify left -anchor w]
+        set options(-hideitemcount) [from args -hideitemcount 0]
+        if {! $options(-hideitemcount)} {
+            set lstatus [::ttk::label $_statusframe.lstatus \
+                             -textvariable [myvar _itemcounttext] \
+                             -justify left -anchor w]
+        }
 
 
         set _displaymode [from args -displaymode "highlighted"]
@@ -5961,8 +5968,10 @@ snit::widgetadaptor wits::widget::listframe {
                               -text "Freeze" \
                               -variable [myvar _freezedisplay]]
 
-        pack $lstatus -side left -expand no -fill none -padx 1
-        pack [::ttk::separator $_statusframe.sep2 -orient vertical] -expand no -fill y -padx 1 -side left
+        if {[info exist lstatus]} {
+            pack $lstatus -side left -expand no -fill none -padx 1
+            pack [::ttk::separator $_statusframe.sep2 -orient vertical] -expand no -fill y -padx 1 -side left
+        }
 
         pack [::ttk::sizegrip $_statusframe.grip] -side right -anchor se
         pack $cbfreezemode -side right -expand no -fill none -padx 1
@@ -5987,7 +5996,6 @@ snit::widgetadaptor wits::widget::listframe {
         if {$options(-title) == ""} {
             $self configure -title "Record List View"
         }
-
 
         # Collect all the column names
 
@@ -6228,8 +6236,12 @@ snit::widgetadaptor wits::widget::listframe {
 
         # Note that active count is not same as number in table as
         # the latter will include deleted items
-        set n [dict size $_records]
-        set _itemcounttext [expr {$n == 1 ? "1 $options(-itemname)" : "$n $_itemname_plural"}]
+        if {$options(-hideitemcount)} {
+            set _itemcounttext ""
+        } else {
+            set n [dict size $_records]
+            set _itemcounttext [expr {$n == 1 ? "1 $options(-itemname)" : "$n $_itemname_plural"}]
+        }
 
         # Also update the details widget - why rescheduled for later ? TBD
         $_scheduler after1 idle [mymethod _updatedetailsfromsel $_listframe]
@@ -6446,6 +6458,7 @@ snit::widgetadaptor wits::widget::listframe {
     }
 
     method _updatedetails {sel {propnames_changed false}} {
+        # TBD - why not get info from _records if it is there ?
         if {[llength $sel] == 1} {
             set _details_recid [lindex $sel 0]
             set proplist [$_records_provider get_formatted_record $_details_recid $options(-detailfields) $_refreshinterval]

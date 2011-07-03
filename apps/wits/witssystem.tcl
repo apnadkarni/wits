@@ -10,6 +10,10 @@
 
 namespace eval ::wits::app::system {
     namespace path [list [namespace parent] [namespace parent [namespace parent]]]
+
+    # Name to use for All CPU's
+    variable _all_cpus_label "All CPUs"
+
     # Map BIOS feature codes to strings
     variable _wmi_BIOSCharacteristics_codes
 
@@ -285,7 +289,7 @@ proc wits::app::system::get_property_defs {} {
 oo::class create wits::app::system::Objects {
     superclass util::PropertyRecordCollection
 
-    variable _fixed_cpu_properties _fixed_system_properties _semistatic_properties _semistatic_properties_timestamp _cpu_timestamps _records
+    variable _fixed_cpu_properties _fixed_system_properties _semistatic_properties _semistatic_properties_timestamp _cpu_timestamps _records 
 
     constructor {} {
         namespace path [concat [namespace path] [list [namespace qualifiers [self class]]]]
@@ -363,9 +367,9 @@ oo::class create wits::app::system::Objects {
         }
 
         # Pseudo processor "all"
-        dict set _fixed_cpu_properties All [dict get $_fixed_cpu_properties 0]
+        dict set _fixed_cpu_properties $::wits::app::system::_all_cpus_label [dict get $_fixed_cpu_properties 0]
         # Fix up the CPU 0 -> CPU All
-        dict set _fixed_cpu_properties All cpuid All
+        dict set _fixed_cpu_properties $::wits::app::system::_all_cpus_label cpuid $::wits::app::system::_all_cpus_label
     }
 
     method _refresh_semistatic_properties {} {
@@ -488,14 +492,14 @@ oo::class create wits::app::system::Objects {
         }
 
         # Add the "all" pseudo CPU to returned data.
-        dict set newdata All [dict merge $system_properties [dict get $_fixed_cpu_properties All] $allcpus]
+        dict set newdata $::wits::app::system::_all_cpus_label [dict merge $system_properties [dict get $_fixed_cpu_properties $::wits::app::system::_all_cpus_label] $allcpus]
         if {$all_elapsed_cpu} {
-            dict set newdata All CPUPercent [expr {((100*($all_elapsed_cpu-$all_idle_cpu))+$all_elapsed_cpu-1)/$all_elapsed_cpu}]
-            dict set newdata All UserPercent [expr {((100*$all_user_cpu)+$all_elapsed_cpu-1)/$all_elapsed_cpu}]
-            dict set newdata All KernelPercent [expr {[dict get $newdata All CPUPercent] - [dict get $newdata All UserPercent]}]
+            dict set newdata $::wits::app::system::_all_cpus_label CPUPercent [expr {((100*($all_elapsed_cpu-$all_idle_cpu))+$all_elapsed_cpu-1)/$all_elapsed_cpu}]
+            dict set newdata $::wits::app::system::_all_cpus_label UserPercent [expr {((100*$all_user_cpu)+$all_elapsed_cpu-1)/$all_elapsed_cpu}]
+            dict set newdata $::wits::app::system::_all_cpus_label KernelPercent [expr {[dict get $newdata $::wits::app::system::_all_cpus_label CPUPercent] - [dict get $newdata $::wits::app::system::_all_cpus_label UserPercent]}]
         }
 
-        return [list updated [dict keys [dict get $newdata All]] $newdata]
+        return [list updated [dict keys [dict get $newdata $::wits::app::system::_all_cpus_label]] $newdata]
     }
 }
 
@@ -505,8 +509,11 @@ proc wits::app::system::viewlist {args} {
         set ${name}img [images::get_icon16 $name]
     }
 
+    # -hideitemcount is set to 1 because otherwise the item count
+    # is not right as it includes the "All" record
     return [::wits::app::viewlist [namespace current] \
                 -itemname "processor" \
+                -hideitemcount 1 \
                 -displaymode standard \
                 -actiontitle "Processor Tasks" \
                 -actions [list \
@@ -549,7 +556,7 @@ proc wits::app::system::popuphandler {viewer tok objkeys} {
 proc wits::app::system::getviewer {cpu} {
     variable _page_view_layout
 
-    if {$cpu eq "All"} {
+    if {$cpu eq "$::wits::app::system::_all_cpus_label"} {
         set title "All Processors"
     } else {
         set title "Processor $cpu"
