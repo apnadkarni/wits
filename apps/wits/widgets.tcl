@@ -6719,6 +6719,7 @@ snit::widgetadaptor wits::widget::listframe {
             ttk::entry $e -font $_table_font -text abc
             bind $e <Return> [mymethod _closeeditfilter %W save]
             bind $e <Tab> [mymethod _closeeditfilter %W saveandnext]
+            bind $e <Shift-Tab> [mymethod _closeeditfilter %W saveandprev]
             bind $e <FocusOut> [mymethod _closeeditfilter %W save]
             bind $e <Escape> [mymethod _closeeditfilter %W discard]
             bind $e <KeyRelease-F1> [myproc _balloonpopup $e true]
@@ -6748,7 +6749,7 @@ snit::widgetadaptor wits::widget::listframe {
         set _filter_column_being_edited ""
         place forget $entry
 
-        if {$action in {save saveandnext}} {
+        if {$action in {save saveandnext saveandprev}} {
             set newcondition [string trim [$entry get]]
             set old_filter $options(-filter)
             set new_filter $old_filter
@@ -6770,10 +6771,17 @@ snit::widgetadaptor wits::widget::listframe {
                     after 0 [list [namespace which showerrordialog] "Error in filter definition ($msg). Original filter restored."]
                 }
             } else {
-                if {$action eq "saveandnext"} {
+                if {$action in {saveandnext saveandprev}} {
                     set colnum [lsearch -exact $options(-displaycolumns) $filter_col]
-                    if {[incr colnum] >= [llength $options(-displaycolumns)]} {
-                        set colnum 0
+                    if {$action eq "saveandnext"} {
+                        if {[incr colnum] >= [llength $options(-displaycolumns)]} {
+                            set colnum 0
+                        }
+                    } else {
+                        if {[incr colnum -1] < 0} {
+                            set colnum [llength $options(-displaycolumns)]
+                            incr colnum -1
+                        }
                     }
                     after 0 [list $self _editfilter [lindex $options(-displaycolumns) $colnum]]
                 }
