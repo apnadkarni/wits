@@ -1426,8 +1426,8 @@ namespace eval util::filter {
             return $prefix
         }
 
-        set desc [dict get $filter displayname]
-        if {$desc eq "" && [dict exists $filter properties]} {
+        if {[dict exists $filter properties]} {
+            set desc ""
             dict for {propname propdict} [dict get $filter properties] {
                 if {[dict exists $propdict condition]} {
                     if {[dict exists $properties $propname shortdesc]} {
@@ -1438,6 +1438,8 @@ namespace eval util::filter {
                 }
             }
             set desc [join $desc ", "]
+        } else {
+            set desc [dict get $filter displayname]
         }
 
         if {[string length $desc]} {
