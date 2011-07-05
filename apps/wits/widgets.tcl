@@ -4899,6 +4899,9 @@ snit::widgetadaptor wits::widget::listframe {
         grid remove $win.hscroll
         grid remove $win.vscroll
 
+        # Bind to select all
+        bind $_treectrl <Control-a> [list %W selection add all]
+
         # Standard mouse bindings
         bind $_treectrl <Double-1> [mymethod _dblclickhandler %x %y %X %Y]
         bind $_treectrl <ButtonPress-3> [mymethod _rightclickhandler %x %y %X %Y]
