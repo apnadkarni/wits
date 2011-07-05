@@ -5,7 +5,7 @@
 </p>
 
 <ul>
-  <li>Operating system and hardware</li>
+  <li>Operating system and processors</li>
   <li>Processes</li>
   <li>Services</li>
   <li>Drives and volumes</li>
@@ -15,7 +15,7 @@
   <li>Network interfaces</li>
   <li>Network connections</li>
   <li>Network routing tables</li>
-  <li>Printers</li>
+  <li>Windows event log</li>
   <li>Modules and dynamic link libraries</li>
   <li>Kernel drivers</li>
 </ul>

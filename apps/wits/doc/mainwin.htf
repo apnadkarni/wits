@@ -21,7 +21,7 @@
   The menu pane on the left contains dropdown menus.
   The <span class="witsmenu">Tools and Options</span>
   dropdown contains items for various utilities, such as
-  system shutdown and configuration of WiTS preferences.
+  a console and configuration of WiTS preferences.
   The <span class="witsmenu">Help and Support</span>
   dropdown contains menu items that provide access to
   documentation and online support.

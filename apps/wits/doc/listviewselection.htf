@@ -14,3 +14,10 @@
   via either the pop-up menu or the toolbar. For example, in the
   processes list view, all selected processes can be terminated.
 </p>  
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="listview.html">List views</a></li>
+    <li><a href="listviewbindings.html">Navigating a list view</a></li>
+  </ul>
+</div>

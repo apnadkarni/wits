@@ -17,7 +17,6 @@
   <span class='cmd'>remoteshare</span>,
   <span class='cmd'>localshare</span>,
   <span class='cmd'>network</span>,
-  <span class='cmd'>printer</span> or
   <span class='cmd'>file</span>.
 </p>
 <p>
@@ -30,7 +29,6 @@
   <li>Remote file shares</li>
   <li>Local file shares</li>
   <li>Network connections</li>
-  <li>Printers</li>
   <li>Files and directories</li>
 </ul>
 <p>
@@ -71,10 +69,6 @@
   <li>
     Network connections are matched against local or remote
     port numbers, IP addresses, host names and finally service names.
-  </li>
-  <li>
-    Matching against printers is similar to matching against
-    remote shares as described above.
   </li>
   <li>
     Files and directories are matched using wildcards. If no

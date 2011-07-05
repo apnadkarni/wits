@@ -1,10 +1,9 @@
 <h1>WiTS Source Code</h1>
-
+<p>
 The source code for WiTS is available from the
-<a href="http://sourceforge.net/projects/twapi">SourceForge</a>
+<a href="http://sourceforge.net/projects/windowstoolset">SourceForge</a>
 repository. 
-See <a href="http://sourceforge.net/cvs/?group_id=90123">CVS</a>
-instructions for obtaining a copy of the source code.
+</p>
 <p>
 WiTS is written in Tcl/Tk which is a
 simple yet powerful, cross-platform, open source
@@ -20,5 +19,5 @@ in 1997.
 <p>
 To get started on Tcl/Tk, see
 <a href="http://www.tcl.tk">Tcl Developer Xchange</a> and
-<a href="http://mini.net/tcl">Tcl Wiki</a>.
+<a href="http://wiki.tcl.tl">Tcl Wiki</a>.
 </p>

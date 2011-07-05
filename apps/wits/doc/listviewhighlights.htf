@@ -1,26 +1,43 @@
 <h1>Highlighting changed data in a list view</h1>
 <p>
-  When a list view contains many displayed rows, it can be difficult
-  to spot changes in displayed data. To help with this, WiTS
-  highlights modified rows in each cycle.
-<p>
-  On each refresh cycle of a list view,
-  objects that no longer exist (for example, a process that has
-  exited) are highlighted in red before being
-  removed from the table. Similarly, new objects are
-  highlighted in green and modified rows are highlighted
-  in yellow.
+  Often, all items in a list view are of interest to the user.
+  However, on many occasions the user primary focus is on items
+  whose properties are changing and in some cases, <em>only</em> those
+  items are of interest.
 </p>
 <p>
-  In addition, selecting the <span class="witsmenu">Show changed
-  only</span> checkbox in the status bar of a list view will hide all
-  rows whose data is unchanged since the previous refresh cycle. Only
-  the deleted, modified and new rows will be displayed.
+  You can choose an appropriate WiTS display mode to suit any of the
+  above circumstances via the drop down menu in the status bar of 
+  a WiTS list view shown below.
 </p>
+<p>
+<img src="listview3-displaymode-labeled.png" alt="List view display mode image"/>
+</p>
+
+<p>
+  You can choose one of the following display modes:
+</p>
+<ul>
+  <li>Select <span class="witsmenu">No highlighting</span> to show
+    all items present in the last refresh without any
+    highlighting.</li>
+  <li>Select <span class="witsmenu">Highlight changes</span> to show
+    all items present in the last refresh with new items shown in
+    green and items whose properties have changed shown in yellow. In
+    addition, items which were present in the previous refresh but
+    are no longer present are also shown (in red). Items that are
+    unchanged from the previous refresh are shown without any color
+    coding.</li>
+  <li>Select <span class="witsmenu">Changes only</span> to show only
+    items that have been added, modified or deleted color-coded as
+    above. Unchanged items are not displayed at all.</li>
+</ul>
+
 <div class="seealso">
   <h2>Related topics</h2>
   <ul>
     <li><a href="listview.html">List views</a></li>
+    <li><a href="listfilters.html">Filtering list view data</a></li>
     <li><a href="listrefresh.html">Refreshing list views</a></li>
   </ul>
 </div>

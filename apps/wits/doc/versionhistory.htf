@@ -10,7 +10,7 @@
   Changes between 2.1 and 3.0
 </p>
 <ul>
-  <li>Support for Windows Vista, Windows Server 2008/2008R2</li>
+  <li>Support for Windows Vista, Windows Server 2008/2008R2 and Windows 7</li>
   <li>Native 64-bit support.</li>
   <li>Added user defined filtering to list views.</li>
   <li>Enhanced list view display modes associated with change tracking.</li>
