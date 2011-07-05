@@ -1,0 +1,19 @@
+<h1>Accessing WiTS through the system tray</h1>
+<p>
+  When WiTS is running, its icon
+  <img src='mycomputer+viewmag16.png' alt='WiTS icon' />
+  appears in the system tray area. Clicking the left mouse on the icon
+  will alternately show and hide the WiTS main window.
+</p>
+<p>
+  Right clicking the icon will bring up a menu, with keyboard shortcuts,
+  that provides access to all the WiTS functions. You can also configure
+  a hotkey to display this menu.
+</p>
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="launch.html">Running WiTS</a></li>
+    <li><a href="hotkey.html">Accessing WiTS using hotkeys</a></li>
+  </ul>
+</div>

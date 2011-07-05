@@ -1,0 +1,92 @@
+<h1>Monitoring events</h1>
+
+<p>
+  The WiTS event monitor window displays various system events such as
+  process starts and exit, new network connections, logon session changes
+  and more. A sample monitor display output is shown below.
+</p>
+<p>
+  <img src="eventmonitor.png" alt="Event monitor"/>
+</p>
+<p>
+  Events are displayed in the event monitor window with a
+  timestamp indicating when they were logged. As events are added
+  to the end of the scrolling display, they are briefly
+  <span style="background:yellow;">highlighted</span>
+  to indicate that new events have arrived.
+</p>
+<p>
+  The toolbar in the event monitor window provides the following functions:
+</p>
+<ul>
+  <li>
+    The <span class="witsmenu">Save</span>
+    button saves the currently displayed events to a file. Note this only
+    saves the currently displayed events. Continuous logging of events
+    to a file is separate and independent functionality.
+  </li>
+  <li>
+    The <span class="witsmenu">Clear</span>
+    button discards all event messages and clears the event
+    monitor window.
+  </li>
+  <li>
+    The <span class="witsmenu">Stop</span> stops the event monitor
+    while keeping the window open. When stopped, the button
+    changes into a
+    <span class="witsmenu">Start</span> that resumes logging
+    of events.
+  </li>
+  <li>
+    The <span class="witsmenu">Options</span>
+    button brings up the
+    <a href="eventmonitorpreferences.html">preferences</a>
+    page that allows configuration of event monitor settings such as
+    number of events to display.
+  </li>
+  <li>
+    The <span class="witsmenu">Filters</span>
+    button brings up the
+    <a href="eventmonitorpreferences.html">preferences</a>
+    page that allows selection of which events are displayed in the event
+    monitor.
+  </li>
+  <li>
+    The <span class="witsmenu">Keep on top</span> checkbox, if
+    enabled, keeps the event monitor on top of other windows
+    at all times so that it is always visible.
+  </li>
+  <li>
+    The <span class="witsmenu">Enable autoscroll</span> checkbox
+    controls automatic scrolling of the event monitor window as
+    new events are added. Normally, the display
+    scrolls up as new event messages are added. This behaviour can
+    be distracting when you have scrolled up to look at previous
+    events and new events arrive. This checkbox allows this
+    behaviour to be turned off.
+  </li>
+</ul>
+
+<p>
+  In all cases, the event monitor
+  is always shown at the same location and size as its last
+  invocation.
+</p>
+
+<p>
+  Wherever relevant, data logged in each event is linked to the
+  corresponding object. For example, an event for a process starting up is
+  linked to the properties page view for that process.
+</p>
+
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="eventmonitorstart.html">Starting the event monitor</a></li>
+    <li><a href="navigation.html">Object cross-linking and navigation</a></li>
+    <li><a href="eventmonitorfilter.html">Filtering events</a></li>
+    <li><a href="eventmonitorlogging.html">Logging events to a file</a></li>
+    <li><a href="eventmonitorpreferences.html">Configuring the event monitor</a></li>
+    <li><a href="preferences.html">Configuring preferences</a></li>
+  </ul>
+</div>

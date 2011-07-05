@@ -1,0 +1,49 @@
+<h1>Configuring the event monitor</h1>
+<p>
+  The <span class="witsmenu">Event Monitor</span> tab in the
+  <a href="preferences.html">preferences</a> dialog allows setting
+  of several options related to the WiTS event monitor.
+</p>
+<p>
+  <img src="eventmonitorprefs.png" alt="Event monitor preferences"/>
+</p>
+<p>
+  The <span class='witsmenu'>Categories to monitor</span> and
+  <span class='witsmenu'>System resource threshold</span> frames
+  in the tab control <a href='eventmonitorfilter.html'>filtering</a>
+  of events.
+</p>
+<p>
+  The <span class="witsmenu">Throttle</span> frame controls
+  the event monitor display content:
+</p>
+<ul>
+  <li>
+    The <span class="witsmenu">Number of events to display</span> field
+    controls how many events the event monitor will display. When the
+    number of events exceeds this number, older events will be
+    discarded when new ones arrive.
+  </li>
+  <li>
+    The <span class="witsmenu">Hide duplicates (secs)</span>
+    field is the number of seconds that duplicate events will be
+    suppressed. Certain types of events, such as process starts,
+    are never suppressed.
+  </li>
+</ul>
+<p>
+  The <span class="witsmenu">Event Monitor</span> tab
+  also controls logging of events to a file.
+  Selecting the <span class="witsmenu">Log events to file</span>
+  checkbox will configure WiTS to log events to the file specified
+  in the  <span class="witsmenu">Log file</span> field.
+
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="eventmonitor.html">Monitoring events</a></li>
+    <li><a href="eventmonitorfilter.html">Filtering events</a></li>
+    <li><a href="eventmonitorlogging.html">Logging events to a file</a></li>
+    <li><a href="preferences.html">Configuring preferences</a></li>
+  </ul>
+</div>

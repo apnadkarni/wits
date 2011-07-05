@@ -1,0 +1,29 @@
+<h1>Object cross-linking and navigation</h1>
+<p>
+  All WiTS views, list and property pages as well as the event monitor,
+  are linked where appropriate so that it
+  is easy to navigate between views of related objects.
+</p>
+<p>
+  An example of this linking is displayed below. The event monitor shows a new
+  connection from the Firefox browser. Clicking on the process name
+  link in the event
+  will bring up the property page for the Firefox process including
+  the user account under which the process is running. Clicking in
+  turn on the user account link will show the details of the user account.
+</p>
+<p>
+<img src="navigation.png" alt="Navigation image"/>
+</p>
+<p>
+  This cross-linking of objects makes it very easy to navigate between
+  objects and explore a running Windows system for
+  troubleshooting or investigative purposes.
+</p>
+
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="objecttypes.html">Supported object types</a></li>
+  </ul>
+</div>

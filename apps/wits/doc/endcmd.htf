@@ -1,0 +1,51 @@
+<h1><span class='cmd'>end</span> internal command</h1>
+<p>
+The <span class='cmd'>end</span> command takes the following form:
+</p>
+<div class='cmdblock'>
+  end OBJECTNAME [OBJECTTYPE]
+</div>
+<p>
+  The command terminates Windows services or processes 
+  <span class='cmd'>OBJECTNAME</span>.
+  If <span class='cmd'>OBJECTTYPE</span> is specified, only
+  objects of that type are matched.
+  <span class='cmd'>OBJECTTYPE</span> may be one of
+  <span class='cmd'>service</span> or <span class='cmd'>process</span>.
+</p>
+<p>
+  Otherwise, the command searches
+  for object types in the following order:
+</p>
+<ul>
+  <li>Windows services</li>
+  <li>Processes</li>
+</ul>
+<p>
+  All matching objects of a specific type are terminated.
+  However, no attempt is made at matching against further object
+  types.
+</p>
+<p>
+  In all cases, the object space is searched using multiple match criteria.
+</p>
+<ul>
+  <li>
+    For services, <span class='cmd'>OBJECTNAME</span> is
+    matched against the internal and display service names. A
+    stop command is sent to the matching service.
+  </li>
+  <li>
+    For processes, <span class='cmd'>OBJECTNAME</span> is
+    matched against the process id, path, name (with and without
+    file name extension), or the title of toplevel windows.
+    All matching processes are terminated.
+  </li>
+</ul>
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="objecttypes.html">Supported object types</a></li>
+    <li><a href="usercmd.html">Running user commands</a></li>
+  </ul>
+</div>

@@ -1,0 +1,18 @@
+<h1>License Information</h1>
+<p>
+  Most of the WiTS source code is covered by a BSD-style license that
+  allows for both personal and commercial use and redistribution with
+  a few simple requirements in terms of maintaining copyrights and
+  such. Please see the LICENSE file in the root of
+  the <a href="sourcecode.html">source</a> directory for details.
+</p>
+<p>
+  However, many of the images and icons used in the program have come
+  from the <a href="http://icon-king.com/?p=15">Nuvola</a>
+  distribution which is covered under the GNU Lesser General Public
+  License.  If you are planning on redistributing WiTS (modified or
+  not) without publishing source code, please make sure you are not in
+  violation of this license. The exact terms of the license are in the
+  nuvola subdirectory in the source repository. Alternatively, you
+  can replace all the images and icons and rebuild the binaries.
+</p>

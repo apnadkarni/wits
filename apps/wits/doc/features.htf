@@ -1,0 +1,48 @@
+<h1>Features</h1>
+
+<p>
+  Windows Inspection Tool Set (WiTS)
+  provides list and detail views of various
+  components and objects in a Windows system.
+  WiTS also provides event monitoring and logging capability.
+</p>
+<ul>
+  <li>Customizable list views show properties of objects in table form.</li>
+  <li>Flexible user-defined filters and sorting modes allow focusing on 
+    specific objects.
+  <li>Change tracking to allow highlighting of changes or limiting
+    display to only those objects whose properties have changed.
+  <li>Property page views provide details about objects.</li>
+  <li>Supported object types include processes, services, CPU's,
+    modules, drivers,
+    network connections and interfaces, disks, shares, users,
+    groups, logon sessions and the windows event log.
+  <li>Event monitor displays user-selectable events such as process
+    starts, new network connections, system resource levels and more.</li>
+  <li>Optional logging of all events to a file.</li>
+  <li>Cross-linking of all objects, including events,
+    for easy point-and-click navigation.</li>
+  <li>User command line for running external as well as
+    internal commands.</li>
+  <li>A full <a href="http://www.tcl.tk">Tcl</a>
+    console with access to the
+    <a href="http://twapi.magicsplat.com">Tcl Windows API</a> for
+    advanced users.</li>
+  <li>Automatic startup and multifunction hotkey support for quick access.</li>
+</ul>
+
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="launch.html">Running WiTS</a></li>
+    <li><a href="objecttypes.html">Supported object types</a></li>
+    <li><a href="mainwin.html">The WiTS main window</a></li>
+    <li><a href="listview.html">List views</a></li>
+    <li><a href="pageview.html">Property page views</a></li>
+    <li><a href="navigation.html">Object cross-linking and navigation</a></li>
+    <li><a href="eventmonitor.html">Monitoring events</a></li>
+    <li><a href="usercmd.html">Running user commands</a></li>
+    <li><a href="preferences.html">Configuring preferences</a></li>
+    <li><a href="versionhistory.html">Version history</a></li>
+  </ul>
+</div>

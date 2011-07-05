@@ -1,0 +1,26 @@
+<h1>Accessing WiTS using hotkeys</h1>
+<p>
+  You can configure WiTS with hotkey support for quick
+  access to specific views. Hotkeys can be configured through the
+  <a href="preferences.html">preferences</a> dialog shown below.
+</p>
+<p>
+  <img src="hotkeyprefs.png" alt="Hotkey settings dialog"/>
+</p>
+<p>
+  Currently hotkeys can be assigned to four views - the main
+  WiTS window, the event monitor,
+  the process list view and the network connection
+  list view.
+</p>
+<p>
+  You can also configure a hotkey to toggle between hiding and restoring
+  all opened WiTS views.
+</p>
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="launch.html">Running WiTS</a></li>
+    <li><a href="preferences.html">Configuring WiTS preferences</a></li>
+  </ul>
+</div>

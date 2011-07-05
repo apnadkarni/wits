@@ -1,0 +1,24 @@
+<h1>WiTS Source Code</h1>
+
+The source code for WiTS is available from the
+<a href="http://sourceforge.net/projects/twapi">SourceForge</a>
+repository. 
+See <a href="http://sourceforge.net/cvs/?group_id=90123">CVS</a>
+instructions for obtaining a copy of the source code.
+<p>
+WiTS is written in Tcl/Tk which is a
+simple yet powerful, cross-platform, open source
+programming language that has been used in
+a wide variety of applications over the last fifteen years.
+Tcl/Tk was originally developed by
+<a href="http://home.pacbell.net/ouster/">John K. Ousterhout</a>
+for which he received the
+<a href="http://www.acm.org/awards/ss_citations/1997.html">
+ACM Software System award</a>
+in 1997.
+</p>
+<p>
+To get started on Tcl/Tk, see
+<a href="http://www.tcl.tk">Tcl Developer Xchange</a> and
+<a href="http://mini.net/tcl">Tcl Wiki</a>.
+</p>

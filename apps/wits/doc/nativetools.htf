@@ -1,0 +1,62 @@
+      <h1>WiTS and Native Tools</h1>
+      There are of course several programs that are installed as part
+      of Windows that provide the same functionality as WiTS and
+      more. Here we summarize the reasons you might prefer to use WiTS
+      and when you are better off using the native Windows tools such
+      as task manager, control panel applets, administrative tools and
+      winmsd.
+      <p>
+        Note that WiTS views include buttons to allow for 
+        easy access to corresponding Windows tools when needed.
+      </p>
+
+      <p>The Windows native tools have the following advantages:</p>
+
+      <ul>
+        <li>
+          They cover more types of components.
+        </li>
+        <li>
+          They support modification of configuration information.
+          WiTS generally provides only a subset
+          of the possible control operations.
+        </li>
+        <li>
+          The Windows tools are localized in various languages and
+          WiTS is available only in English.
+        </li>
+      </ul>
+
+      On the other hand, WiTS offers several advantages:
+      <ul>
+        <li>
+          WiTS is a single integrated tool as opposed to a bunch of
+          separate programs and applets. The integration allows quick
+          access to the different views. More important, it
+          facilitates easy navigation between different object
+          types. For example, you can easily jump from a specific
+          network connection, to the process that owns it, to the user
+          account under which the process is running.
+        </li>
+        <li>
+          WiTS provides some functionality and tools that are not
+          available with native tools, for example the ability to view
+          active logon sessions, terminate TCP connections etc.
+        </li>
+        <li>
+          WiTS provides better filtering and selection capabilities
+          and commands can be invoked simultaneously on multiple
+          objects. For example, you can filter and select all
+          processes for a specific user and terminate them with a
+          single click.
+        </li>
+        <li>
+          WiTS is generally faster and more responsive than some of the
+          integrated native tools like winmsd.
+        </li>
+        <li>
+          Finally, and possibly most important, WiTS is
+          <a href="sourcecode.html">open source</a> and can be modified
+          in any manner you wish to fit your needs.
+        </li>
+      </ul>

@@ -1,0 +1,29 @@
+<h1>Running WiTS</h1>
+<p>
+  After installation, WiTS is automatically started every time
+  the user logs on to the system. This behaviour can be changed
+  through the preferences dialog.
+  You can also start WiTS through the
+  <span class="witsmenu">Windows Inspection Tool Set</span> menu item
+  in the Windows <span class="witsmenu">Start &gt; All Programs</span> menu.
+</p>
+<p>
+  Once running, WiTS sits in the system tray area of the
+  taskbar. Clicking on the WiTS system tray icon will bring up
+  the main WiTS window which allows access to
+  the various list views.
+</p>
+<p>
+  If you have several WiTS views open, you can assign a 
+  <a href="hotkey.html">hotkey</a>
+  to hide and restore them as a group.
+</p>
+
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="hotkey.html">Accessing WiTS using hotkeys</a></li>
+    <li><a href="systray.html">Accessing WiTS through the system tray</a></li>
+    <li><a href="preferences.html">Configuring WiTS preferences</a></li>
+  </ul>
+</div>

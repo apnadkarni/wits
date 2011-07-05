@@ -1,0 +1,45 @@
+<h1>Property page views</h1>
+<p>
+  A property page view shows detailed properties of a single
+  object. An example of a property page view for a window
+  is shown below.
+</p>
+<p>
+<img src="processpage.png" alt="Property page"/>
+</p>
+<p>
+The property page for an object may be displayed through several means:
+</p>
+<ul>
+  <li>Double click the corresponding row in the list view for that
+    object type or click the <span class="witsmenu">Tasks</span> menu.
+    The latter also allows display of the property page views of
+    multiple selected objects.</li>
+  <li><a href="navigation.html">Navigate</a> to it via a link
+    that points to it.</li>
+  <li>Type the <a href="showcmd.html">show</a> command in the
+    user command window in the main WiTS window specifying the
+    name of the object of interest.</li>
+</ul>
+<p>
+Use the toolbar at the top of the property page to invoke
+specific actions on that object.
+For example,
+the <span class="witsmenu">Terminate</span>
+button in the process property page displayed above will terminate
+the process.
+</p>
+<p>
+  Any objects related to the one being displayed are shown as links
+  in the property page. Click on the link to bring up the property page
+  for that object.
+</p>
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="listview.html">List views</a></li>
+    <li><a href="navigation.html">Object cross-linking and navigation</a></li>
+    <li><a href="eventmonitor.html">Monitoring events</a></li>
+    <li><a href="showcmd.html">User command <span class='cmd'>show</span></a></li>
+  </ul>
+</div>

@@ -1,0 +1,84 @@
+<h1>Running user commands</h1>
+<p>
+  The <span class="witsmenu">Command</span>
+  entry window in the main WiTS window
+  allows entry of commands and has a dropdown list box
+  that allows selection of previously entered commands.
+</p>
+<p>
+  <img src="usercmd.png" alt="User command field"/>
+</p>
+
+<p>
+  The command is executed either when the <span class="witsmenu">Return</span>
+  key is entered or the <span class="witsmenu">Run</span>
+  button is clicked.
+</p>
+<p>
+  The command may be either an internal WiTS command or the name of
+  an external Windows program. The command is parsed in standard
+  Windows fashion (<em>not</em> using Tcl syntax) and arguments
+  with spaces and special characters must be quoted as required
+  by Windows.
+</p>
+<h2>WiTS internal commands</h2>
+<p>
+  WiTS internal commands are:
+</p>
+<ul>
+  <li>
+    <a href="showcmd.html">show</a> shows the
+    <a href="pageview.html">property page view</a>
+    for an object
+  </li>
+  <li>
+    <a href="listcmd.html">list</a> shows a
+    <a href="listview.html">list view</a> containing
+    matching objects
+  </li>
+  <li>
+    <a href="endcmd.html">end</a> stops or terminates running objects
+  </li>
+</ul>
+<p>
+  Many WiTS internal commands like
+  <a href='listcmd.html'>list</a> and
+  <a href='endcmd.html'>end</a> operate on multiple types of
+  objects and will attempt to guess the object type if it is not
+  specified. For example, the command
+  <br /><span class='cmdblock'>list www.yahoo.com</span><br />
+  will show a list view containing all connections to
+  www.yahoo.com.
+</p>
+<p>
+  Moreover, the commands will attempt to match objects in
+  multiple ways. For example,
+  <br /><span class='cmdblock'>end rpcss</span><br />
+  will stop a Windows service matching against both internal
+  and display names.
+</p>
+<p>
+  The matching modes for each command are described in the
+  documentation for the command.
+</p>
+
+<h2>Running external programs</h2>
+<p>
+  If the entered command does not match one of the internal
+  commands listed above, WiTS will assume it is an external
+  command. This behaviour is similar to the Windows
+  <span class="witsmenu">Run</span>
+  dialog box and the command may even be the path to a document
+  associated with a program.
+</p>
+
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="mainwin.html">WiTS main window</a></li>
+    <li><a href='endcmd.html'><span class='cmd'>end</span> internal command</a></li>
+    <li><a href='listcmd.html'><span class='cmd'>list</span> internal command</a></li>
+    <li><a href='showcmd.html'><span class='cmd'>show</span> internal command</a></li>
+
+  </ul>
+</div>

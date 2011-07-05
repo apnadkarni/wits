@@ -1,0 +1,37 @@
+<h1>List views</h1>
+<p>
+  List views show properties of objects of a specific type in a
+  tabular format:
+</p>
+<ul>
+  <li>The main display area of a list view shows the properties of a set
+    of objects (such as processes, network connections etc.) in a table.</li>
+  <li>An optional summary pane on the left shows additional information about
+    an object selected in the table. Use the toolbar
+    <span class='witsmenu'>Show/Hide Summary</span> 
+    button to hide this pane.</li>
+  <li>A toolbar at the top provides a set of standard
+    functions in all list views.</li>
+  <li>Finally, a status pane at the bottom
+    includes controls for refreshing the displayed.</li>
+</ul>
+<p>
+  The example below shows the list view for processes running on a system.
+</p>
+<p>
+<img src="listview3-detail-labeled.png" alt="List view image"/>
+</p>
+
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="listviewbindings.html">Navigating a list view</a></li>
+    <li><a href="listviewselection.html">Selecting list view items</a></li>
+    <li><a href="listcolumns.html">Configuring columns in a list view</a></li>
+    <li><a href="listfilters.html">Filtering list view data</a></li>
+    <li><a href="listviewhighlights.html">Using display modes to track changes</a></li>
+    <li><a href="listrefresh.html">Refreshing data in a list view</a></li>
+    <li><a href="listclipboard.html">Copying list view data to the clipboard</a></li>
+    <li><a href="listexport.html">Exporting list view data to a file</a></li>
+  </ul>
+</div>

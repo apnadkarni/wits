@@ -1,0 +1,38 @@
+<h1>Refreshing list views</h1>
+<p>
+List views are refreshed automatically by default. Change the refresh
+properties through the refresh controls in the list view status bar
+as shown below.
+</p>
+<p>
+<img src="listview3-detail-labeled.png" alt="List view image"/>
+</p>
+<p>
+The interval between refreshes is set rate by editing the
+<span class='witsmenu'>Refresh interval (s)'</span> edit box.
+This interval is common to all views that show a specific object type.
+Changes in the value in a window showing processes will also be 
+reflected in all other windows showing processes.
+</p>
+<p>
+You can prevent a window from refreshing by selecting the
+<span class='witsmenu'>Freeze</span> checkbox. Note that this will
+only prevent that particular window from updating. Other windows, even of
+the same object type, will continue to update.
+</p>
+<p>
+The <span class='witsmenu'>Refresh now</span> button will do an immediate
+refresh of the displayed data. You can select the
+<span class='witsmenu'>Freeze</span> checkbox and use the 
+<span class='witsmenu'>Refresh now</span> button to manually control
+exactly when the display is refreshed.
+</p>
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="listview.html">List views</a></li>
+    <li><a href="listcolumns.html">Configuring columns in a list view</a></li>
+    <li><a href="listfilters.html">Filtering list view data</a></li>
+    <li><a href="listviewhighlights.html">Using display modes to track changes</a></li>
+  </ul>
+</div>

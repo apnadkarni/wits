@@ -1,0 +1,49 @@
+<h1>WiTS main window</h1>
+<p>
+  The WiTS main window is shown below.
+<p>
+<img src="mainwindow.png" alt="Main window"/>
+</p>
+<p>
+  The window has four main sections.
+</p>
+<p>
+  The
+  <span class="witsmenu">Command</span>
+  entry window
+  allows entry of user commands which may be either internal commands
+  or external programs or documents.
+  The entry box also has a dropdown list box that maintains a history
+  of previously entered commands.
+</p>
+
+<p>
+  The menu pane on the left contains dropdown menus.
+  The <span class="witsmenu">Tools and Options</span>
+  dropdown contains items for various utilities, such as
+  system shutdown and configuration of WiTS preferences.
+  The <span class="witsmenu">Help and Support</span>
+  dropdown contains menu items that provide access to
+  documentation and online support.
+</p>
+
+<p>
+  The pane on the right side contains links to list views for the
+  various object types supported by WiTS. Click on the appropriate
+  link to bring up the list view for that object type.
+</p>
+
+<p>
+  Finally, the status bar at the bottom displays a summary of system resources
+  in use.
+</p>
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="usercmd.html">Running commands</a></li>
+    <li><a href="listview.html">List views</a></li>
+    <li><a href="objecttypes.html">Supported object types</a></li>
+    <li><a href="eventmonitor.html">Monitoring events</a></li>
+    <li><a href="preferences.html">Configuring preferences</a></li>
+  </ul>
+</div>

@@ -1,0 +1,20 @@
+<h1>Copying list view data to the clipboard</h1>
+<p>
+  The rows selected in a <a href="listview.html">list view</a> may be copied
+  to a clipboard either through the right click menu in the list view or
+  through the standard Windows <span class="cmd">Ctrl-C</span> shortcut key or
+  the <span class='witsmenu'>Copy</span> button in the toolbar.
+</p>
+<p>
+  The data is stored in the clipboard as a series of lines with tab
+  characters separating the column values.
+</p>
+
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="listview.html">List views</a></li>
+    <li><a href="listviewselection.html">Selecting list view items</a></li>
+    <li><a href="listexport.html">Exporting list view data to a file</a></li>
+  </ul>
+</div>

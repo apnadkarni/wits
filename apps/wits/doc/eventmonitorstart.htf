@@ -1,0 +1,29 @@
+<h1>Starting the event monitor</h1>
+<p>
+  The event monitor can be configured to start up in one of three ways:
+</p>
+<ul>
+  <li>
+    You can configure WiTS preferences to automatically show
+    the event monitor when the program starts up.
+  </li>
+  <li>
+    You can assign a hotkey to bring up
+    the event monitor window when the hotkey is pressed.
+  </li>
+  <li>
+    You can start the event monitor through the
+    <span class="witsmenu">Monitor events</span> link
+    in either the main WiTS window or the WiTS
+    <a href="systray.html">system tray</a> menu.
+  </li>
+</ul>
+
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="eventmonitor.html">Monitoring events</a></li>
+    <li><a href="preferences.html">Configuring preferences</a></li>
+    <li><a href="hotkey.html">Accessing WiTS using hotkeys</a></li>
+  </ul>
+</div>

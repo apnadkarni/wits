@@ -1,0 +1,40 @@
+<h1>Logging events to a file</h1>
+
+<p>
+  The WiTS event monitor can also be configured to continuously log all events
+  to a file. Use the <span class="witsmenu">Event Monitor</span> tab in
+  the WiTS preferences dialog to enable this feature and to specify
+  the name of the log file.
+</p>
+<h2>Managing log file space</h2>
+<p>
+  When the logfile grows beyond a million bytes, WiTS will close the logfile,
+  rename it, and open a new logfile with the same name as the original. The
+  renamed file has the same extension as the original, and a base name
+  that is suffixed with a string of the form
+  <span class='cmd'>FROM-TO</span> where both
+  <span class='cmd'>FROM</span> and
+  <span class='cmd'>TO</span> have the form
+  <span class='cmd'>YYYYMMDDHHMMSS</span>
+  and corresponding to the beginning and end of the time interval
+  covered by the file.
+</p>
+<p>
+  Old logfiles are not deleted or archived automatically by WiTS. It is up
+  to the user to arrange for this so that disk space does not fill up.
+  However, WiTS will stop logging events to a file if the free disk space
+  on the drive drops to below 100MB.
+</p>
+<p>
+  If logging to a file is enabled, and the event monitor window
+  is closed, you will be given a choice as to whether logging to the
+  file should continue in the background.
+</p>
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="eventmonitor.html">Monitoring events</a></li>
+    <li><a href="eventmonitorfilter.html">Filtering events</a></li>
+    <li><a href="eventmonitorpreferences.html">Configuring the event monitor</a></li>
+  </ul>
+</div>

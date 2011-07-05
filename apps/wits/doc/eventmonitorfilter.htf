@@ -1,0 +1,95 @@
+<h1>Filtering events</h1>
+
+<p>
+  Several different categories of events can be monitored by the event
+  monitor.
+  Monitoring of each category can be enabled and disabled through the
+  <span class="witsmenu">Event Monitor</span> tab in
+  the WiTS preferences dialog shown below. When WiTS
+  is installed, only a subset of the categories are enabled by default.
+  Only the events matching the filters are displayed in the event monitor
+  and written to the log file.
+</p>
+
+<p>
+  <img src="eventmonitorprefs.png" alt="Event monitor preferences"/>
+</p>
+<ul>
+  <li>
+    The <span class="witsmenu">System resources</span> category
+    enables monitoring of system resources and will log an event
+    when system resources drop below a certain limit. The system
+    resources being monitored include per process and system wide
+    thread and handle counts. The thresholds at which system
+    resources are considered to be low can be set through the
+    <a href="eventmonitorpreferences.html">Event Monitor</a> page in
+    the <a href="preferences.html">preferences</a> dialog.
+  </li>
+  <li>
+    The <span class="witsmenu">Disk space</span> category
+    enables monitoring of low disk space conditions on the system.
+    The thresholds at which disk space is
+    considered to be low can be set through the
+    <a href="eventmonitorpreferences.html">Event Monitor</a> page in
+    the <a href="preferences.html">preferences</a> dialog.
+  </li>
+  <li>
+    The <span class="witsmenu">Process starts and exits</span>
+    category includes events related to starting of new
+    processes. The process id, the program name and the parent
+    process are logged.
+  </li>
+  <li>
+    The <span class="witsmenu">Network connections</span> category
+    includes all new TCP connections and creation of new TCP and UDP
+    sockets. Termination of connections is not logged to reduce
+    amount of logged messages.
+  </li>
+  <li>
+    The <span class="witsmenu">Driver loads and unloads</span>
+    category enables logging of events pertaining to dynamic
+    loading and unloading of drivers into the operating system
+    kernel.
+  </li>
+  <li>
+    The <span class="witsmenu">Windows services</span> category
+    enables monitoring of starting and stopping of Windows services.
+  </li>
+  <li>
+    The <span class="witsmenu">Network shares</span> category
+    logs connections to local and remote network shares. Note this
+    capability is not available on Windows 2000.
+  </li>
+  <li>
+    The <span class="witsmenu">Logon sessions</span> category
+    enables monitoring of the creation and deletion of new logon
+    sessions including new users logging on and remote sessions.
+  </li>
+  <li>
+    The <span class="witsmenu">Windows event log</span> category
+    enables monitoring of the Windows event log. Any events logged
+    there are also shown in the WiTS event log. Note that
+    sometimes can result in duplicate events - one when WiTS
+    detects an event itself and a second when the application itself
+    writes an event to the Windows event log. An example of this
+    is startup or shutdown of a Windows service.
+  </li>
+</ul>
+
+<p>
+  The <span class="witsmenu">Thresholds</span> frame controls
+  the thresholds for various system resources. When any of these
+  thresholds is crossed, an appropriate event is logged. These
+  thresholds should be tuned as appropriate depending on system
+  resources and load.
+</p>
+
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="eventmonitor.html">Monitoring events</a></li>
+    <li><a href="eventmonitorlogging.html">Logging events to a file</a></li>
+    <li><a href="eventmonitorpreferences.html">Configuring the event monitor</a></li>
+    <li><a href="preferences.html">Configuring preferences</a></li>
+  </ul>
+</div>

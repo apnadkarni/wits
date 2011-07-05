@@ -1,0 +1,16 @@
+<h1>Using the list view selection </h1>
+<p>A row in the table can be selected by clicking on it or navigating
+  using the keyboard arrow keys. The selection can
+  be extended by holding down the shift key while clicking or
+  dragging the mouse, or when using the arrow keys. 
+</p>
+<p>
+  When a single item is selected, additional information about the
+  object is displayed in the <span class='witsmenu'>Summary</span>
+  pane if it is visible.
+</p>
+<p>
+  When one or more items are selected, actions can be invoked on them
+  via either the pop-up menu or the toolbar. For example, in the
+  processes list view, all selected processes can be terminated.
+</p>  

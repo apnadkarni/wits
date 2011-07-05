@@ -1,0 +1,17 @@
+    <h1>WiTS Screen Shots</h1>
+
+    <p>
+      Below is a sample screen shot that shows how various views are linked together.
+      Clicking on the <span class='witsmenu'>PID</span>
+      field in the <span class='witsmenu'>Network Connections</span>
+      window will bring up
+      the property page for that process. Similarly, the
+      <span class='witsmenu'>Executable path</span> field
+      in the process property page
+      links to the property page for that file. All object types
+      supported by WiTS are linked together in this fashion.
+      </p>
+    <p>
+      <img alt="screenshots (90K)" src="screenshot.png"/>
+    </p>
+

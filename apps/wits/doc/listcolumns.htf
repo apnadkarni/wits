@@ -1,0 +1,62 @@
+<h1>Configuring columns in a list view</h1>
+
+<p>
+  <a href='listview.html'>List views</a> display properties
+  in tabular format. The layout of table columns can
+  be customized to include or exclude specific properties and the order
+  in which they are displayed.
+</p>
+
+<h2>Interactive manipulation of columns</h2>
+<p>
+  You can interactively manipulate the display in the following ways:
+</p>
+<ul>
+  <li>Click on a column header to sort the table based on the values in that
+    column.</li>
+  <li>Drag a column header to change the order in which columns are
+    displayed.</li>
+  <li>Resize a column by dragging a column border in the header row.</li>
+</ul>
+<p>
+  The changes made in this fashion are not persistent and will not be
+  applied to newly created windows.
+</p>
+
+<h2>Using the table editor</h2>
+<p>
+  Alternatively, use the table editor to configure the
+  layout for the table columns in a list view. This editor,
+  shown below, is  available through the
+  <span class="witsmenu">Select table columns</span> button
+  in the toolbar or the right-click popup menu.
+</p>
+<p>
+  <img src="tableeditor.png" alt="Table editor image"/>
+</p>
+
+<p>
+  Move fields between the two lists by either selecting
+  one or more fields and clicking a directional button, or by
+  double clicking a field name. Clicking the
+  <span class='witsmenu'>OK</span> will modify the displayed
+  list view layout.
+</p>
+<p>
+  If you want to use this layout in all future views, save 
+  the configuration as the default table layout
+  by selecting the <span class="witsmenu">Save as default layout</span>
+  checkbox before clicking
+  <span class="witsmenu">OK</span> button. If you have made changes to
+  the displayed table, restore the table to the last saved default
+  configuration by clicking the
+  <span class='witsmenu'>Reset to defaults</span> button.
+</p>
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="listview.html">List views</a></li>
+    <li><a href="listfilters.html">Filtering list view data</a></li>
+    <li><a href="listviewhighlights.html">Using display modes to track changes</a></li>
+  </ul>
+</div>

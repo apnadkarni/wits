@@ -1,0 +1,107 @@
+<h1>Version history</h1>
+
+<p>
+  Version 3.0 Beta is now available via the
+  <a href="download.html">Download</a> page. Changes in this,
+  and all previous versions, are listed below.
+</p>
+
+<p>
+  Changes between 2.1 and 3.0
+</p>
+<ul>
+  <li>Support for Windows Vista, Windows Server 2008/2008R2</li>
+  <li>Native 64-bit support.</li>
+  <li>Added user defined filtering to list views.</li>
+  <li>Enhanced list view display modes associated with change tracking.</li>
+  <li>Support for displaying IPv6 connections.</li>
+  <li>Added list view for Windows event log.</li>
+  <li>Added list view for loaded modules.</li>
+  <li>More properties displayed for each object type.</li>
+  <li>User interface enhancements including font change and toolbars.</li>
+  <li>Significantly improved display performance.</li>
+  <li>The following features have been removed: display of printers,
+    routing tables, and termination of network connections.</li>
+</ul>
+
+<p>
+  Changes between 2.1 Beta and 2.1.11 Release
+</p>
+<ul>
+  <li>Bug fixes only.</li>
+</ul>
+
+<p>
+  Changes between 2.0 and 2.1 Beta
+</p>
+  <ul>
+    <li>Added logging of events to a file.</li>
+    <li>Added ability to save the displayed events to a file.</li>
+    <li>Added bind time and module information to network connection views.</li>
+    <li>Added right click menu to list views.</li>
+    <li>Added ability to copy list view selection to clipboard.</li>
+    <li>Added export capability to write list views to a file.</li>
+    <li>Added hotkey for taskbar menu as well as keyboard shortcuts.</li>
+    <li>Added checks for software updates.</li>
+    <li>Cosmetic user interface changes.
+  </ul>
+<p>
+  Changes between 1.1 and 2.0
+</p>
+  <ul>
+    <li>
+      Added the event monitor to track
+      various system events like new processes, network connections etc.
+    </li>
+    <li>
+      Made list views customizable by allowing selection of columns
+      to be displayed for each object type.
+    </li>
+    <li>
+      Show network routing tables.
+    </li>
+    <li>
+      Show kernel driver information.
+    </li>
+    <li>
+      More detail in individual object types.
+    </li>
+    <li>
+      Significant performance improvements to reduce load when
+      multiple views are open.
+    </li>
+  </ul>
+<p>
+  Changes between 1.0 and 1.1
+</p>
+  <ul>
+    <li>
+      Added a user command line to main window
+    </li>
+    <li>
+      Added WiTS internal commands
+      <span class='cmd'>list</span>,
+      <span class='cmd'>show</span> and
+      <span class='cmd'>end</span>
+    </li>
+    <li>
+      Added list view for loaded modules in a process
+    </li>
+    <li>
+      Added hotkeys for process and network connection list views
+    </li>
+    <li>
+      Enhanced printer properties page dialog including listing of
+      jobs in print queue.
+    </li>
+    <li>
+      Added BIOS information to system view
+    </li>
+    <li>
+      Added buttons to provide access to related Windows tools
+    </li>
+    <li>
+      Removed list view for open handles in a process
+    </li>
+  </ul>
+

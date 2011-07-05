@@ -1,0 +1,19 @@
+<h1>Exporting list view data to a file</h1>
+<p>
+  You can save the data currently displayed in a
+  <a href="listview.html">list view</a> to a file through
+  <span class='witsmenu'>Export to file</span> toolbar button or
+  the right-click popup menu.
+</p>
+<p>
+  The data is saved in Comma Separated Value (CSV) format with
+  the first line in the file containing the column names.
+</p>
+
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="listview.html">List views</a></li>
+    <li><a href="listclipboard.html">Copying list view data to the clipboard</a></li>
+  </ul>
+</div>

@@ -1,0 +1,26 @@
+<h1>Highlighting changed data in a list view</h1>
+<p>
+  When a list view contains many displayed rows, it can be difficult
+  to spot changes in displayed data. To help with this, WiTS
+  highlights modified rows in each cycle.
+<p>
+  On each refresh cycle of a list view,
+  objects that no longer exist (for example, a process that has
+  exited) are highlighted in red before being
+  removed from the table. Similarly, new objects are
+  highlighted in green and modified rows are highlighted
+  in yellow.
+</p>
+<p>
+  In addition, selecting the <span class="witsmenu">Show changed
+  only</span> checkbox in the status bar of a list view will hide all
+  rows whose data is unchanged since the previous refresh cycle. Only
+  the deleted, modified and new rows will be displayed.
+</p>
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="listview.html">List views</a></li>
+    <li><a href="listrefresh.html">Refreshing list views</a></li>
+  </ul>
+</div>

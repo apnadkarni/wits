@@ -1,0 +1,46 @@
+<h1>Introduction</h1>
+
+<p>
+  The
+  <a href='http://wits.magicsplat.com' target=_top>Windows Inspection Tool Set</a> (WiTS)
+  slices a Windows system in multiple ways, providing you with flexible,
+  cross-linked, filtered views into a Windows system. View
+  operating system information, processes, services, users,
+  network interfaces and connections, file shares, printers and
+  more. Get notified of system resource status and events such
+  as new network connections, process starts,
+  service status and other system events.
+</p>
+
+<p>
+  Read about <a href="features.html">WiTS features</a>, user
+  <a href="testimonials.html">testimonials</a>,
+  compare with <a href="nativetools.html">Windows native tools</a>
+  or view <a href="screenshot.html">screen shots</a>.
+</p>
+
+<p>
+  If you are using an older version of WiTS, read about
+  <a href='versionhistory.html'>changes</a> in the latest version.
+</p>
+
+    <h2>License</h2>
+    <p>
+    WiTS may be freely used in both non-commercial and commercial
+    environments.  Distribution of WiTS has some additional
+    requirements.  See <a href="license.html">license details</a>.
+    </p>
+    <h2>Source code</h2>
+    <p>
+      WiTS is an open source application. You can modify or enhance
+      the sources for your own purposes. Find out more about the
+      <a href="sourcecode.html">implementation</a>.
+    </p>
+
+    <h2>Download</h2>
+    <p>
+      Ready to give it a spin? WiTS supports Windows XP (SP2 or later),
+      Windows 2003, Windows Vista, Windows Server 2008, Windows Server 2008R2
+      and Windows 7.
+      <a href="download.html">Download</a> an installer.
+    </p>

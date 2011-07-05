@@ -1,0 +1,45 @@
+<h1>Supported object types</h1>
+
+<p>
+  Windows object types supported by WiTS include:
+</p>
+
+<ul>
+  <li>Operating system and hardware</li>
+  <li>Processes</li>
+  <li>Services</li>
+  <li>Drives and volumes</li>
+  <li>Users and groups</li>
+  <li>Logon sessions</li>
+  <li>Local and remote shares</li>
+  <li>Network interfaces</li>
+  <li>Network connections</li>
+  <li>Network routing tables</li>
+  <li>Printers</li>
+  <li>Modules and dynamic link libraries</li>
+  <li>Kernel drivers</li>
+</ul>
+
+<p>
+  These objects have various properties associated with them. These
+  properties may be
+</p>
+<ul>
+  <li>Scalar values, an example being the amount of virtual memory being
+    consumed by a process</li>
+  <li>A reference to another object; for example, the user account
+    under which a process is running is itself an object</li>
+  <li>A list of the above. For instance, the group accounts to which
+    a user account belongs is a list of object references.</li>
+</ul>
+<p>
+  All references objects, whether single or a list,
+  show up as navigational links.
+</p>
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="navigation.html">Object cross-linking and navigation</a></li>
+  </ul>
+</div>
+

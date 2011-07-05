@@ -1,0 +1,36 @@
+<h1>Configuring preferences</h1>
+
+<p>
+Various aspects of WiTS behaviour can be controlled through the preferences
+dialog which is accessible either through the
+<span class="witsmenu">Preferences</span> selection in the
+<span class="witsmenu">Tools and Filters</span> dropdown menu in the
+main WiTS window or popup menu associated with the WiTS icon in the
+system tray.
+</p>
+<p>
+  <img src="preferences.png" alt="Preferences dialog"/>
+</p>
+<p>
+The <span class="witsmenu">General</span>
+tab allows setting of several options related to WiTS runtime behaviour.
+</p>
+
+<p>
+The <span class="witsmenu">Hotkeys</span>
+tab allows hotkeys to be registered that bring up the specific WiTS windows.
+</p>
+
+<p>
+The <span class="witsmenu">Event Monitor</span>
+tab allows configuration of
+<a href="eventmonitorpreferences.html">event monitor options</a>.
+</p>
+
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="eventmonitorpreferences.html">Configuring the event monitor</a></li>
+    <li><a href="hotkey.html">Accessing WiTS using hotkeys</a></li>
+  </ul>
+</div>

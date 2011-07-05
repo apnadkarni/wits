@@ -1,0 +1,41 @@
+<h1>Filtering data displayed in a list view</h1>
+<p>
+Filters are one of the mechanisms WiTS offers
+to make it easier to focus on specific objects of interest in a list view.
+Configure a filter when you only want to see records whose field values
+meet specific criteria.
+</p>
+<p>
+The example below shows only those processes that are running under a
+specific user account and are consuming CPU.
+</p>
+<p>
+<img src="listview3-filter-labeled.png" alt="List view image"/>
+</p>
+<p>
+The filter configuration row resides just below the column header row.
+Use the <span class='witsmenu'>Filter on/off</span> toolbar button to
+toggle show or hide the filter configuration row. When hidden, filtering is
+disabled; however, any defined filter values are not cleared. Clicking
+on the  <span class='witsmenu'>Clear filter settings</span> button on
+the other hand will clear any defined filters.
+</p>
+<p>
+Define or modify a filter by clicking on the appropriate cell and typing
+a filter expression. By default, a help window containing
+a summary of filter expression syntax and operators is displayed as shown
+below.
+</p>
+<p>
+<img src="listview3-filter-edit.png" alt="List view image"/>
+</p>
+
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="listview.html">List views</a></li>
+    <li><a href="listcolumns.html">Configuring columns in a list view</a></li>
+    <li><a href="listviewhighlights.html">Using display modes to track changes</a></li>
+    <li><a href="listrefresh.html">Refreshing data in a list view</a></li>
+  </ul>
+</div>

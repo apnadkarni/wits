@@ -1,0 +1,26 @@
+<h1>Mouse and keyboard bindings</h1>
+<p>
+  The standard Windows mechanisms can be used to navigate within the
+  list view. For example, a left-click with the mouse will select a
+  row and right click will bring up a pop-up menu.
+</p>
+<p>
+  Standard windows keys can also be 
+  used to navigate a list view. The Tab and Shift-Tab keys will cycle
+  the keyboard focus through all the control elements of the list
+  view. When the table has the focus, the arrow keys may be used to
+  move the selection, and PgUp/PgDn keys to page through the table.
+</p>
+<p>
+  In addition to the standard key shortcuts, you can also use the keyboard
+  to increase (<span class="witsmenu">Ctrl++</span>) or decrease
+  (<span class="witsmenu">Ctrl+-</span>) the font in a list view. 
+  Restore the default font by typing <span class="witsmenu">Ctrl+0</span>.
+</p>
+<div class="seealso">
+  <h2>Related topics</h2>
+  <ul>
+    <li><a href="listview.html">List views</a></li>
+    <li><a href="listviewselection.html">Selecting list view items</a></li>
+  </ul>
+</div>

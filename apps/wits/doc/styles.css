@@ -1,0 +1,136 @@
+/* WiTS website customization */
+
+/* Yahoo copyrighted section - base-min.css. See base.css for readable version */
+
+/*
+Copyright (c) 2008, Yahoo! Inc. All rights reserved.
+Code licensed under the BSD License:
+http://developer.yahoo.net/yui/license.txt
+version: 2.5.1
+*/
+h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em 0;}h1,h2,h3,h4,h5,h6,strong{font-weight:bold;}abbr,acronym{border-bottom:1px dotted #000;cursor:help;} em{font-style:italic;}blockquote,ul,ol,dl{margin:1em;}ol,ul,dl{margin-left:2em;}ol li{list-style:decimal outside;}ul li{list-style:disc outside;}dl dd{margin-left:1em;}th,td{border:1px solid #000;padding:.5em;}th{font-weight:bold;text-align:center;}caption{margin-bottom:.5em;text-align:center;}p,fieldset,table,pre{margin-bottom:1em;}input[type=text],input[type=password],textarea{width:12.25em;*width:11.9em;}
+
+/* End Yahoo copyright */
+
+/* WiTS customization */
+
+h1,h2 {
+  color: #888888;
+  margin-bottom: 0.5em;
+}
+
+#hd {
+    border-top-style: solid;
+    border-top-width: 10px;
+    border-top-color: #aaaaaa;
+    border-bottom-style: solid;
+    border-bottom-width: 4px;
+    border-bottom-color: #aaaaaa;
+    margin-right: 180px;
+}
+#hd p {
+    margin-bottom: 0px;
+}
+
+#ft {
+    font-size: 77%;
+    text-align: center;
+    border-top: 1px solid #aaaaaa;
+    margin-right: 180px;
+    margin-top: 10px;
+}
+
+div.headingbar {
+    font-family: Trebuchet MS, Helvetica, sans-serif;
+    font-size: 200%;
+    font-weight: bold;
+    color: #888888;
+    line-height: 64px;
+    background-image: url(mycomputer+viewmag.png);
+    background-position: center left;
+    background-repeat: no-repeat;
+    text-indent: 60px;
+}
+
+div.headingbar a:link, div.headingbar a:visited {
+  text-decoration: none;
+  color: #888888;
+}
+
+div.headingbar a:hover {
+  color: #880000;
+}
+
+div.headingads {
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border: 1px solid #AAAAAA;
+    text-indent: 60px;
+}
+
+div.sideads {
+  margin-top: 4em;
+  margin-left: 1em;
+}
+
+div.navigation {
+  margin-top: 0.5em;
+}
+
+.navigation ul {
+  margin-left: 0em;
+}
+
+.navigation ul li {
+  list-style: none;
+}
+
+.navigation li a:link, .navigation li a:visited {
+  text-decoration: none;
+  color: #00f;
+}
+
+.navigation li a:hover {
+  font-weight: bold;
+}
+
+.seealso ul {
+  margin-top: 0em;
+  margin-left: 0.5em;
+}
+
+.seealso ul li {
+  list-style: none;
+  color: #00f;
+}
+
+.seealso a {
+  text-decoration: none;
+}
+
+.witsmenu { color: blue; font-family: Arial; font-size: 93%; font-weight: bold;}
+.debug { background-color: red; }
+.seemore {
+  font-size: 93%;
+}
+.blockquote {
+  font-size: 93%;
+  margin-left: 4em;
+}
+.cmd {
+  font-size: 100%;
+  font-family: "Courier New", Courier;
+}
+.cmdblock {
+  font-size: 100%;
+  font-family: "Courier New", Courier;
+  margin-left: 2em;
+  margin-bottom: 1em;
+}
+
+.content {
+  font-family: Verdana;
+  font-size: 108%;
+}
