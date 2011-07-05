@@ -5858,9 +5858,9 @@ snit::widgetadaptor wits::widget::listframe {
         $_toolbar add separator
 
         $_toolbar add button fontenlarge -image [images::get_icon16 fontenlarge] -command [mymethod _change_font_size 1]
-        tooltip::tooltip [$_toolbar itemid fontenlarge] "Increase font size"
+        tooltip::tooltip [$_toolbar itemid fontenlarge] "Increase font size (Ctrl++)"
         $_toolbar add button fontreduce -image [images::get_icon16 fontreduce] -command [mymethod _change_font_size -1]
-        tooltip::tooltip [$_toolbar itemid fontreduce] "Decrease font size"
+        tooltip::tooltip [$_toolbar itemid fontreduce] "Decrease font size (Ctrl+-"
         set _splitwindowbuttonvar 1; # Since we start with window open
         $_toolbar add checkbutton splitwindow -image [images::get_icon16 splitwindow] -command [mymethod _setleftpanevisibility] -variable [myvar _splitwindowbuttonvar]
         tooltip::tooltip [$_toolbar itemid splitwindow] "Show summary pane"
