@@ -4,7 +4,7 @@ UISHORTNAME=WiTS
 APPVERSIONMAJOR=3
 APPVERSIONMINOR=0
 APPVERSIONPATCH=3
-RELEASETYPE=b
+RELEASETYPE=a
 # NOTE - the order of files here is important. It must be the same order
 # as required to be stored in the concatenated .tm file
 APPFILES= \
