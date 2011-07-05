@@ -492,7 +492,8 @@ snit::widgetadaptor ::wits::app::mainview {
             set interval 2000
             # TBD - optimize by opening a PDH query and keeping it open
             # instead of using high level twapi functions
-            set cpu [[wits::app::get_objects ::wits::app::system] get_field All CPUPercent $interval 0]
+            set cpu [[wits::app::get_objects ::wits::app::system] get_field $wits::app::system::_all_cpus_label CPUPercent $interval 0]
+
             array set systemstatus [twapi::get_system_info -processcount -threadcount]
             array set systemstatus [twapi::get_memory_info -availcommit -totalcommit -availphysical -totalphysical]
             set usedphysical [expr {$systemstatus(-totalphysical) - $systemstatus(-availphysical)}]
