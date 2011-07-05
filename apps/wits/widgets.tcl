@@ -1199,6 +1199,10 @@ snit::widget wits::widget::collapsibleframe {
 
         $self configurelist $args
 
+        if {[$self cget -takefocus] == 0} {
+            $_headerw configure -takefocus 0
+        }
+
         # Arrange the frames
         pack $_headerw -fill both -expand true
 
