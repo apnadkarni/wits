@@ -1237,6 +1237,12 @@ snit::widget wits::widget::collapsibleframe {
     }
 
     method _manageclientframe {state} {
+        # Note this next check is very important for efficiency
+        # as needlessly drawing the headers is expensive
+        if {[$_headerw cget -state] eq $state} {
+            return
+        }
+
         if {$state == "closed"} {
             grid forget $_clientf
         } else {
@@ -5620,8 +5626,8 @@ snit::widgetadaptor wits::widget::listframe {
             {selectall "Select all"}
             {copy      "Copy selection"}
             -
-            {export    "Export table"}
-            {customize "Customize table view"}
+            {export    "Export to file"}
+            {customize "Select table columns"}
             -
             {properties "Properties"}
         }
@@ -6459,6 +6465,8 @@ snit::widgetadaptor wits::widget::listframe {
 
     method _updatedetails {sel {propnames_changed false}} {
         # TBD - why not get info from _records if it is there ?
+        # TBD - if details frame was already open/closed do not
+        #   call the open/closed methods again as the case may be
         if {[llength $sel] == 1} {
             set _details_recid [lindex $sel 0]
             set proplist [$_records_provider get_formatted_record $_details_recid $options(-detailfields) $_refreshinterval]
