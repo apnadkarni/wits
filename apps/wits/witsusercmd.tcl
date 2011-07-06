@@ -70,155 +70,84 @@ set ::wits::app::userCmdSummary(show) "Shows property views of matching objects"
 set ::wits::app::userCmdHelpfile(show) "showcmd.html"
 proc ::wits::app::user_cmd_show {cmdline parent} {
     set nargs [llength $cmdline]
-    if {$nargs != 2 && $nargs != 3} {
-        wits::widget::showerrordialog "Syntax error: Should be '[lindex $cmdline 0] OBJECTNAME ?OBJECTTYPE?'" -parent $parent
+    if {$nargs == 2} {
+        set objtype ""
+        set objname [lindex $cmdline 1]
+    } elseif {$nargs == 3} {
+        set objtype [lindex $cmdline 1]
+        set objname [lindex $cmdline 2]
+    } else {
+        wits::widget::showerrordialog "Syntax error: Should be '[lindex $cmdline 0] ?OBJECTTYPE? OBJECTNAME'" -parent $parent
         return
     }
 
-    set objname [lindex $cmdline 1]
-    set objtype [string tolower [lindex $cmdline 2]]
-    foreach {objtype objlist} [_match_objects $objname $objtype] break
+    lassign [_match_objects $objname $objtype] objtype objlist
 
-    if {![info exists objlist] || [llength $objlist] == 0} {
+    if {[llength $objlist] == 0} {
         tk_messageBox -message "No matching objects found" \
             -parent $parent \
             -title "$::wits::app::long_name"
         return
     }
 
-    set nlimit 4
+    set nlimit 5
     if {[llength $objlist] > $nlimit} {
-        if {$objtype ne "file"} {
-            set answer [wits::widget::showconfirmdialog \
-                            -message "There are [llength $objlist] matching objects. Would you prefer to see a list view?" \
-                            -detail "The command will result in creation of [llength $objlist] separate property view windows. If you would you prefer to see the objects in a single list summary view, click Yes. Click No to continue displaying [llength $objlist] separate property view windows." \
-                            -icon question \
-                            -type yesno \
-                            -title $::wits::app::long_name]
-            if {$answer eq "yes"} {
-                user_cmd_list $cmdline $objtype
-                return
-            }
-        } else {
-            # For files, we currently do not have a list view - TBD
-            set answer [wits::widget::showconfirmdialog \
-                            -message "There are [llength $objlist] matching files. Do you want to continue?" \
-                            -detail "The command will result in creation of [llength $objlist] separate property view windows. Click Yes to continue, and Cancel to cancel." \
-                            -icon question \
-                            -type okcancel \
-                            -title $::wits::app::long_name]
-            if {$answer eq "cancel"} {
-                return
-            }
+        set answer [wits::widget::showconfirmdialog \
+                        -message "There are [llength $objlist] matching items. Do you want to continue?" \
+                        -detail "The command will result in creation of [llength $objlist] separate property view windows. Click OK to continue, and Cancel to cancel." \
+                        -icon question \
+                        -type okcancel \
+                        -title $::wits::app::long_name]
+        if {$answer ne "ok"} {
+            return
         }
     }
 
-    switch -exact -- $objtype {
-        service {
-            foreach match $objlist {
-                viewdetails ::wits::app::service $match
-            }
-        }
-        process {
-            foreach match $objlist {
-                viewdetails ::wits::app::process $match
-            }
-        }
-        remoteshare {
-            foreach match $objlist {
-                viewdetails ::wits::app::remoteshare $match
-            }
-        }
-        localshare {
-            foreach match $objlist {
-                viewdetails ::wits::app::localshare $match
-            }
-        }
-        printer {
-            foreach match $objlist {
-                viewdetails ::wits::app::printer $match
-            }
-        }
-        file {
-            foreach match $objlist {
-                viewdetails ::wits::app::wfile $match
-            }
-        }
-        network {
-            foreach match $objlist {
-                viewdetails ::wits::app::netconn $match
-            }
-        }
-        default {
-            wits::widget::showerrordialog "Objects of type '$type' are not supported by this command" -parent $parent
-        }
+    foreach item $objlist {
+        viewdetails $objtype $item
     }
-    return
 }
 
 #
 # List command
 set ::wits::app::userCmd(list) ::wits::app::user_cmd_list
-set ::wits::app::userCmdSummary(list) "Shows list view of matching objects"
+set ::wits::app::userCmdSummary(list) "Shows list view of objects"
 set ::wits::app::userCmdHelpfile(list) "listcmd.html"
 proc ::wits::app::user_cmd_list {cmdline parent} {
     set nargs [llength $cmdline]
-    if {$nargs != 2 && $nargs != 3} {
-        wits::widget::showerrordialog "Syntax error: Should be '[lindex $cmdline 0] OBJECTNAME ?OBJECTTYPE?'" -parent $parent
+    if {$nargs != 2} {
+        wits::widget::showerrordialog "Syntax error: Should be '[lindex $cmdline 0] OBJECTTYPE'" -parent $parent
         return
     }
 
-    set objname [lindex $cmdline 1]
-    set objtype [string tolower [lindex $cmdline 2]]
-    foreach {objtype objlist} [_match_objects $objname $objtype] break
-
-    # As long as we know the object type, we can go ahead and create the
-    # viewer even if there are no objects currently. Some matching
-    # objects may be created in the future and would show up in the list
-    if {$objtype eq ""} {
-        tk_messageBox -message "No matching objects found" \
-            -parent $parent \
-            -title "$::wits::app::long_name"
-        return
-    }
+    set objtype [string tolower [lindex $cmdline 1]]
 
     switch -exact -- $objtype {
-        service {
-            set title "Services matching $objname"
-            set customcmd "wits::app::match_services $objname"
-        }
-        process {
-            set title "Processes matching $objname"
-            set customcmd "wits::app::match_processes $objname"
-        }
-        remoteshare {
-            set title "Remote shares matching $objname"
-            set customcmd "wits::app::match_remote_shares $objname"
-        }
-        localshare {
-            set title "Local shares matching $objname"
-            set customcmd "wits::app::match_local_shares $objname"
-        }
-        printer {
-            set title "Printers matching $objname"
-            set customcmd "wits::app::match_printers $objname"
-        }
-        network {
-            set objtype netconn
-            set title "Connections matching $objname"
-            set customcmd "wits::app::match_network_connections $objname"
-        }
+        process -
+        processes { set objtype ::wits::app::process }
+        remoteshares -
+        remoteshare {set objtype ::wits::app::remote_share}
+        localshares -
+        localshare {set objtype ::wits::app::local_share}
+        connections -
+        connection -
+        network { set objtype ::wits::app::netconn }
+        interfaces -
+        interface { set objtype ::wits::app::netif }
+        eventlog { set objtype ::wits::app::wineventlog }
+        setvices -
+        service { set objtype ::wits::app::service }
+        modules -
+        module { set objtype ::wits::app::module }
+        drivers -
+        driver { set objtype ::wits::app::driver }
         default {
-            wits::widget::showerrordialog "Objects of type '$type' are not supported by this command" -parent $parent
+            wits::widget::showerrordialog "Objects of type '[namespace tail $objtype]' are not supported by this command." -parent $parent
+            return
         }
     }
-    set viewer [::wits::app::$objtype viewlist \
-                    -filter [::wits::filter::create \
-                                 -displayname $title \
-                                 -matchtype custom \
-                                 -customcmd $customcmd]]
-    $viewer configure -title $title
-    return
+
+    ${objtype}::viewlist
 }
 
 
@@ -293,7 +222,7 @@ proc ::wits::app::run_user_command {cmdline parent} {
     variable userCmd
 
     if {[info exists userCmd($cmd)]} {
-        eval $userCmd($cmd) [list $cmdline $parent]
+        uplevel #0 [linsert $userCmd($cmd) end $cmdline $parent]
         return
     }
 
@@ -597,10 +526,15 @@ proc ::wits::app::_match_objects {objname {matchorder ""}} {
             process      match_processes
             remoteshare  match_remote_shares
             localshare   match_local_shares
-            printer      match_printers
             file         match_files
             network      match_network_connections
         } $objtype]
+        switch -exact -- $objtype {
+            file    { set objtype ::wits::app::wfile }
+            network { set objtype ::wits::app::netconn }
+            default { set objtype ::wits::app::$objtype }
+        }
+
         set matches [$matchfn $objname]
         if {[llength $matches]} {
             return [list $objtype $matches]

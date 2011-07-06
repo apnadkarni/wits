@@ -87,7 +87,7 @@ proc wits::app::wineventlog::get_property_defs {} {
                  objtype $objtype]
 
         if {$propname ne "-data"} {
-            # -data is expensive to format in a table
+            # -data is VERY expensive to format in a table
             lappend _table_properties $propname
         }
     }

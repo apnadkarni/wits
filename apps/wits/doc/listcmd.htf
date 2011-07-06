@@ -3,79 +3,22 @@
 The <span class='cmd'>list</span> command takes the following form:
 </p>
 <div class='cmdblock'>
-  list OBJECTNAME [OBJECTTYPE]
+  list OBJECTTYPE
 </div>
 <p>
         The command displays a
         <a href='listview.html'>list view</a> containing
-        objects that match <span class='cmd'>OBJECTNAME</span>.
-        If <span class='cmd'>OBJECTTYPE</span> is specified, only
-        matching objects of that type are searched.
+        objects of the specified type.
         <span class='cmd'>OBJECTTYPE</span> may be one of
         <span class='cmd'>service</span>,
         <span class='cmd'>process</span>,
         <span class='cmd'>remoteshare</span>,
         <span class='cmd'>localshare</span>,
         <span class='cmd'>network</span> or
-        <span class='cmd'>file</span>. Even if no matching objects
-        are found, an empty view is still created and will be populated
-        if and when matching objects of that type are created.
+        <span class='cmd'>driver</span> or
+        <span class='cmd'>eventlog</span> or
+        <span class='cmd'>module</span>.
 </p>
-<p>
-  If <span class='cmd'>OBJECTTYPE</span> is not specified,
-  the command searches
-  for object types in the following order:
-</p>
-<ul>
-  <li>Windows services</li>
-  <li>Processes</li>
-  <li>Remote file shares</li>
-  <li>Local file shares</li>
-  <li>Network connections</li>
-  <li>Files and directories</li>
-</ul>
-<p>
-  All matching objects of a specific type are displayed.
-  However, no attempt is made at matching against further object
-  types. If objects of the wrong type are being displayed, use the
-  <span class='cmd'>OBJECTTYPE</span> parameter to restrict
-  matching to a specific object type.
-</p>
-<p>
-  In all cases, the object space is searched using multiple match criteria.
-</p>
-<ul>
-  <li>
-    For services, <span class='cmd'>OBJECTNAME</span> is
-    matched against the internal and display service names.
-  </li>
-  <li>
-    For processes, <span class='cmd'>OBJECTNAME</span> is
-    matched against the process id, path, name (with and without
-    file name extension), or the title of toplevel windows.
-    The results of the first match type that succeeds are displayed.
-  </li>
-  <li>
-    For remote shares, matching is tried using an exact match,
-    only the share name, only the system name and finally with
-    trailing wildcards.
-    The results of the first match type that succeeds are displayed.
-  </li>
-  <li>
-    For local shares, matching is tried with the exact share
-    name and then with trailing wildcards.
-  </li>
-  <li>
-    Network connections are matched against local or remote
-    port numbers, IP addresses, host names and finally service names.
-  </li>
-  <li>
-    Files and directories are matched using wildcards. If no
-    match is found, then the list of directories in the
-    <span class='cmd'>PATH</span> environment variable is searched.
-  </li>
-</ul>
-
 <div class="seealso">
   <h2>Related topics</h2>
   <ul>
