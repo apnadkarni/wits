@@ -385,21 +385,7 @@ snit::widgetadaptor ::wits::app::mainview {
         switch -exact -- $objtype {
             eventlog { ::wits::app::showeventviewer }
             default {
-                # Under some circumstances, the dialog
-                # takes a long time to come up. So we show a progress
-                # dialog in the meanwhile
-                set bb [::wits::app::show_data_collection_busybar]
-                twapi::trap {
-                    set view [wits::app::${objtype}::viewlist]
-                } finally {
-                    if {[info exists bb] && [winfo exists $bb]} {
-                        if {[info exists view]} {
-                            $bb waitforwindow $view
-                        } else {
-                            destroy $bb
-                        }
-                    }
-                }
+                wits::app::${objtype}::viewlist
             }
         }
         if {[::wits::app::prefs getbool IconifyOnCommand $::wits::app::prefGeneralSection false]} {
@@ -1590,10 +1576,7 @@ proc ::wits::app::configure_preferences {{page ""}} {
 #
 # Show the data collecting progress bar
 proc ::wits::app::show_data_collection_busybar {{title {Please wait}} {message {Please wait while we gather the data...}}} {
-    # TBD - only specifying frame dimensions because else pseudo title bar
-    # does not get drawn in unmanaged window
     set bb [::wits::widget::busybar .%AUTO% -title $title \
-                -framewidth 210 -frameheight 60 \
                 -message $message]
     util::hide_window_and_redraw $bb "" "" -geometry center
     #util::center_window $bb
@@ -1691,30 +1674,47 @@ proc wits::app::viewlist {objtype args} {
 
     # Need to create a new view
 
-    # Create the services object if not done yet. This single object
-    # will service all list views
-    if {[llength [info commands ${objtype}::objects]] == 0} {
-        ${objtype}::Objects create ${objtype}::objects
+    # Under some circumstances, the dialog
+    # takes a long time to come up. So we show a progress
+    # dialog in the meanwhile
+    set bb [::wits::app::show_data_collection_busybar]
+    twapi::trap {
+        # Create the services object if not done yet. This single object
+        # will service all list views
+        if {[llength [info commands ${objtype}::objects]] == 0} {
+            ${objtype}::Objects create ${objtype}::objects
+        }
+
+        set title [util::filter description $opts(filter) [${objtype}::objects get_property_defs] [${objtype}::getlisttitle]]
+
+        set view \
+            [widget::propertyrecordslistview .lv%AUTO% \
+                 $objtype \
+                 ${objtype}::objects \
+                 -itemname $opts(itemname) \
+                 -title $title \
+                 -detailtitle $opts(detailtitle) \
+                 -filter $opts(filter) \
+                 -prefscontainer $opts(prefscontainer) \
+                 -actiontitle $opts(actiontitle) \
+                 -actioncommand $opts(actioncommand) \
+                 -pickcommand $opts(pickcommand) \
+                 -objlinkcommand $opts(objlinkcommand) \
+                 -popupcommand $opts(popupcommand) \
+                 -popupmenu $opts(popupmenu) \
+                 {*}$args ]
+    } finally {
+        if {[info exists bb] && [winfo exists $bb]} {
+            if {[info exists view]} {
+                $bb waitforwindow $view
+            } else {
+                destroy $bb
+            }
+        }
     }
 
-    set title [util::filter description $opts(filter) [${objtype}::objects get_property_defs] [${objtype}::getlisttitle]]
+    return $view
 
-    return \
-        [widget::propertyrecordslistview .lv%AUTO% \
-             $objtype \
-             ${objtype}::objects \
-             -itemname $opts(itemname) \
-             -title $title \
-             -detailtitle $opts(detailtitle) \
-             -filter $opts(filter) \
-             -prefscontainer $opts(prefscontainer) \
-             -actiontitle $opts(actiontitle) \
-             -actioncommand $opts(actioncommand) \
-             -pickcommand $opts(pickcommand) \
-             -objlinkcommand $opts(objlinkcommand) \
-             -popupcommand $opts(popupcommand) \
-             -popupmenu $opts(popupmenu) \
-             {*}$args ]
 }
 
 proc wits::app::name_to_sid {name} {

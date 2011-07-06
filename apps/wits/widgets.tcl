@@ -3494,7 +3494,8 @@ snit::widgetadaptor wits::widget::tipoftheday {
         set tipfont {{MS Sans Serif} 8}
         install _htextw using [namespace parent]::htext $f.ht \
             -font $tipfont \
-            -background $background  -width 40 -height 10
+            -background $background \
+            -width 40 -height 10
 
         ::ttk::style configure "WitsTip.TCheckbutton" -background $background -font WitsDefaultFont
         ::ttk::style configure "WitsTip.TButton" -background $background
