@@ -294,18 +294,7 @@ proc wits::app::wineventlog::viewlist {args} {
 
 # Takes the specified action on the passed processes
 proc wits::app::wineventlog::listviewhandler {viewer act objkeys} {
-    variable _property_defs
-
-    switch -exact -- $act {
-        view {
-            foreach objkey $objkeys {
-                viewdetails [namespace current] $objkey
-            }
-        }
-        default {
-            widget::propertyrecordslistview standardfilteractionhandler $viewer $act $objkeys
-        }
-    }
+    standardactionhandler $viewer $act $objkeys
 }
 
 # Handler for popup menu

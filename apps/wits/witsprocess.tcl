@@ -412,16 +412,11 @@ proc wits::app::process::listviewhandler {viewer act objkeys} {
         terminate {
             terminate_processes $objkeys $viewer
         }
-        view {
-            foreach objkey $objkeys {
-                viewdetails [namespace current] $objkey
-            }
-        }
         wintool {
             [get_shell] ShellExecute taskmgr.exe
         }
         default {
-            widget::propertyrecordslistview standardfilteractionhandler $viewer $act $objkeys
+            standardactionhandler $viewer $act $objkeys
         }
     }
 }

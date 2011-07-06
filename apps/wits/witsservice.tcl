@@ -273,11 +273,6 @@ proc wits::app::service::listviewhandler {viewer act objkeys} {
         start {
             changestate $objkeys running $viewer
         }
-        view {
-            foreach objkey $objkeys {
-                viewdetails [namespace current] $objkey
-            }
-        }
         running {
             $viewer configure -title "Services (Filter: Running)" \
                 -disablefilter 0 \
@@ -289,7 +284,7 @@ proc wits::app::service::listviewhandler {viewer act objkeys} {
 
         }
         default {
-            widget::propertyrecordslistview standardfilteractionhandler $viewer $act $objkeys
+            standardactionhandler $viewer $act $objkeys
         }
     }
 }

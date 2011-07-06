@@ -160,17 +160,12 @@ proc wits::app::driver::listviewhandler {viewer act objkeys} {
     variable _property_defs
 
     switch -exact -- $act {
-        view {
-            foreach objkey $objkeys {
-                viewdetails [namespace current] $objkey
-            }
-        }
         wintool {
             [get_shell] ShellExecute devmgmt.msc
 
         }
         default {
-            widget::propertyrecordslistview standardfilteractionhandler $viewer $act $objkeys
+            standardactionhandler $viewer $act $objkeys
         }
     }
 }

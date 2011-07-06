@@ -188,18 +188,7 @@ proc wits::app::module::viewlist {args} {
 
 # Takes the specified action on the passed drivers
 proc wits::app::module::listviewhandler {viewer act objkeys} {
-    variable _property_defs
-
-    switch -exact -- $act {
-        view {
-            foreach objkey $objkeys {
-                viewdetails [namespace current] $objkey
-            }
-        }
-        default {
-            widget::propertyrecordslistview standardfilteractionhandler $viewer $act $objkeys
-        }
-    }
+    standardactionhandler $viewer $act $objkeys
 }
 
 # Handler for popup menu

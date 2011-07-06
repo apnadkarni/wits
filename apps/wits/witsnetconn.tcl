@@ -218,13 +218,8 @@ proc wits::app::netconn::listviewhandler {viewer act objkeys} {
         shownetif {
             ::wits::app::netif::viewlist
         }
-        view {
-            foreach objkey $objkeys {
-                viewdetails [namespace current] $objkey
-            }
-        }
         default {
-            widget::propertyrecordslistview standardfilteractionhandler $viewer $act $objkeys
+            standardactionhandler $viewer $act $objkeys
         }
     }
 }

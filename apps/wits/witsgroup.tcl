@@ -229,13 +229,8 @@ proc wits::app::group::listviewhandler {viewer act objkeys} {
         wintool {
             [::wits::app::get_shell] ShellExecute lusrmgr.msc
         }
-        view {
-            foreach objkey $objkeys {
-                viewdetails [namespace current] $objkey
-            }
-        }
         default {
-            widget::propertyrecordslistview standardfilteractionhandler $viewer $act $objkeys
+            standardactionhandler $viewer $act $objkeys
         }
     }
     return

@@ -341,11 +341,6 @@ proc wits::app::user::listviewhandler {viewer act objkeys} {
             # TBD
             tk_messageBox -icon info -message "This function is not implemented"
         }
-        view {
-            foreach objkey $objkeys {
-                viewdetails [namespace current] $objkey
-            }
-        }
         enabledusers {
             $viewer configure \
                 -title "Users (Enabled)" \
@@ -354,7 +349,7 @@ proc wits::app::user::listviewhandler {viewer act objkeys} {
                              -properties {status {condition "!= Disabled"}}]
         }
         default {
-            widget::propertyrecordslistview standardfilteractionhandler $viewer $act $objkeys
+            standardactionhandler $viewer $act $objkeys
         }
     }
     return

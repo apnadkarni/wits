@@ -164,19 +164,7 @@ proc wits::app::local_share::viewlist {args} {
 
 
 proc wits::app::local_share::listviewhandler {viewer act objkeys} {
-    variable _property_defs
-
-    switch -exact -- $act {
-        view {
-            foreach objkey $objkeys {
-                viewdetails [namespace current] $objkey
-            }
-        }
-        default {
-            widget::propertyrecordslistview standardfilteractionhandler $viewer $act $objkeys
-        }
-    }
-    return
+    standardactionhandler $viewer $act $objkeys
 }
 
 # Handler for popup menu

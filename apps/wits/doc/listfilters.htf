@@ -24,7 +24,12 @@ the other hand will clear any defined filters.
 Define or modify a filter by clicking on the appropriate cell and typing
 a filter expression. By default, a help window containing
 a summary of filter expression syntax and operators is displayed as shown
-below.
+below. You can turn this off by deselecting the 
+<span class="witsmenu">Show filter help</span> checkbox on the help
+popup or through the
+<a href="eventmonitorpreferences.html">preferences</a> page. Even when
+turned off, the help popup can be accessed through the
+<span class="witsmenu">F1</span> key.
 </p>
 <p>
 <img src="listview3-filter-edit.png" alt="List view image"/>

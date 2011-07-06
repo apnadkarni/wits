@@ -266,16 +266,11 @@ proc wits::app::drive::listviewhandler {viewer act objkeys} {
     variable _property_defs
 
     switch -exact -- $act {
-        view {
-            foreach objkey $objkeys {
-                viewdetails [namespace current] $objkey
-            }
-        }
         wintool {
             [::wits::app::get_shell] ShellExecute diskmgmt.msc
         }
         default {
-            widget::propertyrecordslistview standardfilteractionhandler $viewer $act $objkeys
+            standardactionhandler $viewer $act $objkeys
         }
     }
 }

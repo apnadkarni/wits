@@ -1616,6 +1616,39 @@ proc wits::app::view_property_page {propname propdef val} {
     return
 }
 
+proc wits::app::standardactionhandler {viewer action args} {
+    # Currently only one standard action!
+    switch -exact -- $action {
+        view {
+            set objkeys [lindex $args 0]
+            if {[llength $objkeys] > 20} {
+                wits::widget::showerrordialog \
+                    "Too many items selected. Please select up to 20 items only." \
+                    -title "$::wits::app::name: Too many items selected."
+                return
+            }
+            if {[llength $objkeys] > 5} {
+                set response [::wits::widget::showconfirmdialog \
+                                  -title $::wits::app::dlg_title_confirm \
+                                  -message "This will open up [llength $objkeys] property pages. Are you sure you want to do so?" \
+                                  -modal local \
+                                  -icon warning \
+                                  -parent $viewer \
+                                  -type yesno
+                             ]
+                
+                if {$response ne "yes"} {
+                    return
+                }
+            }
+            foreach objkey $objkeys {
+                viewdetails [$viewer getobjtype] $objkey
+            }
+        }
+    }
+}
+
+
 # Returns a list view for the specified type
 proc wits::app::viewlist {objtype args} {
 
