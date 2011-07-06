@@ -19,6 +19,19 @@
   to hide and restore them as a group.
 </p>
 
+<h2>Running in elevated mode on Vista and Windows 7</h2>
+<p>
+The User Account Control feature in Vista and Windows 7 limits the 
+privileges that a process runs under even if the user signed in under
+an administrative account. Under these circumstances, WiTS will
+prompt asking whether you want to elevate privileges. If you decline,
+WiTS will continue to run but certain system information will not be
+accessible. If you accept, WiTS will restart itself with elevated
+privileges, resulting in Windows showing a UAC dialog either asking
+for an administrative password or just for your permission. You need
+to answer in the affirmative to the UAC prompt for WiTS to be
+fully functional.
+
 <div class="seealso">
   <h2>Related topics</h2>
   <ul>
