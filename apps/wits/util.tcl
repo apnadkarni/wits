@@ -1273,7 +1273,7 @@ namespace eval util::filter {
     # A filter is a dictionary with the following keys:
     #   id - unique id of the filter
     #   displayname - display name of the filter
-    #   subjecttype - the types of objects the filter can be applied to. If
+    #   objtype - the types of objects the filter can be applied to. If
     #      "*" filter can be applied to any type.
     #   properties - dictionary mapping property names to a script to call
     #      with value appended (key 'cmdprefix') and the text to display
@@ -1283,7 +1283,7 @@ namespace eval util::filter {
     proc create {args} {
         array set attrs [twapi::parseargs args {
             displayname.arg
-            {subjecttype.arg *}
+            {objtype.arg *}
             properties.arg
         } -nulldefault -maxleftover 0]
 
@@ -1293,7 +1293,7 @@ namespace eval util::filter {
 
     # Returns a filter that is a null filter (that is matches all)
     proc null {} {
-        return [dict create properties {} displayname All subjecttype *]
+        return [dict create properties {} displayname All objtype *]
     }
 
     # Returns true if the filter corresponds to "all" (i.e. null filter)
