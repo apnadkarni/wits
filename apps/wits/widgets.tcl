@@ -5593,9 +5593,11 @@ snit::widgetadaptor wits::widget::listframe {
                     <=\tis less than or equal to VALUE\n\
                     *\tmatches VALUE pattern (case-insensitive)\n\
                     ~\tmatches VALUE regexp (case-insensitive)\n\
+                    in\tis one of values in list VALUE (case-insensitive)\n\
                     \n Examples:\n\
-                    \t> 128KB (show rows if field is > 128KB)\n\
-                    \t* *Service* (show rows if field conains 'Service')" \
+                    \t> 128KB\n\
+                    \tin running stopped\n\
+                    \t* *Local*" \
                 -checkboxvar [mytypevar _show_filter_help] \
                 -checkboxlabel "Show filter help" \
                 -closehandler [namespace current]::_balloonburst

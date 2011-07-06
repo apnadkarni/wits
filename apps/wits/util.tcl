@@ -1323,7 +1323,7 @@ namespace eval util::filter {
                 }
 
 
-                if {![regexp {^(=|!=|>|>=|<|<=|\*|~)\s*([^\s].*)$} $condition _ oper arg]} {
+                if {![regexp {^(=|!=|>|>=|<|<=|\*|~|in\s)\s*([^\s].*)$} $condition _ oper arg]} {
                     set oper =
                     set arg $condition
                     dict set filter properties $propname condition "= $arg"
@@ -1349,6 +1349,11 @@ namespace eval util::filter {
                         # Validate the regexp
                         regexp -nocase $arg abc; # Throw error if invalid
                         set cmdprefix [list ::regexp -nocase $arg]
+                    }
+                    "in " {
+                        # Validate the list syntax
+                        lrange $arg 0 end
+                        set cmdprefix [list [namespace current]::op::in $arg]
                     }
                     default {
                         error "Invalid filter condition '$condition'"
@@ -1455,6 +1460,14 @@ namespace eval util::filter {
 
     namespace export set_attribute get_id get_display_name set_property save read description create match null null? parse
     namespace ensemble create
+
+    # Filter operations
+    namespace eval op {
+        # Is val in $l (case-insensitive)
+        proc in {l val} {
+            return [expr {[lsearch -exact -nocase $l $val] >= 0}]
+        }
+    }
 }
 
 
