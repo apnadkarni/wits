@@ -18,6 +18,9 @@ package require widget::dialog
 package require widget::scrolledwindow
 package require swaplist
 
+bind TButton <Key-Return> [bind TButton <Key-space>]
+
+
 namespace eval wits::widget {
     # Array indexed by WITS class, part
     # Contains corresponding Tile style
