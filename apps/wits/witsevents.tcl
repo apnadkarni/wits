@@ -6,6 +6,8 @@
 #
 # TBD - color code severity
 # TBD - event options - color coding, alerts - sound, popup
+# TBD - for some options like remote shares, should we just internally
+# poll for changes instead of using WMI ?
 
 #
 # Module for receiving system events and forwarding them to subscribers
@@ -340,7 +342,7 @@ snit::type ::wits::app::eventmanager {
         }
 
         $self reportevent \
-            "$action local share %<link {$name} [::wits::app::make_pageview_link ::wits::app::localshare $name]>." \
+            "$action local share %<link {$name} [::wits::app::make_pageview_link ::wits::app::local_share $name]>." \
             "$action local share $name." \
             [::twapi::large_system_time_to_secs [$event_obj TIME_CREATED]] \
             info \
@@ -370,7 +372,7 @@ snit::type ::wits::app::eventmanager {
             set user "User %<link {$user} [::wits::app::make_pageview_link ::wits::app::user $user]>"
         }
         $self reportevent \
-            "$user $action local share %<link {$name} [::wits::app::make_pageview_link ::wits::app::localshare $name]> from remote client $computer." \
+            "$user $action local share %<link {$name} [::wits::app::make_pageview_link ::wits::app::local_share $name]> from remote client $computer." \
             "$user $action local share $name from remote client $computer." \
             [::twapi::large_system_time_to_secs [$event_obj TIME_CREATED]] \
             info \
@@ -402,7 +404,7 @@ snit::type ::wits::app::eventmanager {
             set user "user $user"
         }
         $self reportevent \
-            "$action remote share %<link {$name} [::wits::app::make_pageview_link ::wits::app::remoteshare $name]> as $user." \
+            "$action remote share %<link {$name} [::wits::app::make_pageview_link ::wits::app::remote_share $name]> as $user." \
             "$action remote share $name as $user." \
             [::twapi::large_system_time_to_secs [$event_obj TIME_CREATED]] \
             info \
