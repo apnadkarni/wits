@@ -3,9 +3,9 @@
 <p>
   You can download WiTS from
   <a href="http://sourceforge.net/projects/windowstoolset/files/">
-    SourceForge download area</a>. The download package name is
-  <b>wits</b>. Note that there are separate installers for 32-bit
-  and 64-bit platforms. Ensure that you download the latest available version.
+    SourceForge download area</a>. 
+  Note that there are separate installers for 32-bit
+  and 64-bit platforms.
 </p>
 <p>
   WiTS is distributed as a self extracting setup program. To install
@@ -20,6 +20,7 @@
 <div class="seealso">
   <h2>Related topics</h2>
   <ul>
+    <li><a href="launch.html">Running WiTS</a></li>
     <li><a href="sourcecode.html">Source code</a></li>
     <li><a href="versionhistory.html">Version history</a></li>
   </ul>
