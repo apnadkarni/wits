@@ -529,11 +529,7 @@ proc wits::app::service::changestate {svclist newstate parentwin} {
             -parent $parentwin
     }
 
-    foreach view [::wits::widget::propertyrecordslistview info instances] {
-        if {[$view getobjtype] eq [namespace current]} {
-            $view schedule_display_update immediate -forcerefresh 1
-        }
-    }
+    wits::app::update_list_views [namespace current]
 }
 
 proc wits::app::service::getviewer {name} {

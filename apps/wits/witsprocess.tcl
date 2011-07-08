@@ -528,11 +528,7 @@ proc wits::app::process::terminate_processes {pids parentwin} {
             -parent $parentwin
     }
 
-    foreach view [::wits::widget::propertyrecordslistview info instances] {
-        if {[$view getobjtype] eq [namespace current]} {
-            $view schedule_display_update immediate -forcerefresh 1
-        }
-    }
+    wits::app::update_list_views [namespace current]
 }
 
 

@@ -504,5 +504,5 @@ proc wits::app::user::changeaccountstatus {sids newstate viewer} {
             -parent $viewer
     }
 
-    $viewer schedule_display_update immediate -forcerefresh 1
+    wits::app::update_list_views [namespace current]
 }

@@ -1580,7 +1580,7 @@ proc ::wits::app::show_data_collection_busybar {{title {Please wait}} {message {
                 -message $message]
     util::hide_window_and_redraw $bb "" "" -geometry center
     #util::center_window $bb
-    update;         # Needed to completely show busybar window
+    update;    # Needed to completely show busybar window, even event generate <Map> not enough for progress bar
     return $bb
 }
 
@@ -1715,6 +1715,14 @@ proc wits::app::viewlist {objtype args} {
 
     return $view
 
+}
+
+proc wits::app::update_list_views {objtype} {
+    foreach view [::wits::widget::propertyrecordslistview info instances] {
+        if {[$view getobjtype] eq $objtype} {
+            $view schedule_display_update immediate -forcerefresh 1
+        }
+    }
 }
 
 proc wits::app::name_to_sid {name} {
