@@ -1028,7 +1028,7 @@ oo::class create util::WmiInstanceTracker {
         array set options [twapi::parseargs args {
             clause.arg
             callback.arg
-        } -maxleftover 0]
+        } -maxleftover 0 -nulldefault]
 
         set wmi [twapi::_wmi]
 
@@ -1036,13 +1036,13 @@ oo::class create util::WmiInstanceTracker {
         set _sink [twapi::comobj wbemscripting.swbemsink]
 
         # Attach our handler to it
-        set _sink_id [$_sink -bind [list [self] _change_handler]]
+        set _sink_id [$_sink -bind [list [self] change_handler]]
 
         # Associate the sink with a query
-        if {$options(-clause) eq ""} {
+        if {$options(clause) eq ""} {
             $wmi ExecNotificationQueryAsync [$_sink -interface] "select * from $wmi_change_class within $poll_secs where TargetInstance ISA '$wmi_target_class'"
         } else {
-            $wmi ExecNotificationQueryAsync [$_sink -interface] "select * from $wmi_change_class within $poll_secs where TargetInstance ISA '$wmi_target_class' and $options(-clause)"
+            $wmi ExecNotificationQueryAsync [$_sink -interface] "select * from $wmi_change_class within $poll_secs where TargetInstance ISA '$wmi_target_class' and $options(clause)"
         }
         $wmi -destroy;                  # Don't need WMI toplevel obj anymore
     }
@@ -1058,7 +1058,7 @@ oo::class create util::WmiInstanceTracker {
         catch {$_sink -destroy}
     }
 
-    method _change_handler {wmi_event args} {
+    method change_handler {wmi_event args} {
         if {$wmi_event eq "OnObjectReady"} {
             # First arg is a IDispatch interface of the event object
             # Create a TWAPI COM object out of it
@@ -1067,8 +1067,8 @@ oo::class create util::WmiInstanceTracker {
             set event_obj [twapi::comobj_idispatch $ifc]
 
             ::twapi::try {
-                if {$options(-callback) ne ""} {
-                    uplevel #0 [linsert $options(-callback) end $event_obj]
+                if {$options(callback) ne ""} {
+                    uplevel #0 [linsert $options(callback) end $event_obj]
                 }
             } finally {
                 # Get rid of the event object

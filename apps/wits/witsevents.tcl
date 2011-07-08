@@ -275,7 +275,7 @@ snit::type ::wits::app::eventmanager {
         if {$poll == 0} {
             set poll 1
         }
-        set _service_tracker [util::wmi_instance_tracker %AUTO% __InstanceModificationEvent Win32_Service $poll -callback [mymethod _service_handler] -clause "(TargetInstance.State <> PreviousInstance.State)"]
+        set _service_tracker [util::WmiInstanceTracker new __InstanceModificationEvent Win32_Service $poll -callback [mymethod _service_handler] -clause "(TargetInstance.State <> PreviousInstance.State)"]
     }
 
     method _stop_service_tracking {} {
@@ -308,9 +308,9 @@ snit::type ::wits::app::eventmanager {
         if {$poll == 0} {
             set poll 1
         }
-        set _share_tracker [util::wmi_instance_tracker %AUTO% __InstanceOperationEvent Win32_Share $poll -callback [mymethod _share_handler]]
-        set _share_connection_tracker [util::wmi_instance_tracker %AUTO% __InstanceOperationEvent Win32_ServerConnection $poll -callback [mymethod _share_connection_handler]]
-        set _remote_share_tracker [util::wmi_instance_tracker %AUTO% __InstanceOperationEvent Win32_NetworkConnection $poll -callback [mymethod _remote_share_handler]]
+        set _share_tracker [util::WmiInstanceTracker new __InstanceOperationEvent Win32_Share $poll -callback [mymethod _share_handler]]
+        set _share_connection_tracker [util::WmiInstanceTracker new __InstanceOperationEvent Win32_ServerConnection $poll -callback [mymethod _share_connection_handler]]
+        set _remote_share_tracker [util::WmiInstanceTracker new __InstanceOperationEvent Win32_NetworkConnection $poll -callback [mymethod _remote_share_handler]]
     }
 
     method _stop_share_tracking {} {
