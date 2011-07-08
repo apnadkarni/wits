@@ -1,0 +1,66 @@
+Version 3.0 Beta of Windows Inspection Tool Set (WiTS)
+has been released.
+
+Project home page is at http://wits.magicsplat.com.
+Tcl source code is hosted at 
+http://sourceforge.net/projects/windowstoolset.
+Sample screen shot is at
+http://sourceforge.net/p/windowstoolset/screenshot/screenshot.png
+
+What is WiTS
+------------
+
+Windows Inspection Tool Set slices a running Windows system
+multiple ways, providing cross-linked, filtered views of
+Windows components.
+
+- Navigate easily across processes, network connections,
+  users, services and more, via richly cross-linked views
+
+- Focus on specific items through flexible filtering capabilities
+
+- Customize displayed information and layouts to focus on
+  areas of interest.
+
+- Track and monitor resources and system activity such as
+  process startup, network connections, logins and more with
+  optional recording to disk
+
+- Integrated view of Windows event logs with filtering/search
+
+
+WiTS started out as a demo for TWAPI (http://twapi.sf.net) 
+but is now an independent project on sourceforge.
+
+Changes since version 2.1
+-------------------------
+
+WiTS has been revived after a long hiatus. Changes since 2.1
+include
+
+New platforms:
+
+- support for Vista, Windows Server 2008 and 2008R2, and
+  Windows 7
+
+- 64-bit version (note the 32-bit version will refuse
+  installation on 64-bit version)
+
+New components:
+
+- integrated view of Windows event log
+
+- support for IPv6 connections and interfaces
+
+- loaded modules/DLLs
+
+User interface:
+
+- User defined filters for views
+
+- Enhanced display modes focusing on changing data
+
+- Many user interface improvements for more flexible layouts
+  and streamlined access to functions
+
+- Significantly smaller system load
