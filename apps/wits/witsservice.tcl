@@ -461,6 +461,7 @@ proc wits::app::service::changestate {svclist newstate parentwin} {
     set pb_maximum [expr {[llength $svcorder] * $max_tries}]
     set pbdlg [widget::progressdialog .%AUTO% -title "Service control" -maximum $pb_maximum]
     $pbdlg display
+    event generate $pbdlg <Map>
     update idletasks
     ::twapi::try {
         # We do it this way instead of a foreach because we want
