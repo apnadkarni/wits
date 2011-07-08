@@ -1163,7 +1163,7 @@ snit::type ::wits::app::eventmanager {
     # Called when no event categories are selected.
     typemethod _askforcategories {} {
         set response [::wits::widget::showconfirmdialog \
-                          -title $::wits::app::dlg_title_config_error \
+                          -title "Events not configured" \
                           -message "Do you want to set up categories of events to be monitored?" \
                           -detail "There are no event categories currently selected. The event monitor will therefore not monitor and show any events.\n\nSelect Yes to set up event categories to be monitored. If you select No, no event categories will be enabled and the event monitor will not log any events." \
                           -type yesno \
