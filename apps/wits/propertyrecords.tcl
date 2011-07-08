@@ -641,6 +641,7 @@ oo::class create util::PropertyRecordCollection {
     }
 
     method _refresh_cache {notify {force 0}} {
+
         # Updates the cache for the currently requested set of property names
         lassign [my _retrieve $_requested_propnames $force] status propnames records
         if {$status eq "updated" || $force} {

@@ -514,7 +514,7 @@ snit::type ::wits::app::eventmanager {
 
         set totalhandles 0
         set totalthreads 0
-        foreach {pid prec} [[wits::app::get_objects ::wits::app::process] get {ThreadCount HandleCount ProcessName} 0] {
+        foreach {pid prec} [[wits::app::get_objects ::wits::app::process] get {ThreadCount HandleCount ProcessName} $options(-monitorinterval)] {
             set threads [dict get $prec ThreadCount]
             incr totalthreads $threads
 
@@ -741,7 +741,7 @@ snit::type ::wits::app::eventmanager {
         set now [clock seconds]
 
         # Get current list of drivers
-        set snapshot [[::wits::app::get_objects ::wits::app::driver] get {-name}]
+        set snapshot [[::wits::app::get_objects ::wits::app::driver] get {-name} $options(-monitorinterval)]
         if {![info exists _drivers]} {
             set _drivers $snapshot
             return
@@ -783,7 +783,7 @@ snit::type ::wits::app::eventmanager {
 
         set now [clock seconds]
 
-        set snapshot [[::wits::app::get_objects ::wits::app::netconn] get {-pid -remoteaddr -remoteportname -localaddr -localport -remotehostname -remoteport -localportname} 0]
+        set snapshot [[::wits::app::get_objects ::wits::app::netconn] get {-pid -remoteaddr -remoteportname -localaddr -localport -remotehostname -remoteport -localportname} $options(-monitorinterval)]
         if {![info exists _connections]} {
             set _connections $snapshot
             return
@@ -965,15 +965,15 @@ snit::type ::wits::app::eventmanager {
 
         set now [clock seconds]
 
-        set snapshot [[wits::app::get_objects ::wits::app::logonsession] get {-logonid -sid -type}]
+        set snapshot [[wits::app::get_objects ::wits::app::logonsession] get {-logonid -sid -type} $options(-monitorinterval)]
 
         # If we have not been tracking so far, there is nothing to compare to
         if {![info exists _logonsessions]} {
-            set _logonsessions $snapshots
+            set _logonsessions $snapshot
             return
         }
 
-        foreach {existing new deleted} [::struct::set intersect3 [dict keys snapshot] [dict keys _logonsessions]] break
+        foreach {existing new deleted} [::struct::set intersect3 [dict keys $snapshot] [dict keys $_logonsessions]] break
 
         foreach sess $new {
             if {[dict exists $snapshot $sess -sid]} {
