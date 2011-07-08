@@ -18,7 +18,7 @@ snit::type ::wits::app::eventmanager {
 
     proc make_process_link_string {pid {name ""}} {
         if {$name ne ""} {
-            return "%<link {$name (PID $pid)} [::wits::app::make_pageview_link ::wits::app::process $pid]>"
+            return "%<link {$name} [::wits::app::make_pageview_link ::wits::app::process $pid]> (PID $pid)"
         } else {
             return "%<link {Process $pid} [::wits::app::make_pageview_link ::wits::app::process $pid]>"
         }
