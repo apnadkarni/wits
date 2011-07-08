@@ -5381,7 +5381,10 @@ snit::widgetadaptor wits::widget::listframe {
 
         # Call the selection callback
         if {$options(-selectcommand) ne ""} {
-            {*}$options(-selectcommand) $self
+            # Schedule it for later else double-clicks get lost because
+            # if the callback takes longer to run than the double-click
+            # time, it does not get treated as a double click
+            after 200 [linsert $options(-selectcommand) end $self]
         }
     }
 
