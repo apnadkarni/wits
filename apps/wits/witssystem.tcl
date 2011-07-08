@@ -572,7 +572,7 @@ proc wits::app::system::getviewer {cpu} {
 }
 
 # Handle button clicks from a page viewer
-proc wits::app::service::pageviewhandler {name button viewer} {
+proc wits::app::system::pageviewhandler {name button viewer} {
     switch -exact -- $button {
         home {
             ::wits::app::gohome
