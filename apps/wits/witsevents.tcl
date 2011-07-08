@@ -17,10 +17,11 @@ snit::type ::wits::app::eventmanager {
     ### Procs
 
     proc make_process_link_string {pid {name ""}} {
-        if {$name eq ""} {
-            set name "PID $pid"
+        if {$name ne ""} {
+            return "%<link {$name (PID $pid)} [::wits::app::make_pageview_link ::wits::app::process $pid]>"
+        } else {
+            return "%<link {Process $pid} [::wits::app::make_pageview_link ::wits::app::process $pid]>"
         }
-        return "%<link {$name} [::wits::app::make_pageview_link ::wits::app::process $pid]>"
     }
 
     ### Type variables
@@ -213,11 +214,20 @@ snit::type ::wits::app::eventmanager {
             set event_obj [twapi::comobj_idispatch $ifc]
 
             ::twapi::trap {
-                set pid  [$event_obj ProcessID]
-                set name [::wits::app::pid_to_name $pid]
+                set pid  [$event_obj -get ProcessID]
+                if {0} {
+                    Looking up cache here can be much slower as newly
+                    created proceses may not be in cache causing the name
+                    to be specifically looked up. Plus it may already exit
+                    in the case of short lived processes. So we use the
+                    COM method 
+                    set name [::wits::app::pid_to_name $pid]
+                } else {
+                    set name [$event_obj -get ProcessName]
+                }
                 switch -exact -- [$event_obj -with [list Path_] Class] {
                     "Win32_ProcessStartTrace" {
-                        set parent [$event_obj ParentProcessID]
+                        set parent [$event_obj -get ParentProcessID]
                         set parent_name [::wits::app::pid_to_name $parent]
                         set parent_link [::wits::app::make_pageview_link ::wits::app::process $parent]
                         set event_fmt \
@@ -1290,6 +1300,7 @@ snit::type ::wits::app::eventmanager {
                 catch {close $_logfd}
                 set _logfd ""
             }
+            ::wits::app::prefs unsubscribe [mymethod _prefs_handler]
             $_scheduler destroy
             $_eventmgr unregister_callback [mymethod _eventhandler]
             $_eventmgr destroy
