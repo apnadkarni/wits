@@ -1170,22 +1170,6 @@ proc ::wits::app::ip2hw {ip} {
 }
 
 #
-# Sid to name cache. Generally use this only for local processes etc
-# since else the cache may get too big
-proc ::wits::app::sid2name_lookup {sid} {
-    variable sidCache
-
-    if {![info exists sidCache($sid)]} {
-        if {$sid eq ""} {
-            set sidCache($sid) SYSTEM
-        } else {
-            set sidCache($sid) [twapi::map_account_to_name $sid]
-        }
-    }
-    return $sidCache($sid)
-}
-
-#
 # Get a shared handle to WMI
 proc ::wits::app::get_wmi {} {
     variable _handle_get_wmi
@@ -1746,7 +1730,12 @@ proc wits::app::get_sid_info {sid} {
 }
 
 proc wits::app::sid_to_name {sid} {
-    return [dict get [get_sid_info $sid] -name]
+    set info [get_sid_info $sid]
+    if {[dict exists $info -name]} {
+        return [dict get $info -name]
+    } else {
+        return $sid
+    }
 }
 
 # Callback when an address is resolved

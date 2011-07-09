@@ -1022,9 +1022,9 @@ snit::type ::wits::app::eventmanager {
         foreach sess $deleted {
             # Note we get the session info from the saved _logonsessions,
             # and not the new snapshot
-            if {[llength $_logonsessions($sess)]} {
-                set user [::wits::app::sid2name_lookup [::twapi::kl_get $_logonsessions($sess) -sid]]
-                set type [::twapi::kl_get $_logonsessions($sess) -type]
+            if {[llength [dict get $_logonsessions $sess]]} {
+                set user [::wits::app::sid_to_name [dict get $_logonsessions$sess -sid]]
+                set type [dict get $_logonsessions $sess -type]
                 $self reportevent \
                     "Closed $type logon session %<link {$sess} [::wits::app::make_pageview_link ::wits::app::logonsession $sess]> from user %<link {$user} [::wits::app::make_pageview_link ::wits::app::user $user]>." \
                     "Closed $type logon session $sess from user $user." \
