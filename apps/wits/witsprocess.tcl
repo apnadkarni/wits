@@ -399,7 +399,7 @@ proc wits::app::process::viewlist {args} {
                 -colattrs {-path {-squeeze 1} ProcessName {-squeeze 1} -description {-squeeze 1}} \
                 -nameproperty ProcessName \
                 -descproperty -description \
-                -detailfields {ProcessId -user -path -commandline CPUPercent ThreadCount HandleCount VmCounters.VirtualSize VmCounters.WorkingSetSize -elapsedtime} \
+                -detailfields {ProcessId -user -commandline CPUPercent ThreadCount HandleCount VmCounters.VirtualSize VmCounters.WorkingSetSize -elapsedtime} \
                 {*}$args
                ]
 }
