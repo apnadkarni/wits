@@ -5404,15 +5404,16 @@ snit::widgetadaptor wits::widget::listframe {
 
         $_treectrl item sort root $_sort_order -column $_sort_column -dictionary
 
-        # Make sure selection, if any is still visible
-        set selected [$_treectrl selection get]
-        if {[llength $selected]} {
-            $_treectrl see [lindex $selected 0]
-        } else {
-            if {0} {
-                Commented out because if widget is scrolled we do not want
-                to move displayed viewport to the top
+        if {0} {
+            Commented out because if widget is scrolled we do not want
+            to move displayed viewport to the top or selection
 
+            # Make sure selection, if any is still visible
+            set selected [$_treectrl selection get]
+            if {[llength $selected]} {
+                $_treectrl see [lindex $selected 0]
+            } else {
+                
                 # If list is not empty, show first entry. For some reason,
                 # the treectrl shows the 3rd entry (scrolled) when first
                 # displayed.
