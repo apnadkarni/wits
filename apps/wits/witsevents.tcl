@@ -981,12 +981,12 @@ snit::type ::wits::app::eventmanager {
             if {[dict exists $snapshot $sess -sid]} {
                 set user [::wits::app::sid_to_name [dict get $snapshot $sess -sid]]
             } else {
-                set user "<unknown>"
+                set user "(unknown)"
             }
             if {[dict exists $snapshot $sess -type]} {
                 set type [dict get $snapshot $sess -type]
             } else {
-                set type "<unknown>"
+                set type "(unknown)"
             }
             if {$user ne "" && $type ne ""} {
                 $self reportevent \
@@ -1023,7 +1023,11 @@ snit::type ::wits::app::eventmanager {
             # Note we get the session info from the saved _logonsessions,
             # and not the new snapshot
             if {[llength [dict get $_logonsessions $sess]]} {
-                set user [::wits::app::sid_to_name [dict get $_logonsessions $sess -sid]]
+                if {[dict exists $_logonsessions $sess -sid]} {
+                    set user [::wits::app::sid_to_name [dict get $_logonsessions $sess -sid]]
+                } else {
+                    set user (unknown)
+                }
                 set type [dict get $_logonsessions $sess -type]
                 $self reportevent \
                     "Closed $type logon session %<link {$sess} [::wits::app::make_pageview_link ::wits::app::logonsession $sess]> from user %<link {$user} [::wits::app::make_pageview_link ::wits::app::user $user]>." \
