@@ -3340,14 +3340,15 @@ snit::widget wits::widget::logwindow {
                 $cmd ne "link" || [llength $placeholder] != 3} {
                 error "Invalid placeholder format '$placeholder' in event string."
             }
+            set linktext [util::decode_url [lindex $placeholder 1]]
             # Create a link tag and bind it
             set tag "t[incr _tagId]"
             lappend taglist $tag
             $_textw tag config $tag -foreground blue -underline 1
             $_textw tag bind $tag <Enter> "$_textw config -cursor hand2"
             $_textw tag bind $tag <Leave> "$_textw config -cursor {}"
-            $_textw tag bind $tag <ButtonRelease-1> [mymethod _click [string map {% %%} [lindex $placeholder 1]] [string map {% %%} [lindex $placeholder 2]]]
-            lappend inslist [lindex $placeholder 1] [linsert $basetags 0 $tag]
+            $_textw tag bind $tag <ButtonRelease-1> [mymethod _click [string map {% %%} $linktext] [string map {% %%} [lindex $placeholder 2]]]
+            lappend inslist $linktext [linsert $basetags 0 $tag]
 
             # Set up loop to look at remaining string
             set event $after

@@ -20,7 +20,7 @@ snit::type ::wits::app::eventmanager {
 
     proc make_process_link_string {pid {name ""}} {
         if {$name ne ""} {
-            return "%<link {$name} [::wits::app::make_pageview_link ::wits::app::process $pid]> (PID $pid)"
+            return "%<link {[util::encode_url $name]} [::wits::app::make_pageview_link ::wits::app::process $pid]> (PID $pid)"
         } else {
             return "%<link {Process $pid} [::wits::app::make_pageview_link ::wits::app::process $pid]>"
         }
@@ -293,7 +293,7 @@ snit::type ::wits::app::eventmanager {
         set state [$target -get State]
         set time [::twapi::large_system_time_to_secs [$event_obj TIME_CREATED]]
         $self reportevent \
-            "Service %<link {$name} [::wits::app::make_pageview_link ::wits::app::service $name]> entered state '[$target -get State]'." \
+            "Service %<link {[util::encode_url $name]} [::wits::app::make_pageview_link ::wits::app::service $name]> entered state '[$target -get State]'." \
             "Service $name entered state '[$target -get State]'." \
             $time \
             info \
@@ -342,7 +342,7 @@ snit::type ::wits::app::eventmanager {
         }
 
         $self reportevent \
-            "$action local share %<link {$name} [::wits::app::make_pageview_link ::wits::app::local_share $name]>." \
+            "$action local share %<link {[util::encode_url $name]} [::wits::app::make_pageview_link ::wits::app::local_share $name]>." \
             "$action local share $name." \
             [::twapi::large_system_time_to_secs [$event_obj TIME_CREATED]] \
             info \
@@ -369,10 +369,10 @@ snit::type ::wits::app::eventmanager {
         if {$user eq ""} {
             set user "Anonymous user"
         } else {
-            set user "User %<link {$user} [::wits::app::make_pageview_link ::wits::app::user $user]>"
+            set user "User %<link {[util::encode_url $user]} [::wits::app::make_pageview_link ::wits::app::user $user]>"
         }
         $self reportevent \
-            "$user $action local share %<link {$name} [::wits::app::make_pageview_link ::wits::app::local_share $name]> from remote client $computer." \
+            "$user $action local share %<link {[util::encode_url $name]} [::wits::app::make_pageview_link ::wits::app::local_share $name]> from remote client $computer." \
             "$user $action local share $name from remote client $computer." \
             [::twapi::large_system_time_to_secs [$event_obj TIME_CREATED]] \
             info \
@@ -404,7 +404,7 @@ snit::type ::wits::app::eventmanager {
             set user "user $user"
         }
         $self reportevent \
-            "$action remote share %<link {$name} [::wits::app::make_pageview_link ::wits::app::remote_share $name]> as $user." \
+            "$action remote share %<link {[util::encode_url $name]} [::wits::app::make_pageview_link ::wits::app::remote_share $name]> as $user." \
             "$action remote share $name as $user." \
             [::twapi::large_system_time_to_secs [$event_obj TIME_CREATED]] \
             info \
@@ -437,7 +437,7 @@ snit::type ::wits::app::eventmanager {
         foreach drive $unchanged {
             set link [::wits::app::make_pageview_link ::wits::app::drive $drive]
             $self reportevent_nodups \
-                "Drive %<link {$drive} $link> is more than $options(-useddiskpercent)% full." \
+                "Drive %<link {[util::encode_url $drive]} $link> is more than $options(-useddiskpercent)% full." \
                 "Drive $drive is more than $options(-useddiskpercent)% full." \
                 [clock seconds] \
                 warning \
@@ -447,7 +447,7 @@ snit::type ::wits::app::eventmanager {
         foreach drive $new {
             set link [::wits::app::make_pageview_link ::wits::app::drive $drive]
             $self reportevent \
-                "Drive %<link {$drive} $link> used space has crossed threshold of $options(-useddiskpercent)%." \
+                "Drive %<link {[util::encode_url $drive]} $link> used space has crossed threshold of $options(-useddiskpercent)%." \
                 "Drive $drive used space has crossed threshold of $options(-useddiskpercent)%." \
                 [clock seconds] \
                 warning \
@@ -457,7 +457,7 @@ snit::type ::wits::app::eventmanager {
         foreach drive $removed {
             set link [::wits::app::make_pageview_link ::wits::app::drive $drive]
             $self reportevent \
-                "Drive %<link {$drive} $link> used space has dropped back below threshold of $options(-useddiskpercent)%." \
+                "Drive %<link {[util::encode_url $drive]} $link> used space has dropped back below threshold of $options(-useddiskpercent)%." \
                 "Drive $drive used space has dropped back below threshold of $options(-useddiskpercent)%." \
                 [clock seconds] \
                 info \
@@ -758,7 +758,7 @@ snit::type ::wits::app::eventmanager {
         foreach drv $new {
             set dname [dict get $snapshot $drv -name]
             $self reportevent \
-                "Loaded driver %<link {$dname} [::wits::app::make_pageview_link ::wits::app::driver $dname]>." \
+                "Loaded driver %<link {[util::encode_url $dname]} [::wits::app::make_pageview_link ::wits::app::driver $dname]>." \
                 "Loaded driver $dname." \
                 $now \
                 info \
@@ -880,10 +880,10 @@ snit::type ::wits::app::eventmanager {
 
 
                 if {[string match -nocase listen* $aconn(-state)]} {
-                    set connstr "Process $pidstr listening for connections on %<link {$portstr} [::wits::app::make_pageview_link ::wits::app::netconn $conn]>."
+                    set connstr "Process $pidstr listening for connections on %<link {[util::encode_url $portstr]} [::wits::app::make_pageview_link ::wits::app::netconn $conn]>."
                     set connstr_txt "Process $pidstr_txt listening for connections on $portstr."
                 } else {
-                    set connstr "New %<link {$portstr} [::wits::app::make_pageview_link ::wits::app::netconn $conn]> connection${localstr}${remotestr}."
+                    set connstr "New %<link {[util::encode_url $portstr]} [::wits::app::make_pageview_link ::wits::app::netconn $conn]> connection${localstr}${remotestr}."
                     set connstr_txt "New $portstr connection${localstr_txt}${remotestr}."
                 }
             } else {
@@ -893,7 +893,7 @@ snit::type ::wits::app::eventmanager {
 
                 set portstr "$aconn(-protocol)/$aconn(-localportname)"
 
-                set connstr "New %<link {$portstr} [::wits::app::make_pageview_link ::wits::app::netconn $conn]> socket created"
+                set connstr "New %<link {[util::encode_url $portstr]} [::wits::app::make_pageview_link ::wits::app::netconn $conn]> socket created"
                 set connstr_txt "New $portstr socket created"
                 if {$pidstr ne ""} {
                     append connstr " by process $pidstr"
@@ -924,14 +924,14 @@ snit::type ::wits::app::eventmanager {
                 [info exists aconn(-pidname)]} {
                 if {$aconn(-protocol) in {TCP TCP6}} {
                     $self reportevent \
-                        "Closed $aconn(-protocol) connection for [make_process_link_string $aconn(-pid) $aconn(-pidname)]: %<link {$conn_string} [::wits::app::make_pageview_link ::wits::app::netconn $conn]>." \
+                        "Closed $aconn(-protocol) connection for [make_process_link_string $aconn(-pid) $aconn(-pidname)]: %<link {[util::encode_url $conn_string]} [::wits::app::make_pageview_link ::wits::app::netconn $conn]>." \
                         "Closed $aconn(-protocol) connection for $aconn(-pidname) (PID $aconn(-pid)): $conn_string." \
                         $now \
                         info \
                         network
                 } else {
                     $self reportevent \
-                        "Closed $aconn(-protocol) socket created by [make_process_link_string $aconn(-pid) $aconn(-pidname)]: %<link {$conn_string} [::wits::app::make_pageview_link ::wits::app::netconn $conn]>." \
+                        "Closed $aconn(-protocol) socket created by [make_process_link_string $aconn(-pid) $aconn(-pidname)]: %<link {[util::encode_url $conn_string]} [::wits::app::make_pageview_link ::wits::app::netconn $conn]>." \
                         "Closed $aconn(-protocol) socket created by $aconn(-pidname) (PID $aconn(-pid)): $conn_string." \
                         $now \
                         info \
@@ -941,14 +941,14 @@ snit::type ::wits::app::eventmanager {
                 # Log without PID
                 if {$aconn(-protocol) in {TCP TCP6}} {
                     $self reportevent \
-                        "Closed $aconn(-protocol) connection: %<link {$conn_string} [::wits::app::make_pageview_link ::wits::app::netconn $conn]>." \
+                        "Closed $aconn(-protocol) connection: %<link {[util::encode_url $conn_string]} [::wits::app::make_pageview_link ::wits::app::netconn $conn]>." \
                         "Closed $aconn(-protocol) connection: $conn_string." \
                         $now \
                         info \
                         network
                 } else {
                     $self reportevent \
-                        "Closed $aconn(-protocol) socket: %<link {$conn_string} [::wits::app::make_pageview_link ::wits::app::netconn $conn]." \
+                        "Closed $aconn(-protocol) socket: %<link {[util::encode_url $conn_string]} [::wits::app::make_pageview_link ::wits::app::netconn $conn]." \
                         "Closed $aconn(-protocol) socket: $conn_string." \
                         $now \
                         info \
@@ -990,28 +990,28 @@ snit::type ::wits::app::eventmanager {
             }
             if {$user ne "" && $type ne ""} {
                 $self reportevent \
-                    "New $type logon session %<link {$sess} [::wits::app::make_pageview_link ::wits::app::logonsession $sess]> from user %<link {$user} [::wits::app::make_pageview_link ::wits::app::user $user]>." \
+                    "New $type logon session %<link {[util::encode_url $sess]} [::wits::app::make_pageview_link ::wits::app::logonsession $sess]> from user %<link {[util::encode_url $user]} [::wits::app::make_pageview_link ::wits::app::user $user]>." \
                     "New $type logon session $sess from user $user." \
                     $now \
                     info \
                     logon
             } elseif {$user ne ""} {
                 $self reportevent \
-                    "New logon session %<link {$sess} [::wits::app::make_pageview_link ::wits::app::logonsession $sess]> from user %<link {$user} [::wits::app::make_pageview_link ::wits::app::user $user]>." \
+                    "New logon session %<link {[util::encode_url $sess]} [::wits::app::make_pageview_link ::wits::app::logonsession $sess]> from user %<link {[util::encode_url $user]} [::wits::app::make_pageview_link ::wits::app::user $user]>." \
                     "New logon session $sess from user $user." \
                     $now \
                     info \
                     logon
             } elseif {$type ne ""} {
                 $self reportevent \
-                    "New $type logon session %<link {$sess} [::wits::app::make_pageview_link ::wits::app::logonsession $sess]>." \
+                    "New $type logon session %<link {[util::encode_url $sess]} [::wits::app::make_pageview_link ::wits::app::logonsession $sess]>." \
                     "New $type logon session $sess." \
                     $now \
                     info \
                     logon
             } else {
                 $self reportevent \
-                    "New logon session %<link {$sess} [::wits::app::make_pageview_link ::wits::app::logonsession $sess]>." \
+                    "New logon session %<link {[util::encode_url $sess]} [::wits::app::make_pageview_link ::wits::app::logonsession $sess]>." \
                     "New logon session $sess." \
                     $now \
                     info \
@@ -1030,14 +1030,14 @@ snit::type ::wits::app::eventmanager {
                 }
                 set type [dict get $_logonsessions $sess -type]
                 $self reportevent \
-                    "Closed $type logon session %<link {$sess} [::wits::app::make_pageview_link ::wits::app::logonsession $sess]> from user %<link {$user} [::wits::app::make_pageview_link ::wits::app::user $user]>." \
+                    "Closed $type logon session %<link {[util::encode_url $sess]} [::wits::app::make_pageview_link ::wits::app::logonsession $sess]> from user %<link {[util::encode_url $user]} [::wits::app::make_pageview_link ::wits::app::user $user]>." \
                     "Closed $type logon session $sess from user $user." \
                     $now \
                     info \
                     logon
             } else {
                 $self reportevent \
-                    "Closed logon session %<link {$sess} [::wits::app::make_pageview_link ::wits::app::logonsession $sess]>." \
+                    "Closed logon session %<link {[util::encode_url $sess]} [::wits::app::make_pageview_link ::wits::app::logonsession $sess]>." \
                     "Closed logon session $sess." \
                     $now \
                     info \
