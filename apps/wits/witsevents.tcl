@@ -979,7 +979,8 @@ snit::type ::wits::app::eventmanager {
 
         foreach sess $new {
             if {[dict exists $snapshot $sess -sid]} {
-                set user [::wits::app::sid_to_name [dict get $snapshot $sess -sid]]
+                set user [dict get $snapshot $sess -sid]
+                catch {set user [::wits::app::sid_to_name [dict get $snapshot $sess -sid]]}
             } else {
                 set user "(unknown)"
             }

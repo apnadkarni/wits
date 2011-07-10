@@ -1753,6 +1753,8 @@ proc wits::app::address_resolve_callback {addr status data} {
 
 # Maps ip addr to name or queues it up for later mapping
 proc wits::app::map_addr_to_name {addr} {
+    # TBD - clean up cache from tiem to time
+
     # Map ports and addresses to names if possible. We do not want to
     # block here when resolving network addresses so we will only
     # lookup the cache and queue up addresses to be resolved later

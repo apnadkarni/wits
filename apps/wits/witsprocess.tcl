@@ -252,8 +252,29 @@ oo::class create wits::app::process::Objects {
             set want_desc 0
         }
 
+        if {"-groups" in $propnames} {
+            # -groups can cause error if domain unreachable so
+            # use -groupattrs. Note we do this AFTER setting
+            # retrieved properties above
+            set propnames [lsearch -inline -exact -all -not $propnames -groups]
+            lappend propnames -groupattrs
+            set want_groups 1
+        } else {
+            set want_groups 0
+        }
+
         if {[llength $propnames]} {
             set rec [dict merge $rec[set rec {}] [twapi::get_process_info $id {*}$propnames]]
+        }
+
+        if {$want_groups} {
+            dict set rec -groups {}
+            foreach {sid attrs} [dict get $rec -groupattrs] {
+                set gname $sid
+                catch {set gname [wits::app::sid_to_name $sid]}
+                dict lappend rec -groups $gname
+            }
+            dict unset rec -groupattrs
         }
 
         if {$want_desc} {
@@ -356,12 +377,34 @@ ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount 
 
             lappend retrieved_properties {*}$opts
 
+            if {"-groups" in $opts} {
+                # -groups can cause error if domain unreachable so
+                # use -groupattrs. Note we do this AFTER setting
+                # retrieved properties above
+                set opts [lsearch -inline -exact -all -not $opts -groups]
+                lappend opts -groupattrs
+                set want_groups 1
+            } else {
+                set want_groups 0
+            }
+
+            set optvals [twapi::get_multiple_process_info {*}$opts]
+
             # Do not just merge, we want a consistent view so only
             # pick up entries that existed in above call
-            set optvals [twapi::get_multiple_process_info {*}$opts]
             dict for {pid rec} $new {
                 if {$want_desc} {
                     dict set rec -description [wits::app::process_path_to_version_description [dict get $optvals $pid -path]]
+                }
+
+                if {$want_groups} {
+                    dict set optvals $pid -groups {}
+                    foreach {sid attrs} [dict get $optvals $pid -groupattrs] {
+                        set gname $sid
+                        catch {set gname [wits::app::sid_to_name $sid]}
+                        dict lappend optvals $pid -groups $gname
+                    }
+                    dict unset optvals $pid -groupattrs
                 }
                 if {[dict exists $optvals $pid]} {
                     dict set new $pid [dict merge $rec [dict get $optvals $pid]]

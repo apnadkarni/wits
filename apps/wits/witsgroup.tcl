@@ -244,7 +244,8 @@ proc wits::app::group::popuphandler {viewer tok objkeys} {
 proc wits::app::group::getviewer {sid} {
     variable _page_view_layout
     if {[twapi::IsValidSid $sid]} {
-        set name [sid_to_name $sid]
+        set name $sid
+        catch {set name [sid_to_name $sid]}
     } else {
         set name $sid
         set sid [name_to_sid $name]
