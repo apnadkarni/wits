@@ -1025,7 +1025,8 @@ snit::type ::wits::app::eventmanager {
             # and not the new snapshot
             if {[llength [dict get $_logonsessions $sess]]} {
                 if {[dict exists $_logonsessions $sess -sid]} {
-                    set user [::wits::app::sid_to_name [dict get $_logonsessions $sess -sid]]
+                    set user [dict get $_logonsessions $sess -sid]
+                    catch {set user [::wits::app::sid_to_name $user]}
                 } else {
                     set user (unknown)
                 }
