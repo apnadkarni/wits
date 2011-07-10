@@ -1,0 +1,26 @@
+[patterns]
+**.hg = native
+**.hgignore = native
+**.hgeol = native
+
+**.cmd = native
+**.bat = native
+**.tcl = native
+**.txt = native
+**.c = native
+**.h = native
+**.cpp = native
+**.html = native
+**.htf = native
+makefile = native
+
+**.lzma = BIN
+**.zip = BIN
+**.kit = BIN
+**.exe = BIN
+**.dll = BIN
+**.msi = BIN
+**.png = BIN
+**.ico = BIN
+
+**.vcproj = CRLF
