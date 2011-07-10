@@ -78,7 +78,7 @@ namespace eval wits::app::process {
                     {label KernelTime}
                     {label UserTime}
                 }
-                {labelframe {title "I/O" cols 1}} {
+                {labelframe {title "I/O" cols 2}} {
                     {label IoCounters.ReadOperationCount}
                     {label IoCounters.ReadTransferCount}
                     {label IoCounters.WriteOperationCount}
@@ -139,10 +139,10 @@ proc wits::app::process::get_property_defs {} {
         HandleCount "Handles count" "Handles" "" int 1
         IoCounters.OtherOperationCount "Control operations" "Control ops" "" int 1
         IoCounters.OtherTransferCount "Control bytes" "Control bytes" "" int 1
-        IoCounters.ReadOperationCount "Data read operations" "Data reads" "" int 1
-        IoCounters.ReadTransferCount  "Data read bytes" "Read bytes" "" int 1
-        IoCounters.WriteOperationCount "Data write operations" "Data writes" "" int 1
-        IoCounters.WriteTransferCount "Data write bytes" "Write bytes" "" int 1
+        IoCounters.ReadOperationCount "Read operations" "Reads" "" int 1
+        IoCounters.ReadTransferCount  "Read bytes" "Read bytes" "" int 1
+        IoCounters.WriteOperationCount "Write operations" "Writes" "" int 1
+        IoCounters.WriteTransferCount "Write bytes" "Write bytes" "" int 1
         KernelTime "Kernel time" "Kernel time" "" ns100 1
         ProcessId         "Process ID" "PID" ::wits::app::process int 1
         SessionId "Terminal server session" "TS session" "" int 1
