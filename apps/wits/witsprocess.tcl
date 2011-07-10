@@ -27,25 +27,21 @@ namespace eval wits::app::process {
         # TBD - layout -tids, -toplevels
         # TBD - Add CPU %
 
-        set accpage {
+        set privpage {
             {frame {cols 2}} {
                 {label -elevation}
                 {label -integritylabel}
                 {label -virtualized}
             }
-            {labelframe {title Accounts}} {
-                {label -primarygroup}
-                {listbox -groups}
-            }
-            {labelframe {title Privileges}} {
-                {listbox -enabledprivileges}
-                {listbox -disabledprivileges}
+            frame {
+                {listbox -enabledprivileges {height 8}}
+                {listbox -disabledprivileges {height 8}}
             }
         }
 
         if {![twapi::min_os_version 6]} {
             # These fields do not exist before Vista
-            set accpage [lrange  $accpage 2 end]
+            set privpage [lrange  $privpage 2 end]
         }
 
         set nbpages [list {
@@ -65,7 +61,15 @@ namespace eval wits::app::process {
                     {label -elapsedtime}
                 }
             }
-        } [list "Groups and Privileges" $accpage] {
+        } {
+            "Groups" {
+                frame {
+                    {label -primarygroup}
+                    {listbox -groups {height 6}}
+                    {listbox -restrictedgroups {height 6}}
+                }
+            }
+        } [list "Privileges" $privpage] {
             "Performance" {
                 {labelframe {title "CPU" cols 3}} {
                     {label CPUPercent}
@@ -158,6 +162,7 @@ proc wits::app::process::get_property_defs {} {
         VmCounters.PeakWorkingSetSize "Peak working set" "Peak working set" "" mb 1
         -elapsedtime "Elapsed time" "Elapsed time" "" interval 0
         -groups "Group membership" "Groups" ::wits::app::group listtext 0
+        -restrictedgroups "Restricted groups" "Restricted groups" ::wits::app::group listtext 0
         -primarygroup "Primary Group" "Group" ::wits::app::group text 0
         -enabledprivileges "Enabled Privileges" "Enabled privs" "" listtext 0
         -disabledprivileges "Disabled Privileges" "Disabled privs" "" listtext 0
@@ -252,15 +257,25 @@ oo::class create wits::app::process::Objects {
             set want_desc 0
         }
 
+        # -groups can cause error if domain unreachable so
+        # use -groupattrs.
         if {"-groups" in $propnames} {
             # -groups can cause error if domain unreachable so
-            # use -groupattrs. Note we do this AFTER setting
-            # retrieved properties above
+            # use -groupattrs.
             set propnames [lsearch -inline -exact -all -not $propnames -groups]
             lappend propnames -groupattrs
             set want_groups 1
         } else {
             set want_groups 0
+        }
+
+        # Ditto for -restrictedgroups
+        if {"-restrictedgroups" in $propnames} {
+            set propnames [lsearch -inline -exact -all -not $propnames -restrictedgroups]
+            lappend propnames -restrictedgroupattrs
+            set want_restrictedgroups 1
+        } else {
+            set want_restrictedgroups 0
         }
 
         if {[llength $propnames]} {
@@ -275,6 +290,15 @@ oo::class create wits::app::process::Objects {
                 dict lappend rec -groups $gname
             }
             dict unset rec -groupattrs
+        }
+        if {$want_restrictedgroups} {
+            dict set rec -restrictedgroups {}
+            foreach {sid attrs} [dict get $rec -restrictedgroupattrs] {
+                set gname $sid
+                catch {set gname [wits::app::sid_to_name $sid]}
+                dict lappend rec -restrictedgroups $gname
+            }
+            dict unset rec -restrictedgroupattrs
         }
 
         if {$want_desc} {
@@ -388,6 +412,16 @@ ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount 
                 set want_groups 0
             }
 
+            # Ditto for -restrictedgroups
+            if {"-restrictedgroups" in $opts} {
+                set opts [lsearch -inline -exact -all -not $opts -restrictedgroups]
+                lappend opts -restrictedgroupattrs
+                set want_restrictedgroups 1
+            } else {
+                set want_restrictedgroups 0
+            }
+
+
             set optvals [twapi::get_multiple_process_info {*}$opts]
 
             # Do not just merge, we want a consistent view so only
@@ -406,6 +440,16 @@ ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount 
                     }
                     dict unset optvals $pid -groupattrs
                 }
+                if {$want_restrictedgroups} {
+                    dict set optvals $pid -restrictedgroups {}
+                    foreach {sid attrs} [dict get $optvals $pid -restrictedgroupattrs] {
+                        set gname $sid
+                        catch {set gname [wits::app::sid_to_name $sid]}
+                        dict lappend optvals $pid -restrictedgroups $gname
+                    }
+                    dict unset optvals $pid -restrictedgroupattrs
+                }
+
                 if {[dict exists $optvals $pid]} {
                     dict set new $pid [dict merge $rec [dict get $optvals $pid]]
                 } else {
