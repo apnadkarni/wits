@@ -64,7 +64,7 @@ namespace eval wits::app::process {
         } {
             "Groups" {
                 frame {
-                    {label -primarygroup}
+                    {label -primarygroupsid}
                     {listbox -groups {height 6}}
                     {listbox -restrictedgroups {height 6}}
                 }
@@ -160,7 +160,7 @@ proc wits::app::process::get_property_defs {} {
         -elapsedtime "Elapsed time" "Elapsed time" "" interval 0
         -groups "Groups" "Groups" ::wits::app::group listtext 0
         -restrictedgroups "Restricted groups" "Restricted groups" ::wits::app::group listtext 0
-        -primarygroup "Primary Group" "Group" ::wits::app::group text 0
+        -primarygroupsid "Primary Group" "Group" ::wits::app::group sid 0
         -enabledprivileges "Enabled Privileges" "Enabled privs" "" listtext 0
         -disabledprivileges "Disabled Privileges" "Disabled privs" "" listtext 0
         -path "Executable path" "Path" ::wits::app::wfile path 0
