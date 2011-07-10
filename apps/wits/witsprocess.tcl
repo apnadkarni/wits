@@ -71,12 +71,10 @@ namespace eval wits::app::process {
             }
         } [list "Privileges" $privpage] {
             "Performance" {
-                {labelframe {title "CPU" cols 3}} {
+                {labelframe {title "Utilization" cols 3}} {
                     {label CPUPercent}
                     {label KernelPercent}
                     {label UserPercent}
-                    {label KernelTime}
-                    {label UserTime}
                 }
                 {labelframe {title "I/O" cols 2}} {
                     {label IoCounters.ReadOperationCount}
@@ -86,9 +84,6 @@ namespace eval wits::app::process {
                     {label IoCounters.OtherOperationCount}
                     {label IoCounters.OtherTransferCount}
                 }
-            }
-        } {
-            "System Resources" {
                 {labelframe {title Memory cols 2}} {
                     {label VmCounters.PagefileUsage}
                     {label VmCounters.PeakPagefileUsage}
@@ -102,7 +97,9 @@ namespace eval wits::app::process {
                     {label VmCounters.PeakWorkingSetSize}
                     {label VmCounters.PageFaultCount}
                 }
-                {labelframe {title "Resources" cols 2}} {
+                {frame {cols 2}} {
+                    {label KernelTime}
+                    {label UserTime}
                     {label ThreadCount}
                     {label HandleCount}
                 }
@@ -136,7 +133,7 @@ proc wits::app::process::get_property_defs {} {
     foreach {propname desc shortdesc objtype format useintable} {
         BasePriority "Base priority" "Base priority" "" int 1
         CreateTime "Start time" "Start time" "" largetime 1
-        HandleCount "Handles count" "Handles" "" int 1
+        HandleCount "Handle count" "Handles" "" int 1
         IoCounters.OtherOperationCount "Control operations" "Control ops" "" int 1
         IoCounters.OtherTransferCount "Control bytes" "Control bytes" "" int 1
         IoCounters.ReadOperationCount "Read operations" "Reads" "" int 1
@@ -161,7 +158,7 @@ proc wits::app::process::get_property_defs {} {
         VmCounters.WorkingSetSize "Working set" "Working set" "" mb 1
         VmCounters.PeakWorkingSetSize "Peak working set" "Peak working set" "" mb 1
         -elapsedtime "Elapsed time" "Elapsed time" "" interval 0
-        -groups "Group membership" "Groups" ::wits::app::group listtext 0
+        -groups "Groups" "Groups" ::wits::app::group listtext 0
         -restrictedgroups "Restricted groups" "Restricted groups" ::wits::app::group listtext 0
         -primarygroup "Primary Group" "Group" ::wits::app::group text 0
         -enabledprivileges "Enabled Privileges" "Enabled privs" "" listtext 0
