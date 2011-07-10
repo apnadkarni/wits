@@ -4637,10 +4637,11 @@ snit::widget wits::widget::unmanagedtoplevel  {
                 }
                 set vframe [::ttk::frame $frame.vf-[incr _wctr] -borderwidth 1 -relief flat]
                 set scroller [::widget::scrolledwindow $vframe.sc -relief flat -borderwidth 0]
+                set height [twapi::kl_get $attrs height 4]
                 set vwin [actionframe $scroller.v \
                               -command [mymethod _listboxlink $propname] \
                               -underlinelinks 1 \
-                              -height 4 -items $items \
+                              -height $height -items $items \
                               -bg [get_theme_setting tab frame normal bg] \
                               -resize false -spacing1 0]
 
@@ -4650,11 +4651,12 @@ snit::widget wits::widget::unmanagedtoplevel  {
             }
             textbox {
                 # Set the width because else dialog defaults to 80 chars wide
+                set height [twapi::kl_get $attrs height 4]
                 set vwin [textlabel $frame.v-[incr _wctr] \
                               -text $propval \
                               -bg [get_theme_setting tab frame normal bg] \
                               -width 30 \
-                              -height 3 \
+                              -height $height \
                               {*}$attrs \
                              ]
                 set retw [list $lwin $vwin new]
