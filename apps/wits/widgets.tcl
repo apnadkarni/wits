@@ -1637,6 +1637,10 @@ snit::widgetadaptor wits::widget::actionframe {
     # label is clicked. Icon maybe empty
     option -items -configuremethod _setopt
 
+    # If true, links are always underlined, else only underlined if
+    # mouse is over them
+    option -underlinelinks -default false -readonly true
+
     delegate option * to hull
 
     ### Variables
@@ -1697,8 +1701,9 @@ snit::widgetadaptor wits::widget::actionframe {
             $self _focuschange 1
             return
         }
-        # Turn of current active indicator
-        $win tag configure $_focus_token -underline 0
+
+        # Turn of current active indicator back to default state
+        $win tag configure $_focus_token -underline $options(-underlinelinks)
 
         set pos [lsearch -exact $_action_tokens $_focus_token]
         incr pos $direction
@@ -1720,7 +1725,7 @@ snit::widgetadaptor wits::widget::actionframe {
             }
         } else {
             if {$_focus_token ne ""} {
-                $win tag configure $_focus_token -underline 0
+                $win tag configure $_focus_token -underline $options(-underlinelinks)
             }
             set _focus_token ""
         }
@@ -1807,11 +1812,6 @@ snit::widgetadaptor wits::widget::actionframe {
         $hull delete 0.0 end
         eval [list $hull tag delete] [$hull tag names]
 
-        # Make up an appropriate underlined font. The font actual command
-        # is to convert various font specs into canonical format
-        #set font [font actual [$win cget -font]]
-        #set font [twapi::kl_set $font -underline 1]
-
         # List of current tokens
         set _action_tokens {}
         set _focus_token ""
@@ -1835,7 +1835,7 @@ snit::widgetadaptor wits::widget::actionframe {
                     $hull insert end $label [list $tok]
                 }
 
-                $hull tag configure $tok -foreground [get_theme_setting actionframe link normal fg]
+                $hull tag configure $tok -underline $options(-underlinelinks) -foreground [get_theme_setting actionframe link normal fg]
 
                 # Bind the tag to invoke the command
                 $win tag bind $tok <ButtonRelease-1> [mymethod _docommand $tok]
@@ -1846,7 +1846,7 @@ snit::widgetadaptor wits::widget::actionframe {
                 # because otherwise the cursor changed shape between and
                 # at the end of lines as well.
                 $win tag bind $tok <Enter> "$win configure -cursor hand2; $win tag configure \"$tok\" -underline 1"
-                $win tag bind $tok <Leave> "$win configure -cursor {}; $win tag configure \"$tok\" -underline 0"
+                $win tag bind $tok <Leave> "$win configure -cursor {}; $win tag configure \"$tok\" -underline $options(-underlinelinks)"
             } else {
                 # Not a link. Insert as plain text
                 if {$icon eq ""} {
@@ -4639,6 +4639,7 @@ snit::widget wits::widget::unmanagedtoplevel  {
                 set scroller [::widget::scrolledwindow $vframe.sc -relief flat -borderwidth 0]
                 set vwin [actionframe $scroller.v \
                               -command [mymethod _listboxlink $propname] \
+                              -underlinelinks 1 \
                               -height 4 -items $items \
                               -bg [get_theme_setting tab frame normal bg] \
                               -resize false -spacing1 0]
