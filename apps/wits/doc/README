@@ -1,11 +1,9 @@
 Version 3.0 Beta of Windows Inspection Tool Set (WiTS)
 has been released.
 
-Project home page is at http://wits.magicsplat.com.
-Tcl source code is hosted at 
-http://sourceforge.net/projects/windowstoolset.
-Sample screen shot is at
-http://sourceforge.net/p/windowstoolset/screenshot/screenshot.png
+Home page -  http://wits.magicsplat.com.
+Project page - http://sourceforge.net/projects/windowstoolset.
+Screen shot - http://sourceforge.net/p/windowstoolset/screenshot/screenshot.png
 
 What is WiTS
 ------------
@@ -14,23 +12,39 @@ Windows Inspection Tool Set slices a running Windows system
 multiple ways, providing cross-linked, filtered views of
 Windows components.
 
-- Navigate easily across processes, network connections,
-  users, services and more, via richly cross-linked views
+  * View properties of processes, network connections,
+    users, services and more in customizable tables
 
-- Focus on specific items through flexible filtering capabilities
+  * Navigate between objects via richly cross-linked views
 
-- Customize displayed information and layouts to focus on
-  areas of interest.
+  * Filter displayed items with flexible user defined filters
 
-- Track and monitor resources and system activity such as
-  process startup, network connections, logins and more with
-  optional recording to disk
+  * Focus on changing data with enhanced change display modes
 
-- Integrated view of Windows event logs with filtering/search
+  * Customize displayed information and layouts to focus on
+    areas of interest.
+
+  * Track and monitor resources and system activity such as
+    process startup, network connections, logins and more with
+    optional recording to disk
+
+  * Filter and search for Windows events through an integrated view
+    of Windows event logs
+
+  * Quickly access functions via the taskbar and hotkeys
 
 
 WiTS started out as a demo for TWAPI (http://twapi.sf.net) 
 but is now an independent project on sourceforge.
+
+System Requirements
+-------------------
+
+Desktop: Windows XP SP2 or later, Windows Vista or Windows 7
+Server:  Windows Server 2003, Windows Server 2008 and 
+         Windows Server 2008 R2.
+
+Currently will not run on Windows Server Core.
 
 Changes since version 2.1
 -------------------------
