@@ -11,7 +11,11 @@
 **.h = native
 **.cpp = native
 **.html = native
+**.htm = native
+**.css = native
 **.htf = native
+**.cfg = native
+**.inc = native
 makefile = native
 
 **.lzma = BIN
