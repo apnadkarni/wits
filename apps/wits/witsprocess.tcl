@@ -541,7 +541,8 @@ proc wits::app::process::terminate_processes {pids parentwin} {
                       -modal local \
                       -icon warning \
                       -parent $parentwin \
-                      -type yesno
+                      -type yesno \
+                      -defaultbutton no
                  ]
 
     if {$response ne "yes"} {
@@ -574,6 +575,7 @@ proc wits::app::process::terminate_processes {pids parentwin} {
                                   -modal local \
                                   -icon warning \
                                   -parent $parentwin \
+                                  -defaultbutton cancel \
                                   -type yesnocancel]
                 
                 if {$response eq "cancel"} {

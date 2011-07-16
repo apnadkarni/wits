@@ -17,9 +17,11 @@ package require tooltip 1.1;    # Used when labels are truncated
 package require widget::dialog
 package require widget::scrolledwindow
 package require swaplist
+if {[catch {package require keynav}]} {
+    source ../../thirdparty/tile-extras/keynav.tcl
+}
 
-bind TButton <Key-Return> [bind TButton <Key-space>]
-
+#bind TButton <Key-Return> [bind TButton <Key-space>]
 
 namespace eval wits::widget {
     # Array indexed by WITS class, part
@@ -2139,12 +2141,17 @@ snit::widgetadaptor wits::widget::dialogx {
     ### Type constructor
 
     typeconstructor {
+        # We even define widget::dialog built-ins here because else
+        # we cannot use keynav to set default
         array set _buttondefs {
             yesno {yes Yes no No}
             close {close Close}
             cancel {cancel Cancel}
             yesnocancel {yes Yes no No cancel Cancel}
             prevnextclose {prev Previous next Next close Close}
+            ok {ok OK}
+            okcancel {ok OK cancel Cancel}
+            okcancelapply {ok OK cancel Cancel apply Apply}
         }
     }
 
@@ -2156,6 +2163,8 @@ snit::widgetadaptor wits::widget::dialogx {
     # Dialog type - extends the widget::dialog type
     option -type -default custom -configuremethod _settype
 
+    option -defaultbutton -default "" -configuremethod _setdefaultbutton
+
     delegate option * to hull
 
     ### Variables
@@ -2165,6 +2174,9 @@ snit::widgetadaptor wits::widget::dialogx {
 
     # Client frame
     variable _clientf
+
+    # Button widgets
+    variable _buttonsw
 
     ### Methods
 
@@ -2176,6 +2188,8 @@ snit::widgetadaptor wits::widget::dialogx {
         } else {
             installhull using ::widget::dialog -type $dlgtype
         }
+
+        array set _buttonsw {}
 
         set f [$hull getframe]
         set _iconw [::ttk::label $f.icon]
@@ -2208,11 +2222,23 @@ snit::widgetadaptor wits::widget::dialogx {
             # If a specialized dialog, add our buttons
             if {[info exists _buttondefs($val)]} {
                 foreach {tok label} $_buttondefs($val) {
-                    $hull add button -text $label -command [list $win close $tok]
+                    set _buttonsw($tok) [$hull add button -text $label -command [list $win close $tok]]
                 }
             }
         } else {
             $hull configure -type $val
+        }
+
+        if {$options(-defaultbutton) ne ""} {
+            keynav::defaultButton $_buttonsw($options(-defaultbutton))
+        }
+
+    }
+
+    method _setdefaultbutton {opt val} {
+        set options($opt) $val
+        if {$options(-defaultbutton) ne ""} {
+            keynav::defaultButton $_buttonsw($options(-defaultbutton))
         }
     }
 

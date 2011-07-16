@@ -1601,6 +1601,7 @@ proc wits::app::standardactionhandler {viewer action args} {
                                   -modal local \
                                   -icon warning \
                                   -parent $viewer \
+                                  -defaultbutton no \
                                   -type yesno
                              ]
                 
@@ -1886,6 +1887,7 @@ proc ::wits::app::main {} {
                                 -detail "Click Yes to run with elevated privileges. Click No to continue with existing privileges." \
                                 -icon question \
                                 -type yesno \
+                                -defaultbutton yes \
                                 -title "$::wits::app::long_name: Raise privileges?" \
                                ]
                 if {$answer eq "yes"} {
@@ -1898,6 +1900,7 @@ proc ::wits::app::main {} {
             -message "You are currently running in an account with limited privileges. This will limit the information displayed and some features will not work properly." \
             -icon info \
             -type ok \
+            -defaultbutton ok \
             -title "$::wits::app::name: Limited functionality."
     }        
 

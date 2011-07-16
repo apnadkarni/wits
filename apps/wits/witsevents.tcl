@@ -1185,6 +1185,7 @@ snit::type ::wits::app::eventmanager {
                           -message "Do you want to set up categories of events to be monitored?" \
                           -detail "There are no event categories currently selected. The event monitor will therefore not monitor and show any events.\n\nSelect Yes to set up event categories to be monitored. If you select No, no event categories will be enabled and the event monitor will not log any events." \
                           -type yesno \
+                          -defaultbutton yes \
                           -modal local]
         if {$response eq "yes"} {
             ::wits::app::configure_preferences "Event Monitor"
@@ -1557,6 +1558,7 @@ snit::type ::wits::app::eventmanager {
                             -detail "Click Yes to continue logging to the file after the window is closed. Click No to stop logging to the file. Click Cancel to continue in the current state." \
                             -icon question \
                             -type yesnocancel \
+                            -defaultbutton cancel \
                             -title $::wits::app::dlg_title_config_error \
                            ]
             switch -exact -- $answer {

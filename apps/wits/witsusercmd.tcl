@@ -97,6 +97,7 @@ proc ::wits::app::user_cmd_show {cmdline parent} {
                         -detail "The command will result in creation of [llength $objlist] separate property view windows. Click OK to continue, and Cancel to cancel." \
                         -icon question \
                         -type okcancel \
+                        -defaultbutton cancel \
                         -title $::wits::app::long_name]
         if {$answer ne "ok"} {
             return

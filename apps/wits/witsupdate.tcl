@@ -247,7 +247,10 @@ proc ::wits::app::show_software_update_balloon {ver url} {
 proc ::wits::app::show_update_available_dialog {ver url {manual false}} {
     if {$manual} {
         # Manual check
-        set response [::wits::widget::showconfirmdialog -type yesno -modal local \
+        set response [::wits::widget::showconfirmdialog \
+                          -type yesno \
+                          -defaultbutton yes \
+                          -modal local \
                           -title "$::wits::app::name software update" \
                           -message "A newer version of $::wits::app::long_name is available. Do you want to download the new version?" \
                           -detail "Version $ver of $::wits::app::long_name has been released. Click Yes to view the changes and download the new version now. Otherwise click No." \
@@ -259,7 +262,10 @@ proc ::wits::app::show_update_available_dialog {ver url {manual false}} {
 
         # Called after automatic background check. Need to ask user whether to
         # notify about this version again
-        set response [::wits::widget::showconfirmdialog -type yesno -modal local \
+        set response [::wits::widget::showconfirmdialog \
+                          -type yesno \
+                          -defaultbutton yes \
+                          -modal local \
                           -title "$::wits::app::name software update" \
                           -message "A newer version of $::wits::app::long_name is available. Do you want to download the new version?" \
                           -detail "Version $ver of $::wits::app::long_name has been released. Click Yes to view the changes and download the new version now. Otherwise click No." \
@@ -317,13 +323,13 @@ proc ::wits::app::check_for_updates {} {
         show_update_available_dialog [lindex $update 0] [lindex $update 1] true
     } elseif {$status eq "ok"} {
         set available_update ""
-        ::wits::widget::showconfirmdialog -type ok -icon info \
+        ::wits::widget::showconfirmdialog -type ok -defaultbutton ok -icon info \
             -message "No updates found." \
             -detail "You are running the latest version of the software." \
             -title "$::wits::app::name software update"
     } else {
         set available_update ""
-        ::wits::widget::showconfirmdialog -type ok -icon info \
+        ::wits::widget::showconfirmdialog -type ok -defaultbutton ok -icon info \
             -message "Could not retrieve update information." \
             -detail "The update information for the software could not be retrieved. Please check $::wits::app::wwwHomePage for updates." \
             -title "$::wits::app::name software update"

@@ -46,7 +46,13 @@ Server:  Windows Server 2003, Windows Server 2008 and
 
 Currently will not run on Windows Server Core.
 
-Changes since version 2.1
+Changes since V3.0.8 Beta
+-------------------------
+
+  * Much faster Windows event log filtering
+
+
+Changes since V2.1
 -------------------------
 
 WiTS has been revived after a long hiatus. Changes since 2.1

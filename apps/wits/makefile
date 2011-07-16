@@ -3,7 +3,7 @@ UILONGNAME=Windows Inspection Tool Set
 UISHORTNAME=WiTS
 APPVERSIONMAJOR=3
 APPVERSIONMINOR=0
-APPVERSIONPATCH=8
+APPVERSIONPATCH=9
 RELEASETYPE=b
 # NOTE - the order of files here is important. It must be the same order
 # as required to be stored in the concatenated .tm file
@@ -70,6 +70,7 @@ witslibraries: "$(VFSDIR)\lib\snit-$(SNITVER)" \
 	"$(VFSDIR)\lib\uri" \
 	"$(VFSDIR)\lib\tooltip-$(TOOLTIPVER).tm"  \
 	"$(VFSDIR)\lib\swaplist-0.2.tm"  \
+	"$(VFSDIR)\lib\keynav-1.0.tm"  \
 	"$(VFSDIR)\lib\struct"
 
 "$(VFSDIR)\lib\snit-$(SNITVER)": 
@@ -82,6 +83,9 @@ witslibraries: "$(VFSDIR)\lib\snit-$(SNITVER)" \
 
 
 "$(VFSDIR)\lib\tooltip-$(TOOLTIPVER).tm": "$(THIRDPARTYDIR)\tooltip-$(TOOLTIPVER)\tooltip.tcl"
+	copy $? $@
+
+"$(VFSDIR)\lib\keynav-1.0.tm": "$(THIRDPARTYDIR)\tile-extras\keynav.tcl"
 	copy $? $@
 
 "$(VFSDIR)\lib\swaplist-0.2.tm": "$(THIRDPARTYDIR)\swaplist\swaplist.tcl"
