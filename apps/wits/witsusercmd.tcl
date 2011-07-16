@@ -178,26 +178,14 @@ proc ::wits::app::user_cmd_end {cmdline parent} {
     }
 
     switch -exact -- $objtype {
-        service {
+        ::wits::app::service {
             ::wits::app::service::changestate $objlist stopped $parent
         }
-        process {
+        ::wits::app::process {
             ::wits::app::process::terminate_processes $objlist $parent
         }
-        remoteshare {
-            # TBD - end remoteshares
-        }
-        localshare {
-            # TBD - end localshares
-        }
-        printer {
-            # TBD - end printer
-        }
-        network {
-            # ::wits::app:netconn terminate_connections $objlist $parent
-        }
         default {
-            wits::widget::showerrordialog "Objects of type '$type' are not supported by this command" -parent $parent
+            wits::widget::showerrordialog "Objects of type '$objtype' are not supported by this command" -parent $parent
         }
     }
     return
