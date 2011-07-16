@@ -1,11 +1,12 @@
-# RCS: @(#) $Id$
+# Copyright (c) 2006-2011 Tim Baker
 
 #
 # Demo: Column span
 #
-proc DemoSpan {} {
+namespace eval DemoSpan {}
+proc DemoSpan::Init {T} {
 
-    set T [DemoList]
+    variable Priv
 
     set width [font measure DemoFont "Span 1"]
     incr width 4
@@ -26,14 +27,14 @@ proc DemoSpan {} {
 
     for {set i 0} {$i < 100} {incr i} {
 	$T column create -itemjustify left -justify center -text "$i" \
-	    -width $width -tags C$i
+	    -tags C$i
     }
 
     #
     # Create elements
     #
 
-    $T state define mouseover
+    $T item state define mouseover
 
     for {set i 1} {$i <= 20} {incr i} {
 	set color gray[expr {50 + $i * 2}]
@@ -61,7 +62,7 @@ proc DemoSpan {} {
 	    $T element configure e$i -fill {white mouseover} \
 		-fill [list white mouseover g$i {}]
 	}
-	$T element create t$i text -text "Span $i"
+	$T element create t$i text -text "Span $i" -lines 1
     }
 
     #
@@ -71,8 +72,8 @@ proc DemoSpan {} {
     for {set i 1} {$i <= 20} {incr i} {
 	set S [$T style create s$i]
 	$T style elements $S [list e$i t$i]
-	$T style layout $S e$i -detach yes
-	$T style layout $S t$i -expand ns -padx 2
+	$T style layout $S e$i -detach yes -iexpand x -squeeze x
+	$T style layout $S t$i -expand ns -padx 2 -squeeze x
     }
 
     #
@@ -92,16 +93,16 @@ proc DemoSpan {} {
     }
 
     bind DemoSpan <Motion> {
-	SpanMotion %W %x %y
+	DemoSpan::Motion %W %x %y
     }
-    set ::Span(prev) ""
+    set Priv(prev) ""
     bindtags $T [list $T DemoSpan TreeCtrl [winfo toplevel $T] all]
 
     return
 }
 
-proc SpanMotion {w x y} {
-    global Span
+proc DemoSpan::Motion {w x y} {
+    variable Priv
     set id [$w identify $x $y]
     if {$id eq ""} {
     } elseif {[lindex $id 0] eq "header"} {
@@ -109,18 +110,18 @@ proc SpanMotion {w x y} {
 	set item [lindex $id 1]
 	set column [lindex $id 3]
 	set curr [list $item $column]
-	if {$curr ne $Span(prev)} {
-	    if {$Span(prev) ne ""} {
-		eval $w item state forcolumn $Span(prev) !mouseover
+	if {$curr ne $Priv(prev)} {
+	    if {$Priv(prev) ne ""} {
+		eval $w item state forcolumn $Priv(prev) !mouseover
 	    }
 	    $w item state forcolumn $item $column mouseover
-	    set Span(prev) $curr
+	    set Priv(prev) $curr
 	}
 	return
     }
-    if {$Span(prev) ne ""} {
-	eval $w item state forcolumn $Span(prev) !mouseover
-	set Span(prev) ""
+    if {$Priv(prev) ne ""} {
+	eval $w item state forcolumn $Priv(prev) !mouseover
+	set Priv(prev) ""
     }
     return
 }

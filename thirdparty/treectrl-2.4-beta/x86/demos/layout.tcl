@@ -1,11 +1,10 @@
-# RCS: @(#) $Id$
+# Copyright (c) 2002-2011 Tim Baker
 
 #
 # Demo: Layout
 #
-proc DemoLayout {} {
-
-    set T [DemoList]
+namespace eval DemoLayout {}
+proc DemoLayout::Init {T} {
 
     #
     # Configure the treectrl widget

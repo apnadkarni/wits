@@ -1,12 +1,8 @@
+# Copyright (c) 2011 Tim Baker
+
 namespace eval DemoHeaders {}
 
-proc DemoHeaders {} {
-    DemoHeaders::Run
-    return
-}
-
-proc DemoHeaders::Run {} {
-    set T [DemoList]
+proc DemoHeaders::Init {T} {
 
     $T configure \
 	-showroot no -xscrollsmoothing yes -yscrollsmoothing yes \
@@ -258,22 +254,18 @@ proc DemoHeaders::Run {} {
     #
     #
 
-    scan [$T column bbox {first lock none}] "%d %d %d %d" left top right bottom
-    scan [$T column bbox {last lock none}] "%d %d %d %d" left2 top2 right2 bottom2
-    set width [expr {$right2 - $left - 12}]
-
     $T item state define current
 
     $T element create theme.rect rect \
 	-fill {{light blue} current white {}} \
 	-outline gray50 -outlinewidth 2 -open s
     $T element create theme.text text \
-	-lines 0 -width $width
+	-lines 0
     $T element create theme.button window -clip yes
     set S [$T style create theme -orient vertical]
     $T style elements $S {theme.rect theme.text theme.button}
     $T style layout $S theme.rect -detach yes -iexpand xy
-    $T style layout $S theme.text -padx 6 -pady 3
+    $T style layout $S theme.text -padx 6 -pady 3 -squeeze x
     $T style layout $S theme.button -expand we -pady {3 6}
 
     NewButtonItem "" \

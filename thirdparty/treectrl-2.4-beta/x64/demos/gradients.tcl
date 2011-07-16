@@ -1,8 +1,7 @@
-# RCS: @(#) $Id$
+# Copyright (c) 2010-2011 Tim Baker
 
-proc DemoGradients {} {
-
-    set T [DemoList]
+namespace eval DemoGradients {}
+proc DemoGradients::Init {T} {
 
     if {[lsearch -exact [font names] DemoGradientFont] == -1} {
 	array set fontInfo [font actual [$T cget -font]]
@@ -32,33 +31,34 @@ proc DemoGradients {} {
     # Define new states
     #
 
-    $T state define openW
-    $T state define openN
+    $T item state define openW
+    $T item state define openN
 
     #
     # Create elements
     #
 
-    $T element create elemTextIntro text -width [expr {600 - 4 * 2}] -font DemoGradientFont
-    $T element create elemText text -width [expr {600 - 4 * 2}]
+    $T element create elemTextIntro text -font DemoGradientFont
+    $T element create elemText text
 
-    $T element create elemBox rect -width 100 -height 30 \
+    $T element create elemBox rect -height 30 \
 	-outline black -outlinewidth 2 -open {wn {openW openN} w openW n openN}
 
     #
     # Create styles using the elements
     #
 
-    $T style create styleIntro
-    $T style elements styleIntro elemTextIntro
-    $T style layout styleIntro elemTextIntro -padx 4 -pady {3 0}
+    set S [$T style create styleIntro]
+    $T style elements $S elemTextIntro
+    $T style layout $S elemTextIntro -padx 4 -pady {3 0} -squeeze x
 
-    $T style create styleText
-    $T style elements styleText elemText
-    $T style layout styleText elemText -padx 4 -pady {15 6}
+    set S [$T style create styleText]
+    $T style elements $S elemText
+    $T style layout $S elemText -padx 4 -pady {15 6} -squeeze x
 
-    $T style create styleBox
-    $T style elements styleBox elemBox
+    set S [$T style create styleBox]
+    $T style elements $S elemBox
+    $T style layout $S elemBox -iexpand x
 
     #
     # Create items and assign styles

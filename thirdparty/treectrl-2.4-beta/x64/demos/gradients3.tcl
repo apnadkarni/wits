@@ -1,8 +1,9 @@
-# RCS: @(#) $Id$
+# Copyright (c) 2010-2011 Tim Baker
 
-proc DemoGradients3 {} {
+namespace eval DemoGradients3 {}
+proc DemoGradients3::Init {T} {
 
-    set T [DemoList]
+    variable Priv
 
     #
     # Configure the treectrl widget
@@ -26,8 +27,8 @@ proc DemoGradients3 {} {
     # Create elements
     #
 
-    $T element create elemBox rect -width 100 -height 30 -fill gray95
-    $T element create elemText text -width [expr {300 - 4 * 2}]
+    $T element create elemBox rect -height 30 -fill gray95
+    $T element create elemText text
 
     #
     # Create styles using the elements
@@ -35,11 +36,11 @@ proc DemoGradients3 {} {
 
     $T style create styleText
     $T style elements styleText elemText
-    $T style layout styleText elemText -padx 4 -pady 6
+    $T style layout styleText elemText -padx 4 -pady 6 -squeeze x
 
     $T style create styleBox
     $T style elements styleBox elemBox
-    $T style layout styleBox elemBox -padx {5 5}
+    $T style layout styleBox elemBox -padx 5 -iexpand x
 
     $T column configure {all !tail} -itemstyle styleBox
 
@@ -114,7 +115,7 @@ proc DemoGradients3 {} {
     $T gradient create G_selected        -steps $steps -stops {{0.0 #ebf4fe} {1.0 #cfe4fe}} -orient vertical
     $T gradient create G_focusout        -steps $steps -stops {{0.0 #f8f8f8} {1.0 #e5e5e5}} -orient vertical
 
-    $T state define mouseover
+    $T item state define mouseover
 
     $T element create elemRectGradient rect \
 	-fill [list	G_selected_active {mouseover} \
@@ -142,7 +143,7 @@ proc DemoGradients3 {} {
 	-stops {{0 #00680a} {0.05 #00680a} {0.1 #197622} {0.45 #197622} {0.5 #00680a} {0.6 #00680a} {1 #00c82c}}
     set I [$T item create -parent root]
     $T item span $I C0 3
-    $T item element configure $I C0 elemBox -fill G_green -width [expr {110 * 3 - 10}]
+    $T item element configure $I C0 elemBox -fill G_green
 
     #####
 
@@ -154,11 +155,12 @@ proc DemoGradients3 {} {
     set height 40
 
     $T element create elemOrangeOutline rect -outline #ffb700 -outlinewidth 1 -rx 1
-    $T element create elemOrangeBox rect -fill {G_orange1 mouseover G_orange2 {}} -width [expr {110 * 3 - 2 * 2 - 10}] \
+    $T element create elemOrangeBox rect -fill {G_orange1 mouseover G_orange2 {}} \
 	-height [expr {$height - 2 * 2}]
 
     set S [$T style create styleOrange]
     $T style elements $S {elemOrangeOutline elemOrangeBox}
+    $T style layout $S elemOrangeBox -iexpand x
     $T style layout $S elemOrangeOutline -union elemOrangeBox -ipadx 2 -ipady 2 -padx 5
 
     set I [$T item create -parent root]
@@ -172,16 +174,14 @@ proc DemoGradients3 {} {
     $T gradient create G_progressBG -orient vertical -steps 2 \
 	-stops {{0 white} {0.45 #dbdbdb} {0.5 #cacaca} {1.0 #cacaca}}
 
-    set width [expr {110 * 3 - 2 * 1 - 10}]
-    set percent 0.33
     $T element create elemProgressOutline rect -rx 1 -outline gray -outlinewidth 1
     $T element create elemProgressBG rect -fill G_progressBG -height 12 \
-	-width $width -outline #eaeaea -outlinewidth 1
-    $T element create elemProgressFG rect -fill G_progressFG -height 12 \
-	-width [expr {$width * $percent}]
+	-outline #eaeaea -outlinewidth 1
+    $T element create elemProgressFG rect -fill G_progressFG -height 12
 
     set S [$T style create styleProgress]
     $T style elements $S {elemProgressOutline elemProgressBG elemProgressFG}
+    $T style layout $S elemProgressBG -iexpand x
     $T style layout $S elemProgressOutline -union elemProgressBG -padx 5 -ipadx 1 -ipady 1
     $T style layout $S elemProgressFG -detach yes -padx 6 -pady 1
 
@@ -189,28 +189,29 @@ proc DemoGradients3 {} {
     $T item span $I C0 3
     $T item style set $I C0 $S C1 "" C2 ""
 
-    set ::Gradients3(percent) 0.0
-    set ::Gradients3(afterId) ""
+    set Priv(progressItem) $I
+    set Priv(percent) 0.0
+    set Priv(afterId) ""
 
     # Pause/resume animating when the progress bar's visibility changes
     $T notify bind $T <ItemVisibility> {
-	Gradients3ItemVisibility %T %v %h
+	DemoGradients3::ItemVisibility %T %v %h
     }
 
     # Stop animating when the item is deleted
     $T notify bind $T <ItemDelete> {
-	after cancel $Gradients3(afterId)
+	after cancel $DemoGradients3::Priv(afterId)
 	dbwin "progressbar deleted"
     }
 
     #####
 
-    set ::Gradients3(prev) ""
+    set Priv(prev) ""
     bind DemoGradients3 <Motion> {
-	Gradients3Motion %W %x %y
+	DemoGradients3::Motion %W %x %y
     }
     bind DemoGradients3 <Leave> {
-	Gradients3Motion %W -1 -1
+	DemoGradients3::Motion %W -1 -1
     }
 
     bindtags $T [concat DemoGradients3 [bindtags $T]]
@@ -218,9 +219,9 @@ proc DemoGradients3 {} {
     return
 }
 
-proc Gradients3Motion {T x y} {
-    global Gradients3
-    if {[lsearch -exact [$T state names] mouseover] == -1} return
+proc DemoGradients3::Motion {T x y} {
+    variable Priv
+    if {[lsearch -exact [$T item state names] mouseover] == -1} return
     set id [$T identify $x $y]
     if {$id eq ""} {
     } elseif {[lindex $id 0] eq "header"} {
@@ -228,47 +229,51 @@ proc Gradients3Motion {T x y} {
 	set item [lindex $id 1]
 	set column [lindex $id 3]
 	set curr [list $item $column]
-	if {$curr ne $Gradients3(prev)} {
-	    if {$Gradients3(prev) ne ""} {
-		eval $T item state forcolumn $Gradients3(prev) !mouseover
+	if {$curr ne $Priv(prev)} {
+	    if {$Priv(prev) ne ""} {
+		eval $T item state forcolumn $Priv(prev) !mouseover
 	    }
 	    $T item state forcolumn $item $column mouseover
-	    set Gradients3(prev) $curr
+	    set Priv(prev) $curr
 	}
 	return
     }
-    if {$Gradients3(prev) ne ""} {
-	eval $T item state forcolumn $Gradients3(prev) !mouseover
-	set Gradients3(prev) ""
+    if {$Priv(prev) ne ""} {
+	eval $T item state forcolumn $Priv(prev) !mouseover
+	set Priv(prev) ""
     }
     return
 }
 
-proc Gradients3Progress {T} {
-    set percent $::Gradients3(percent)
+proc DemoGradients3::Progress {T} {
+    variable Priv
+    set percent $Priv(percent)
     if {$percent > 1.0} {
 	set percent 1.0
-	set ::Gradients3(percent) 0.0
+	set Priv(percent) 0.0
     } else {
-	set ::Gradients3(percent) [expr {$percent + 0.025}]
+	set Priv(percent) [expr {$percent + 0.025}]
     }
-    set width [expr {110 * 3 - 2 * 1 - 10}]
+    scan [$T item bbox $Priv(progressItem)] "%d %d %d %d" x1 y1 x2 y2
+    set width [expr {($x2 - $x1) - 2 * 1 - 10}]
     $T element configure elemProgressFG -width [expr {$width * $percent}]
-    set ::Gradients3(afterId) [after 100 [list Gradients3Progress $T]]
+    set Priv(afterId) [after 100 [list DemoGradients3::Progress $T]]
+    return
 }
 
-proc Gradients3ItemVisibility {T visible hidden} {
+proc DemoGradients3::ItemVisibility {T visible hidden} {
+    variable Priv
     foreach I $visible {
 	if {[$T item tag expr $I progress]} {
-	    set ::Gradients3(afterId) [after 100 [list Gradients3Progress $T]]
+	    set Priv(afterId) [after 100 [list DemoGradients3::Progress $T]]
 	    dbwin "progress resumed"
 	    return
 	}
     }
     foreach I $hidden {
 	if {[$T item tag expr $I progress]} {
-	    after cancel $::Gradients3(afterId)
-	    set ::Gradients3(afterId) ""
+	    after cancel $Priv(afterId)
+	    set Priv(afterId) ""
 	    dbwin "progress paused"
 	    return
 	}
