@@ -26,5 +26,6 @@ makefile = native
 **.msi = BIN
 **.png = BIN
 **.ico = BIN
+**.pdf = BIN
 
 **.vcproj = CRLF
