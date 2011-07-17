@@ -2974,7 +2974,10 @@ snit::widget wits::widget::hotkeyeditor {
         bind $win.hk <KeyPress> [mymethod _keypress %k]
         bind $win.hk <KeyRelease> [mymethod _keyrelease %k]
         bind $win.hk <BackSpace> "[mymethod _clear] ; break"
-        #bind $win.hk <Escape> [mymethod _clear]
+        # Do not want to override normal meaning of following keys
+        bind $win.hk <Tab> "return"
+        bind $win.hk <Return> "return"
+        bind $win.hk <Escape> "return"
         after 100 focus $win.hk
     }
 
