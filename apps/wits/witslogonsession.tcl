@@ -202,6 +202,11 @@ proc wits::app::logonsession::getviewer {sess_id} {
 # Handle button clicks from a page viewer
 proc wits::app::logonsession::pageviewhandler {sess_id button viewer} {
     switch -exact -- $button {
+        processes {
+            ::wits::app::process::viewlist \
+                -filter [util::filter create \
+                             -properties [list -logonsession [list condition "= $sess_id"]]]
+        }
         default {
             tk_messageBox -icon info -message "Function $button is not implemented"
             return
