@@ -41,7 +41,8 @@ APPFILES= \
 
 APPDESC=Windows Inspection Tool Set
 APPAUTHOR=Ashok P. Nadkarni
-APPICO=images\nuvola\wits.ico
+APPICO=images\icons\wits.ico
+APPSETUPICO=images\icons\wits-setup.ico
 
 KITTYPE=gui
 
@@ -145,11 +146,11 @@ MSIPATH="$(DISTBUILDDIR)\$(MSINAME)"
         cd $(DISTBUILDDIR) && $(ZIP) -r nuvola.zip nuvola
 
 
-$(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" wits.wxs images\nuvola\wits.ico binary-license.rtf "$(TREECTRLDIR)\treectrl24.dll"
+$(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" wits.wxs $(APPICO) binary-license.rtf "$(TREECTRLDIR)\treectrl24.dll"
 	-mkdir "$(DISTBUILDDIR)"
 	copy /b /y "$(BUILDDIR)\$(APPTARGET).exe" "$(DISTBUILDDIR)\$(APPNAME).exe"
 	copy "$(TREECTRLDIR)\treectrl24.dll" "$(DISTBUILDDIR)"
-        copy /y images\nuvola\wits.ico "$(DISTBUILDDIR)"
+        copy /y $(APPICO) "$(DISTBUILDDIR)"
         copy /y binary-license.rtf "$(DISTBUILDDIR)\License.rtf"
         set PRODUCT_LONG_NAME=$(UILONGNAME)
         set PRODUCT_SHORT_NAME=$(UISHORTNAME)
@@ -158,19 +159,20 @@ $(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" wits.wxs images\nuvola\wits.ico binar
         set APP_SHORT_NAME=$(UISHORTNAME)
         "$(WIXDIR)\bin\candle.exe" wits.wxs -out "$(DISTBUILDDIR)\wits-$(PLATFORM).wixobj" -dWitsPlatform=$(PLATFORM)
 	"$(WIXDIR)\bin\light.exe" -ext WixUIExtension -cultures:en-us "$(DISTBUILDDIR)\wits-$(PLATFORM).wixobj" -out $(MSIPATH)
-#        cd "$(DISTDIR)" && del license.rtf wits.wixobj license.rtf nuvola.zip wits.ico *.wixobj *.wixpdb
+        cd "$(DISTDIR)" && del license.rtf wits.wixobj license.rtf nuvola.zip wits.ico *.wixobj *.wixpdb
 
 "$(DISTDIR)\$(MSINAME)": $(MSIPATH)
 	copy $(MSIPATH) "$(DISTDIR)"
 
 SETUPEXE=setup-$(APPNAME)-$(PRODUCTVERSIONSTR)$(UIPLATFORM).exe
-"$(DISTDIR)\$(SETUPEXE)": "$(DISTDIR)\$(MSINAME)"
+"$(DISTDIR)\$(SETUPEXE)": "$(DISTDIR)\$(MSINAME)" "$(APPSETUPICO)"
         copy /y $(THIRDPARTYDIR)\ms-sdk\setup.exe "$(DISTBUILDDIR)"
         copy /y $(THIRDPARTYDIR)\ms-sdk\msistuff.exe "$(DISTBUILDDIR)"
         cd $(DISTBUILDDIR) && msistuff.exe setup.exe -d "$(MSINAME)" -v 300 -o INSTALLUPD -n "$(UILONGNAME)"
 	cd $(DISTBUILDDIR) && "$(7ZIPDIR)\7z.exe" a $(APPTARGET).7z "$(MSINAME)" setup.exe
 	copy /y /b "$(7ZIPDIR)\7zS.sfx" "$(DISTBUILDDIR)"
 	$(CTCL) write_version_resource "$(DISTBUILDDIR)\7zS.sfx" -copyright "$(COPYRIGHT)" -timestamp now -version $(APPVERSION) -productversion $(PRODUCTVERSION) ProductName "$(UILONGNAME) Setup" FileDescription "$(APPDESC) Setup" CompanyName "$(APPAUTHOR)" FileVersion "$(APPVERSIONSTR)" ProductVersion "$(PRODUCTVERSIONSTR)"
+	$(CTCL) write_icon_resource "$(DISTBUILDDIR)\7zS.sfx" $(APPSETUPICO) -name 1
 	copy << $(DISTBUILDDIR)\sfxconfig.txt
 ;!@Install@!UTF-8!
 Title="$(UILONGNAME) Setup"

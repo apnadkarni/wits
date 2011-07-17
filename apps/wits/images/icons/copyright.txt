@@ -1,0 +1,3 @@
+The WiTS logo icon is derived from icons in the nuvola and vistaico
+directories. Please see the licenses in those directories for
+copyright information.

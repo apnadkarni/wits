@@ -1275,9 +1275,10 @@ proc ::wits::app::showcredits {} {
     append credits "\nSnit package \u00a9 William H. Duquette"
     append credits "\nTkTreeCtrl package \u00a9 Tim Baker"
     append credits "\nTcl Windows API extension \u00a9 Ashok P. Nadkarni"
-    append credits "\nNuvola icon library \u00a9 David Vignoni"
     append credits "\n7-Zip compression tools \u00a9 Igor Pavlov"
     append credits "\nWiX installer team"
+    append credits "\nNuvola icon library \u00a9 David Vignoni"
+    append credits "\nAeroPack icon library \u00a9 VistaICO.com"
 
     set dlg [::wits::widget::rotextdialog .%AUTO% -type ok \
                  -icon [images::get_icon48 witslogo] \
