@@ -5610,13 +5610,13 @@ snit::widgetadaptor wits::widget::listframe {
             # Set up filter settings from preferences. We cannot do
             # this in the type constructor because prefs commands would
             # have been initialized by then.
-            set _show_filter_help [app::prefs getbool ShowFilterHelpBalloon $_prefssection 1]
+            set _show_filter_help [app::prefs getbool ShowFilterHelpBalloon $_prefssection -default 1]
 
             # Modifications to filter settings will be automatically saved
             app::prefs associate ShowFilterHelpBalloon $_prefssection [mytypevar _show_filter_help]
         } else {
             # Update to latest setting
-            set _show_filter_help [app::prefs getbool ShowFilterHelpBalloon $_prefssection 1]
+            set _show_filter_help [app::prefs getbool ShowFilterHelpBalloon $_prefssection -default 1]
         }
 
         if {! ($_show_filter_help || $force) } { return }

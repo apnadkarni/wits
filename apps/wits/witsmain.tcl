@@ -73,7 +73,12 @@ proc ::wits::app::initialize_preferences {} {
         {{LogFile "Event Monitor"} "Log file" "Log file" "" path ""}
         {{ShowFilterHelpBalloon "Views/ListView"} "Show list view filter help popup" "Filter help" "" bool 1}
     } {
-        lassign $def key description shortdesc objtype displayformat defaultvalue
+        set def [lassign $def key description shortdesc objtype displayformat]
+        if {[llength $def]} {
+            lassign $def defaultvalue
+        } else {
+            set defaultvalue [util::default_property_value $displayformat]
+        }
         # The lrange is to put the pair in canonical list form
         dict set props [lrange $key 0 end] [dict create description $description \
                                  shortdesc $shortdesc \
@@ -90,7 +95,7 @@ proc ::wits::app::initialize_preferences {} {
 
 ::wits::app::initialize_preferences
 
-tooltip::tooltip delay [::wits::app::prefs getitem TooltipDelay UI 200]
+tooltip::tooltip delay [::wits::app::prefs getitem TooltipDelay UI -default 200]
 
 # We only need to source files if we are not build as a single file
 # Tcl module
@@ -388,7 +393,7 @@ snit::widgetadaptor ::wits::app::mainview {
                 wits::app::${objtype}::viewlist
             }
         }
-        if {[::wits::app::prefs getbool IconifyOnCommand $::wits::app::prefGeneralSection false]} {
+        if {[::wits::app::prefs getbool IconifyOnCommand $::wits::app::prefGeneralSection]} {
             wm iconify $win
         }
     }
@@ -553,7 +558,7 @@ proc ::wits::app::check_multiple_instances {{retries 1}} {
 
     # Another instance is already running
     set ::wits::app::multiple_instances true
-    if {[::wits::app::prefs getbool "AllowMultipleInstances" $::wits::app::prefGeneralSection 0]} {
+    if {[::wits::app::prefs getbool "AllowMultipleInstances" $::wits::app::prefGeneralSection]} {
         # OK, multiple instances are allowed
         return
     }
@@ -587,7 +592,7 @@ proc ::wits::app::check_multiple_instances {{retries 1}} {
 proc ::wits::app::first_run_init {} {
     variable prefGeneralSection
 
-    if {[prefs getbool "FirstRunDone" $prefGeneralSection 0]} {
+    if {[prefs getbool "FirstRunDone" $prefGeneralSection]} {
         return
     }
 
@@ -705,7 +710,7 @@ proc ::wits::app::assign_hotkeys {args} {
         foreach {prefname _ _ handler} $hk_def break
 
         # If assignments have not changed, we do not need to do anything
-        set hk [prefs getitem $prefname Hotkeys ""]
+        set hk [prefs getitem $prefname Hotkeys]
         if {[info exists hotkeyAssignments($hk_tok)] &&
             $hk eq $hotkeyAssignments($hk_tok)} {
             continue
@@ -740,7 +745,7 @@ proc ::wits::app::assign_hotkeys {args} {
 
 proc ::wits::app::configure_taskbar {} {
     variable prefGeneralSection
-    if {[prefs getbool "DisableTaskbar" $prefGeneralSection 0]} {
+    if {[prefs getbool "DisableTaskbar" $prefGeneralSection]} {
         # We do not want to show up in the task bar
         remove_from_taskbar
     } else {
@@ -1093,7 +1098,7 @@ proc ::wits::app::showeventviewer {} {
 proc ::wits::app::main_delete_handler {w} {
     # Catch so in case of errors, at least we exit
     twapi::trap {
-        if {[prefs getbool MinimizeOnClose $::wits::app::prefGeneralSection 0]} {
+        if {[prefs getbool MinimizeOnClose $::wits::app::prefGeneralSection]} {
             minimize $w
             return
         }
@@ -1449,7 +1454,7 @@ proc ::wits::app::configure_preferences {{page ""}} {
     if {[llength [info commands ::wits::app::runatlogin_preference_handler]] == 0} {
         # Define the callback
         proc ::wits::app::runatlogin_preference_handler args {
-            ::wits::app::configure_autostart [::wits::app::prefs getitem RunAtLogon General 1]
+            ::wits::app::configure_autostart [::wits::app::prefs getitem RunAtLogon General -default 1]
         }
         # and register it
         prefs subscribe ::wits::app::runatlogin_preference_handler
@@ -1926,7 +1931,7 @@ proc ::wits::app::main {} {
     configure_taskbar
 
     # Start up event viewer if required
-    if {[prefs getitem "ShowAtStartup" "Event Monitor" false]} {
+    if {[prefs getbool "ShowAtStartup" "Event Monitor"]} {
         showeventviewer
     }
 

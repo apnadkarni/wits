@@ -1400,10 +1400,10 @@ snit::type ::wits::app::eventmanager {
 
     # Read preferences and configure event manager accordingly
     method _configure_eventmanager {} {
-        set logfile_enabled [::wits::app::prefs getbool EnableLogFile "Event Monitor" ""]
+        set logfile_enabled [::wits::app::prefs getbool EnableLogFile "Event Monitor"]
         set logfile ""
         if {$logfile_enabled} {
-            set logfile [::wits::app::prefs getitem LogFile "Event Monitor" ""]
+            set logfile [::wits::app::prefs getitem LogFile "Event Monitor"]
             if {$logfile eq ""} {
                 after 0 [list ::wits::widget::showerrordialog "Event monitor file logging enabled but no log file specified." \
                                 -detail "Event monitor logging has been enabled in the preferences dialog but no log file path is specified. Logging of events to file will be disabled. Please enter the log file path in the preferences dialog to enable logging." \
@@ -1414,7 +1414,7 @@ snit::type ::wits::app::eventmanager {
         }
         $self _configurelogfile $logfile
 
-        $_lwin configure -maxevents [::wits::app::prefs getint MaxEvents "Event Monitor" 500]
+        $_lwin configure -maxevents [::wits::app::prefs getint MaxEvents "Event Monitor" -default 500]
 
         set categories [list ]
         foreach {category pref} {
@@ -1446,7 +1446,7 @@ snit::type ::wits::app::eventmanager {
             SystemThreadsThreshold    500  100   5000
             DiskSpaceThresholdPercent  90    0     99
         } {
-            set prefvals($prefitem) [::wits::app::prefs getint $prefitem "Event Monitor" $defaultval]
+            set prefvals($prefitem) [::wits::app::prefs getint $prefitem "Event Monitor" -default $defaultval]
             if {$prefvals($prefitem) < $min || $prefvals($prefitem) > $max} {
                 # Set value exceeds limit - restore default
                 set prefvals($prefitem) $defaultval

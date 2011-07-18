@@ -32,7 +32,7 @@ proc ::wits::app::control_background_update_checker {args} {
     variable gscheduler
 
     set do_background_update \
-        [prefs getbool "CheckUpdates" "General" false]
+        [prefs getbool "CheckUpdates" "General"]
 
     set bg_cmd ::wits::app::background_update_checker
     # Always cancel any existing check (which may not be scheduled for
@@ -64,8 +64,7 @@ proc ::wits::app::initialize_background_update {} {
 proc ::wits::app::background_update_checker {{force false}} {
     variable gscheduler
 
-    set do_background_update \
-        [prefs getbool "CheckUpdates" "General" true]
+    set do_background_update [prefs getbool "CheckUpdates" "General"]
 
     if {! $do_background_update} {
         # No background checks. Return without scheduling another one
@@ -74,7 +73,7 @@ proc ::wits::app::background_update_checker {{force false}} {
 
     # Find out whether we are past the time of the next check
     set next_check \
-        [prefs getint "NextSoftwareUpdateCheck" "General" 0 true]
+        [prefs getint "NextSoftwareUpdateCheck" "General" -ignorecache true]
     set now [clock seconds]
     if {$now < $next_check && !$force} {
         # Still have some time to wait. This can happen depending on
@@ -113,7 +112,7 @@ proc ::wits::app::background_update_callback {status ncode data} {
 
     # Find out if we already asked user about this and were told to
     # not bother him again for this version
-    set ignored_vers [prefs getitem $ignored_update_version_name $ignored_update_version_section "" true]
+    set ignored_vers [prefs getitem $ignored_update_version_name $ignored_update_version_section -ignorecache true]
 
     if {[lsearch -exact $ignored_vers [lindex $update 0]] >= 0} {
         # Do not bother user
@@ -274,7 +273,7 @@ proc ::wits::app::show_update_available_dialog {ver url {manual false}} {
                      ]
         if {$ignore_version_update} {
             # Add this version to the versions that we should not notify about
-            set ignored_vers [prefs getitem $ignored_update_version_name $ignored_update_version_section "" true]
+            set ignored_vers [prefs getitem $ignored_update_version_name $ignored_update_version_section -ignorecache true]
             if {[catch {lappend ignored_vers $ver}]} {
                 # Ill-formed list. Ignore it
                 set ignored_Vers [list $ver]

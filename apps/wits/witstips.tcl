@@ -67,7 +67,7 @@ proc ::wits::app::show_tipoftheday {{startingup false}} {
     variable tips
     variable showTipAtStartup
 
-    set showTipAtStartup [::wits::app::prefs getbool ShowTipsAtStartup General true]
+    set showTipAtStartup [::wits::app::prefs getbool ShowTipsAtStartup General]
     if {$startingup && !$showTipAtStartup} {
         return
     }

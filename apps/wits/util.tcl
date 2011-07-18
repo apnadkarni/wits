@@ -791,9 +791,12 @@ oo::class create util::PublisherMixin {
         if {[llength $tags] == 0} {
             set tags [dict keys $_tag_subscribers]
         }
-        foreach tag $tags {
-            if {[dict exists $_tag_subscribers $tag]} {
-                foreach cmd [dict get $_tag_subscribers $tag] {
+
+        # We want to ignore case when comparing tags but at the same
+        # time send notifications using what the subscriber expects
+        dict for {tag cmds} $_tag_subscribers {
+            if {[lsearch -exact -nocase $tags $tag] >= 0} {
+                foreach cmd $cmds {
                     dict set _scheduler_ids $cmd $tag $event $extra [scheduler after1 0 [list [self] scheduler_handler $cmd $tag $event $extra]]
                 }
             }
@@ -875,16 +878,33 @@ oo::class create util::Preferences {
     }
 
     # Gets the value of a pref item
-    method getitem {name section {default ""} {ignorecache false} } {
+    method getitem {name section args} {
+        if {[dict exists $args -ignorecache]} {
+            set ignorecache [dict get $args -ignorecache]
+        } else {
+            set ignorecache 0
+        }
+
+        if {[dict exists $args -default]} {
+            set default [dict get $args -default]
+        } else {
+            set default ""
+        }
+
         # Make more robust when \ is used instead of /
-        set section [file join $section]
+        set section [string tolower [string map {\\ /} $section]]
+        set name [string tolower $name]
 
         # Look up registry if we don't already have value or are forced
         if {$ignorecache || ![dict exists $_items $section $name]} {
             if {[catch {
                 dict set _items $section $name [registry get [my _makeregpath $section] $name]
             }]} {
-                return $default
+                if {[dict exists $_property_defs [list $name $section] defaultvalue]} {
+                    return [dict get $_property_defs [list $name $section] defaultvalue]
+                } else {
+                    return $default
+                }
             }
         }
         return [dict get $_items $section $name]
@@ -892,8 +912,8 @@ oo::class create util::Preferences {
 
     # Get the value of a pref item as a 1/0 as per Tcl interpretation of
     # boolean strings
-    method getbool {name section {default ""} {ignorecache false} } {
-        set val [my getitem $name $section $default $ignorecache]
+    method getbool {name section args} {
+        set val [my getitem $name $section {*}$args]
         if {[string is boolean -strict $val]} {
             return [expr {!! $val}]; # Return 0/1
         } else {
@@ -903,21 +923,18 @@ oo::class create util::Preferences {
 
     # Get the value of a pref item as an integer. If non-integer, returns
     # default specified and 0 if default is also not an integer
-    method getint {name section {default 0} {ignorecache false} } {
-        set val [my getitem $name $section $default $ignorecache]
+    method getint {name section args} {
+        set val [my getitem $name $section {*}$args]
         if {[string is wideinteger -strict $val]} {
             return $val
-        }
-        if {[string is wideinteger -strict $default]} {
-            return $default
         }
         return 0
     }
 
     # Sets the value of a pref item
-    method setitem {name section val {flush false}} {
-        # Make more robust when \ is used instead of /
-        set section [file join $section]
+    method setitem {namearg sectionarg val {flush false}} {
+        set section [string tolower [string map {\\ /} $sectionarg]]
+        set name [string tolower $namearg]
 
         # Do not send unnecessary notifications
         if {[dict exists $_items $section $name] &&
@@ -926,21 +943,21 @@ oo::class create util::Preferences {
         }
 
         dict set _items $section $name $val
-        dict set _dirty $section $name 1
+        dict set _dirty $section $name [list $namearg $sectionarg]
         if {$flush} {
             # Try to batch writes
             $_scheduler after1 500 [list [self] flush]
         }
 
-        my notify [list $section] write [list $name $val]
+        my notify [list $sectionarg] write [list $namearg $val]
         return
     }
 
     # Writes all values of changed preference items
     method flush {} {
         dict for {section names} $_dirty {
-            dict for {name x} $names {
-                my _writeitem $name $section
+            dict for {name uncanonicalized_names} $names {
+                my _writeitem {*}$uncanonicalized_names
                 dict unset _dirty $section $name
             }
         }
@@ -955,7 +972,8 @@ oo::class create util::Preferences {
     # terminated.
     method associate {name section varname} {
         # Make more robust when \ is used instead of /
-        set section [file join $section]
+        set section [string tolower [string map {\\ /} $section]]
+        set name [string tolower $name]
 
         # We want to note when a variable changes so we remember to save prefs
         # Note: if we want to preserve associations across variable unsets,
@@ -971,7 +989,10 @@ oo::class create util::Preferences {
         # Maps preference items to properties
         #   propdefs -  dictionary of property definitions, keys of
         #     which are preference items identified by {section itemname}
-        set _property_defs $propdefs
+        set _property_defs {};  # Reset existing
+        dict for {key val} $propdefs {
+            dict set _property_defs [string tolower $key] $val
+        }
     }
 
     method get_property_defs {} {
@@ -988,12 +1009,17 @@ oo::class create util::Preferences {
         }
 
         set values [dict create]
+        # We need to create a property def structure where the same
+        # case is used as what was passed in
+        set propdefs {}
         foreach propname $requested_propnames {
             lassign $propname name section
-            set default_value [[namespace qualifiers [self class]]::default_property_value [dict get $_property_defs $propname displayformat]]
-            dict set values $propname [my getitem $name $section $default_value true]
+            set section [string tolower [string map {\\ /} $section]]
+            set name [string tolower $name]
+            dict set values $propname [my getitem $name $section -ignorecache true]
+            dict set propdefs $propname [dict get $_property_defs [list $name $section]]
         }
-        return [dict create definitions $_property_defs values $values]
+        return [dict create definitions $propdefs values $values]
     }
 
     method _trackvar {section name varname1 varname2 op} {
@@ -1010,8 +1036,10 @@ oo::class create util::Preferences {
     }
     export _trackvar;           # Private but invoked from a callback - TBD
 
-    method _writeitem {name section} {
-        registry set [my _makeregpath $section] $name [dict get $_items $section $name]
+    method _writeitem {namearg sectionarg} {
+        set name [string tolower $namearg]
+        set section [string tolower [string map {\\ /} $sectionarg]]
+        registry set [my _makeregpath $sectionarg] $namearg [dict get $_items $section $name]
         return
     }
 }
