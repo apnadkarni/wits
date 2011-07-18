@@ -146,7 +146,7 @@ oo::class create wits::app::wineventlog::Objects {
         if {[dict exists $_events $key]} {
             # Format message field if necessary
             if {![dict exists $_events $key -message]} {
-                dict set _events $key -message [twapi::eventlog_format_message [dict get $_events $key] -width -1]
+                dict set _events $key -message [string map {\r\n \n} [twapi::eventlog_format_message [dict get $_events $key] -width -1]]
             }
             return [dict get $_events $key]
         }
@@ -165,7 +165,7 @@ oo::class create wits::app::wineventlog::Objects {
                 set status updated
                 if {[info exists _events]} {
                     dict for {key eventrec} $_events {
-                        dict set _events $key -message [twapi::eventlog_format_message $eventrec -width -1]
+                        dict set _events $key -message [string map {\r\n \n} [twapi::eventlog_format_message $eventrec -width -1]]
                     }
                 }
                 set _messages_formatted 1
@@ -189,7 +189,7 @@ oo::class create wits::app::wineventlog::Objects {
                     # on application, source and category file
                     dict set eventrec -category [twapi::eventlog_format_category $eventrec -width -1]
                     if {$_messages_formatted} {
-                        dict set eventrec -message  [twapi::eventlog_format_message $eventrec -width -1]
+                        dict set eventrec -message [string map {\r\n \n} [twapi::eventlog_format_message $eventrec -width -1]]
                     }                    
                     dict set eventrec -account [dict get $eventrec -sid]
                     if {[dict get $eventrec -sid] ne ""} {
