@@ -326,6 +326,10 @@ oo::class create util::PropertyRecordCollection {
     }
 
 
+    method exists {id {freshness 0}} {
+        return [expr {[dict size [my _getcachedrecord $id $freshness]] != 0}]
+    }
+
     method get_record {id propnames {freshness 0}} {
         # Returns the property values for a single record
         #  id - record id whose properties are to be returned
