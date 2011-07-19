@@ -381,8 +381,15 @@ snit::type ::wits::app::eventmanager {
 
     method _remote_share_handler {event_obj} {
         # TBD - combine the next two commands ?
-        set name [$event_obj -with [list TargetInstance] RemoteName]
-        set user     [$event_obj -with [list TargetInstance] UserName]
+        set instance [$event_obj TargetInstance]
+        twapi::trap {
+            set name [$instance RemoteName]
+            set user [$instance UserName]
+            set localdevice [$instance LocalName]
+        } finally {
+            $instance destroy
+        }
+
         switch -exact -- [$event_obj -with [list Path_] Class] {
             "__InstanceCreationEvent" {
                 set action "Connected to"
@@ -403,12 +410,25 @@ snit::type ::wits::app::eventmanager {
             # remote context and we may or may not have information on him.
             set user "user $user"
         }
-        $self reportevent \
-            "$action remote share %<link {[util::encode_url $name]} [::wits::app::make_pageview_link ::wits::app::remote_share $name]> as $user." \
-            "$action remote share $name as $user." \
-            [::twapi::large_system_time_to_secs [$event_obj TIME_CREATED]] \
-            info \
-            share
+
+        if {$localdevice eq ""} {
+            $self reportevent \
+                "$action remote share %<link {[util::encode_url $name]} [::wits::app::make_pageview_link ::wits::app::remote_share $name]> as $user." \
+                "$action remote share $name as $user." \
+                [::twapi::large_system_time_to_secs [$event_obj TIME_CREATED]] \
+                info \
+                share
+        } else {
+            # If there is a local device connected, it is the key for
+            # looking up objects.
+            $self reportevent \
+                "$action remote share %<link {[util::encode_url $name]} [::wits::app::make_pageview_link ::wits::app::remote_share $localdevice]> mapped to $localdevice as $user." \
+                "$action remote share $name mapped to $localdevice as $user." \
+                [::twapi::large_system_time_to_secs [$event_obj TIME_CREATED]] \
+                info \
+                share
+            
+        }
     }
 
 
