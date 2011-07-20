@@ -192,7 +192,9 @@ oo::class create wits::app::user::Objects {
                     # Already set via get_sid_info above
                 }
                 -sid {
-                    dict set result -sid $sid
+                    # The cache lowercases all keys (sid in this case)
+                    # but we want to display upper case
+                    dict set result -sid "S[string range $sid 1 end]"
                 }
                 default {
                     # Note get_user_account_info field names have a 
