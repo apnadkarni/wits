@@ -795,8 +795,13 @@ proc ::wits::app::add_to_taskbar {} {
             }
         }
 
-        # Add Icon to the task bar
-        set taskbarIconId [twapi::systemtray addicon $taskbarIconH [namespace current]::taskbar_handler]
+        # Add Icon to the task bar. This may fail if there is no taskbar
+        # for example on ServerCore
+        if {[catch {
+            set taskbarIconId [twapi::systemtray addicon $taskbarIconH [namespace current]::taskbar_handler]
+        }]} {
+            return
+        }
 
         # Bind so when we deiconify, we remove ourselves from the taskbar
         set savedUnmapBinding [bind Snit::wits::app::mainview.mv <Unmap>]
@@ -1720,7 +1725,19 @@ proc wits::app::name_to_sid {name} {
     variable _name_to_sid_cache
 
     if {![info exists _name_to_sid_cache($name)]} {
-        set _name_to_sid_cache($name) [twapi::lookup_account_name $name]
+        if {[string equal -nocase $name "LocalSystem"]} {
+            # Try to map it but LocalSystem is a special name used by
+            # services on Vista+ that does not map to an SID. It actually
+            # corresponds to the SYSTEM account.
+            # TBD - is this name language independent ?
+            if {[catch {
+                set _name_to_sid_cache($name) [twapi::lookup_account_name $name]
+            }]} {
+                set _name_to_sid_cache($name) [twapi::lookup_account_name SYSTEM]
+            }
+        } else {
+            set _name_to_sid_cache($name) [twapi::lookup_account_name $name]
+        }
     }
 
     return $_name_to_sid_cache($name)
