@@ -117,6 +117,10 @@ oo::class create wits::app::netconn::Objects {
         next [get_property_defs] -ignorecase 0 -refreshinterval 2000
     }
 
+    destructor {
+        next
+    }
+
     method _retrieve {propnames force} {
         set conns {}
         

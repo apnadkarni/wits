@@ -297,6 +297,10 @@ oo::class create wits::app::netif::Objects {
         next [get_property_defs] -ignorecase 1 -refreshinterval 15000
     }
 
+    destructor {
+        next
+    }
+
     method _get_one {ver ifindex} {
         
         if {$ver == 4} {

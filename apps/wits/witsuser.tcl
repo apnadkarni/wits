@@ -177,6 +177,10 @@ oo::class create wits::app::user::Objects {
         next [get_property_defs] -ignorecase 1 -refreshinterval 60000
     }
 
+    destructor {
+        next
+    }
+
     method _retrieve1 {sid propnames} {
         set result [get_sid_info $sid]
         set system [wits::app::account::get_defining_system_for_account $sid]

@@ -119,6 +119,10 @@ oo::class create wits::app::group::Objects {
         next [get_property_defs] -ignorecase 1 -refreshinterval 60000
     }
 
+    destructor {
+        next
+    }
+
     method _retrieve1 {sid propnames} {
         set get_group_info_opts {}
         set result [get_sid_info $sid]

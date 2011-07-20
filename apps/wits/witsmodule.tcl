@@ -97,6 +97,10 @@ oo::class create wits::app::module::Objects {
         next [get_property_defs] -ignorecase 0 -refreshinterval 15000
     }
 
+    destructor {
+        next
+    }
+
     method _retrieve1 {id propnames} {
         # Option "-path" is expensive
         if {"-path" in $propnames} {

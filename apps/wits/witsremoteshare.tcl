@@ -173,6 +173,10 @@ oo::class create wits::app::remote_share::Objects {
         next [get_property_defs] -ignorecase 1 -refreshinterval 10000
     }
 
+    destructor {
+        next
+    }
+
     method _retrieve {propnames force} {
         set recs {}
         

@@ -92,6 +92,10 @@ oo::class create wits::app::driver::Objects {
         next [get_property_defs] -ignorecase 1 -refreshinterval 60000
     }
 
+    destructor {
+        next
+    }
+
     method _retrieve {propnames force} {
         set retrieved_properties {}
 

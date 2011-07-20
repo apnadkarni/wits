@@ -176,6 +176,10 @@ oo::class create wits::app::service::Objects {
         next [get_property_defs] -ignorecase 1 -refreshinterval 10000
     }
 
+    destructor {
+        next
+    }
+
     method _retrieve1 {id propnames} {
         # We will only return the properties that have to be gotten for
         # one record at a time. The rest the caller will get from the

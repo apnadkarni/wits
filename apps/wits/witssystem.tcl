@@ -307,6 +307,10 @@ oo::class create wits::app::system::Objects {
         next $propdefs -ignorecase 0 -refreshinterval 2000
     }
 
+    destructor {
+        next
+    }
+
     method _init_fixed_properties {} {
         # Initialize fixed properties
         set  _fixed_system_properties [twapi::get_memory_info -allocationgranularity -pagesize -minappaddr -maxappaddr]

@@ -126,6 +126,10 @@ oo::class create wits::app::logonsession::Objects {
         next [get_property_defs] -ignorecase 1 -refreshinterval 15000
     }
 
+    destructor {
+        next
+    }
+
     method _retrieve {propnames force} {
         foreach sess_id [twapi::find_logon_sessions] {
             if {[catch {

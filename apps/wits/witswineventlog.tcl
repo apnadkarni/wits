@@ -140,6 +140,7 @@ oo::class create wits::app::wineventlog::Objects {
         foreach {src h} [array get _hevents] {
             twapi::eventlog_close $h
         }
+        next
     }
 
     method _retrieve1 {key propnames} {

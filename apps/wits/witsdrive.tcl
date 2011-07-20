@@ -159,6 +159,10 @@ oo::class create wits::app::drive::Objects {
         next [get_property_defs] -ignorecase 1 -refreshinterval 15000
     }
 
+    destructor {
+        next
+    }
+
     method _get_one {drv propnames} {
         # Enclose call in a try because the device may not be ready
         twapi::trap {
