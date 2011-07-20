@@ -262,12 +262,43 @@ oo::class create wits::app::wineventlog::Objects {
                  
         return [lindex $_ordered_events $pos 1]
     }
+
+    method potential_count {} {
+        # Returns potential number of records without actually reading them
+        set count 0
+        foreach src {Application System Security} {
+            if {![info exists _hevents($src)]} {
+                set _hevents($src) [twapi::eventlog_open -source $src]
+            }
+
+            set hevl $_hevents($src)
+            incr count [twapi::eventlog_count $hevl]
+            # Note we keep hevl open
+        }        
+        return $count
+    }
 }
 
 
-# Create a new window showing processes
 proc wits::app::wineventlog::viewlist {args} {
     variable _table_properties
+
+    set objects [::wits::app::get_objects [namespace current]]
+    set count [$objects potential_count]
+    if {[$objects potential_count] > 10000} {
+        set response [::wits::widget::showconfirmdialog \
+                          -title $::wits::app::dlg_title_confirm \
+                          -message "There are $count events in the Windows event logs. This may a take a little while to display. Do you want to continue ?" \
+                          -modal local \
+                          -icon warning \
+                          -defaultbutton no \
+                          -type yesno
+                     ]
+        
+        if {$response ne "yes"} {
+            return
+        }
+    }
 
     get_property_defs;          # Just to init _table_properties
 
