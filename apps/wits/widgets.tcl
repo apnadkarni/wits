@@ -2237,7 +2237,8 @@ snit::widgetadaptor wits::widget::dialogx {
 
     method _setdefaultbutton {opt val} {
         set options($opt) $val
-        if {$options(-defaultbutton) ne ""} {
+        if {$options(-defaultbutton) ne "" &&
+            [info exists _buttonsw($options(-defaultbutton))] } {
             keynav::defaultButton $_buttonsw($options(-defaultbutton))
         }
     }
