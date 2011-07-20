@@ -68,13 +68,17 @@ namespace eval wits::app::account {
 
     # Returns a property viewer
     proc viewdetails {account {makenew false}} {
-        set sid [twapi::map_account_to_sid $account]
+        if {![twapi::is_valid_sid_syntax $account]} {
+            set sid [wits::app::name_to_sid $account]
+        }
         set objtype [get_account_object_type $sid]
         return [[namespace parent]::viewdetails $objtype $sid $makenew]
     }
 
     proc getviewer {account} {
-        set sid [twapi::map_account_to_sid $account]
+        if {![twapi::is_valid_sid_syntax $account]} {
+            set sid [wits::app::name_to_sid $account]
+        }
         return [[get_account_object_type $sid] getviewer $sid]
     }
 }
