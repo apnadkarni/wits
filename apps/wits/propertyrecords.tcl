@@ -640,6 +640,10 @@ oo::class create util::PropertyRecordCollection {
         }
         set _refresh_interval $val
         my notify {} refreshinterval $val
+        if {$_refresh_interval} {
+            # Schedule initial refresh immediately
+            $_scheduler after1 0 [list [self] refresh_callback]
+        }
     }
 
     method get_refresh_interval {} {
