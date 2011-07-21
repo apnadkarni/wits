@@ -169,7 +169,7 @@ proc wits::app::process::get_property_defs {} {
         -toplevels "Toplevel windows" "Toplevels" ::wits::app::window listtext 0
         -commandline "Command line" "Command line" "" text 0
         InheritedFromProcessId  "Parent process" "Parent" ::wits::app::process int 1
-        -logonsession "Logon session" "Session" ::wits::app::logonsession text 0
+        -logonsession "Logon session" "Logon Session" ::wits::app::logonsession text 1
         CPUPercent        "CPU %" "CPU%" "" int 1
         UserPercent       "User %" "User%" "" int 1
         KernelPercent     "Kernel %" "Kernel%" "" int 1
@@ -216,7 +216,7 @@ proc wits::app::process::get_property_defs {} {
 oo::class create wits::app::process::Objects {
     superclass util::PropertyRecordCollection
 
-    variable _records  _processor_count  _cpu_timestamp
+    variable _records  _processor_count  _cpu_timestamp  _ts2logonsession
 
     constructor {} {
         namespace path [concat [namespace path] [list [namespace qualifiers [self class]]]]
@@ -310,6 +310,7 @@ oo::class create wits::app::process::Objects {
     }
 
     method _retrieve {propnames force} {
+
         # Always get base properties
         set retrieved_properties {
 ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount ThreadCount CreateTime UserTime KernelTime VmCounters.PeakVirtualSize VmCounters.VirtualSize VmCounters.PageFaultCount VmCounters.PeakWorkingSetSize VmCounters.WorkingSetSize VmCounters.QuotaPeakPagedPoolUsage VmCounters.QuotaPagedPoolUsage VmCounters.QuotaPeakNonPagedPoolUsage VmCounters.QuotaNonPagedPoolUsage VmCounters.PagefileUsage VmCounters.PeakPagefileUsage IoCounters.ReadOperationCount IoCounters.WriteOperationCount IoCounters.OtherOperationCount IoCounters.ReadTransferCount IoCounters.WriteTransferCount IoCounters.OtherTransferCount
@@ -400,6 +401,12 @@ ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount 
                 set want_desc 0
             }
 
+            if {"-logonsession" in $opts} {
+                lappend opts -tssession; # Might need to get logonsession
+                set want_logonsession 1
+            } else {
+                set want_logonsession 0
+            }
             lappend retrieved_properties {*}$opts
 
             if {"-groups" in $opts} {
@@ -423,13 +430,55 @@ ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount 
             }
 
 
-            set optvals [twapi::get_multiple_process_info {*}$opts]
+            set optvals [twapi::get_multiple_process_info -noaccess (unknown) {*}$opts]
 
             # Do not just merge, we want a consistent view so only
             # pick up entries that existed in above call
             dict for {pid rec} $new {
                 if {$want_desc} {
                     dict set rec -description [wits::app::process_path_to_version_description [dict get $optvals $pid -path]]
+                }
+
+                if {$want_logonsession} {
+                    # we may not have access to process tokens in other logon
+                    # session. Try to get from previous retrieval, or if
+                    # first time, try to match against terminal session.
+                    if {[dict exists $optvals $pid -logonsession] &&
+                        [dict get $optvals $pid -logonsession] eq "(unknown)" &&
+                        [dict exists $optvals $pid -tssession]} {
+                        # Could not get logonsession from token. See if
+                        # we already retrieved it before
+                        # Buglet - recycled PID ?
+                        if {[dict exists $_records $pid -logonsession] &&
+                            [dict get $_records $pid -logonsession] ne "(unknown)" } {
+                            dict set optvals $pid -logonsession [dict get $_records $pid -logonsession]
+                        } else {
+                            # Do not have it. But we do have the terminal
+                            # session. If we can get the logonsessions for
+                            # that, and there is only one, then this process
+                            # must belong to that logonsession. First though,
+                            # we check if we already went through this process
+                            # TBD - for efficiency, we should cache this
+                            # with a timeout
+                            set ts [dict get $optvals $pid -tssession]
+                            if {! [info exists _ts2logonsession($ts)]} {
+                                if {[catch {
+                                    twapi::find_logon_sessions -tssession $ts
+                                } _ts2logonsession($ts)]} {
+                                    set _ts2logonsession($ts) (unknown)
+                                } else {
+                                    if {[llength $_ts2logonsession($ts)] == 1} {
+                                        # Exactly one logon for the ts. Good!
+puts FOUND!
+                                        set _ts2logonsession($ts) [lindex $_ts2logonsession($ts) 0]
+                                    } else {
+                                        set _ts2logonsession($ts) (unknown)
+                                    }
+                                }
+                            }
+                            dict set optvals $pid -logonsession $_ts2logonsession($ts)
+                        }
+                    }
                 }
 
                 if {$want_groups} {
@@ -462,6 +511,17 @@ ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount 
 
         return [list updated [linsert $retrieved_properties end {*}$opts] $new]
     }
+
+    method housekeeping {args} {
+        # Gets called every 60 seconds
+
+        # Get rid of terminal session to logonsession cache
+        unset -nocomplain _ts2logonsession
+
+        next {*}$args
+    }
+
+
 }
 
 
