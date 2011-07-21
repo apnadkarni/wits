@@ -1412,9 +1412,9 @@ proc ::wits::app::make_command_link {command args} {
     return "$baseurl?[join $params &]"
 }
 
-proc ::wits::app::get_objects {objtype} {
+proc ::wits::app::get_objects {objtype args} {
     if {[llength [info commands ${objtype}::objects]] == 0} {
-        ${objtype}::Objects create ${objtype}::objects
+        ${objtype}::Objects create ${objtype}::objects {*}$args
     }
     return ${objtype}::objects
 }
