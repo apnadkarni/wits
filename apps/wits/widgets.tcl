@@ -5333,10 +5333,6 @@ snit::widgetadaptor wits::widget::listframe {
         foreach colname [dict keys $_columns] val $row {
             set col_id [dict get $_columns $colname id]
             $_treectrl item text $item $col_id $val
-            if {0} {
-                Now this is done only on the <Selection> event so inserts are faster
-                $_treectrl item state forcolumn $item $col_id [dict get $_columns $colname outline_state]
-            }
         }
 
         # Place child at end of table
