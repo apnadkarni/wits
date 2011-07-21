@@ -505,6 +505,11 @@ oo::class create wits::app::system::Objects {
 
         return [list updated [dict keys [dict get $newdata $::wits::app::system::_all_cpus_label]] $newdata]
     }
+
+    method dump {} {
+        return [list $_cpu_timestamps $_records]
+    }
+
 }
 
 proc wits::app::system::viewlist {args} {
