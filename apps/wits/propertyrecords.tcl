@@ -282,7 +282,9 @@ oo::class create util::PropertyRecordCollection {
         }
 
         set _scheduler [Scheduler new]
-        $_scheduler after1 0 [list [self] refresh_callback]
+        if {$_refresh_interval} {
+            $_scheduler after1 0 [list [self] refresh_callback]
+        }
         $_scheduler after1 60000 [list [self] housekeeping]
     }
 
