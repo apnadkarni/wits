@@ -117,14 +117,16 @@ proc wits::app::wineventlog::get_property_defs {} {
 oo::class create wits::app::wineventlog::Objects {
     superclass util::PropertyRecordCollection
 
-    variable  _events  _hevents  _messages_formatted  _ordered_events
+    variable  _events  _hevents  _messages_formatted  _ordered_events  _atoms
 
 
-    constructor {} {
+    constructor {args} {
         set ns [namespace qualifier [self class]]
         namespace path [concat [namespace path] [list $ns [namespace parent $ns]]]
 
         set _events [dict create]
+
+        array set _atoms {}
 
         # Flat list of timestamp, event key used for traversing forward
         # and backward through event list
@@ -133,7 +135,7 @@ oo::class create wits::app::wineventlog::Objects {
         # Expensive, so we only format if required
         set _messages_formatted 0
 
-        next [get_property_defs] -ignorecase 0 -refreshinterval 15000
+        next [get_property_defs] -ignorecase 0 -refreshinterval 15000 {*}$args
     }
 
     destructor {
@@ -155,23 +157,28 @@ oo::class create wits::app::wineventlog::Objects {
     }
 
     method _retrieve {propnames force} {
+        set status nochange
 
         # If property names contains -message, and we have not
-        # not previously formatted the message, need to do so
-
-        set status nochange
+        # previously formatted the message, need to do so
 
         if {! $_messages_formatted} {
             if {[lsearch -exact $propnames -message] >= 0} {
                 set status updated
                 if {[info exists _events]} {
                     dict for {key eventrec} $_events {
-                        dict set _events $key -message [string map {\r\n \n} [twapi::eventlog_format_message $eventrec -width -1]]
+                        dict set _events $key -message [my atomize [string map {\r\n \n} [twapi::eventlog_format_message $eventrec -width -1]]]
                     }
                 }
                 set _messages_formatted 1
             }
         }
+
+        # TBD - this call is a bit expensive see if we can limit it to every
+        # few minutes instead of every invocation
+        binary scan [lindex [twapi::GetTimeZoneInformation] 1] i@84i@168i tzoff stdoff daylightoff
+        incr tzoff $stdoff
+        incr tzoff $daylightoff
 
         foreach src {Application System Security} {
             if {![info exists _hevents($src)]} {
@@ -180,7 +187,6 @@ oo::class create wits::app::wineventlog::Objects {
 
             set hevl $_hevents($src)
 
-
             # Just add any new events starting with the last ones we read
             while {[llength [set events [twapi::eventlog_read $hevl]]]} {
                 set status updated
@@ -188,25 +194,27 @@ oo::class create wits::app::wineventlog::Objects {
                 foreach eventrec $events {
                     # Note category cannot be cached as it is dependent
                     # on application, source and category file
-                    dict set eventrec -category [twapi::eventlog_format_category $eventrec -width -1]
+                    dict set eventrec -type [my atomize [dict get $eventrec -type]]
+                    dict set eventrec -source [my atomize [dict get $eventrec -source]]
+                    dict set eventrec -category [my atomize [twapi::eventlog_format_category $eventrec -width -1]]
                     if {$_messages_formatted} {
-                        dict set eventrec -message [string map {\r\n \n} [twapi::eventlog_format_message $eventrec -width -1]]
+                        dict set eventrec -message [my atomize [string map {\r\n \n} [twapi::eventlog_format_message $eventrec -width -1]]]
                     }                    
-                    dict set eventrec -account [dict get $eventrec -sid]
+                    dict set eventrec -account [my atomize [dict get $eventrec -sid]]
                     if {[dict get $eventrec -sid] ne ""} {
                         catch {
                             dict set eventrec -account [wits::app::sid_to_name [dict get $eventrec -sid]]
                         }
                     }
-                    dict set eventrec -logsource $src
+                    dict set eventrec -logsource [my atomize $src]
                     # For compatibility with Windows event viewer only
                     # display low 16 bits
-                    dict set eventrec -eventcode [expr {0xffff & [dict get $eventrec -eventid]}]
+                    dict set eventrec -eventcode [my atomize [expr {0xffff & [dict get $eventrec -eventid]}]]
                     set timegenerated [dict get $eventrec -timegenerated]
                     # clock format is slow so do it now rather than display
                     # time
-                    dict set eventrec -timegenerated [clock format $timegenerated -format "%Y/%m/%d %H:%M:%S"]
-                    dict set eventrec -timewritten [clock format [dict get $eventrec -timewritten] -format "%Y/%m/%d %H:%M:%S"]
+                    dict set eventrec -timegenerated [util::format_localtime $timegenerated $tzoff]
+                    dict set eventrec -timewritten [util::format_localtime [dict get $eventrec -timewritten] $tzoff]
 
                     set key [list $src [dict get $eventrec -recordnum]]
                     dict set _events $key $eventrec
@@ -278,6 +286,23 @@ oo::class create wits::app::wineventlog::Objects {
         }        
         return $count
     }
+
+    method atomize {arg} {
+        # WHen reading very large event logs, reusing the same underlying Tcl object
+        # saves a lot of space. So we keep track of strings where _atom is an
+        # array that maps a string value to an existing Tcl_Obj with the same
+        # string value. On a 100,000 events system, this saves about 250MB of memory
+
+        if {![info exists _atoms($arg)]} {
+            set _atoms($arg) $arg
+        }
+        return $_atoms($arg)
+    }
+
+    method natoms {} {
+        return [array size _atoms]
+    }
+
 }
 
 
@@ -286,7 +311,7 @@ proc wits::app::wineventlog::viewlist {args} {
 
     set objects [::wits::app::get_objects [namespace current]]
     set count [$objects potential_count]
-    if {[$objects potential_count] > 10000} {
+    if {[$objects potential_count] > 20000} {
         set response [::wits::widget::showconfirmdialog \
                           -title $::wits::app::dlg_title_confirm \
                           -message "There are $count events in the Windows event logs. This may a take a little while to display. Do you want to continue ?" \
