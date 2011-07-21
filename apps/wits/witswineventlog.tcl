@@ -309,12 +309,14 @@ oo::class create wits::app::wineventlog::Objects {
 proc wits::app::wineventlog::viewlist {args} {
     variable _table_properties
 
-    set objects [::wits::app::get_objects [namespace current]]
+    # Do not want to immediately get data, there might be lots of it
+    # so pass -refreshinterval 0
+    set objects [::wits::app::get_objects [namespace current] -refreshinterval 0]
     set count [$objects potential_count]
     if {[$objects potential_count] > 20000} {
         set response [::wits::widget::showconfirmdialog \
                           -title $::wits::app::dlg_title_confirm \
-                          -message "There are $count events in the Windows event logs. This may a take a little while to display. Do you want to continue ?" \
+                          -message "There are $count events in the Windows event logs. This may take some time to display. Do you want to continue ?" \
                           -modal local \
                           -icon warning \
                           -defaultbutton no \
@@ -325,6 +327,8 @@ proc wits::app::wineventlog::viewlist {args} {
             return
         }
     }
+
+    $objects set_refresh_interval 15000; # Since we set it to 0 above
 
     get_property_defs;          # Just to init _table_properties
 
