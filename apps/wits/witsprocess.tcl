@@ -216,11 +216,12 @@ proc wits::app::process::get_property_defs {} {
 oo::class create wits::app::process::Objects {
     superclass util::PropertyRecordCollection
 
-    variable _records  _processor_count  _cpu_timestamp  _ts2logonsession
+    variable _records  _processor_count  _cpu_timestamp  _ts2logonsession _unknown_token
 
     constructor {} {
         namespace path [concat [namespace path] [list [namespace qualifiers [self class]]]]
 
+        set _unknown_token "(unknown)"
         set _cpu_timestamp 0
         set _processor_count [twapi::get_processor_count]
 
@@ -246,6 +247,10 @@ oo::class create wits::app::process::Objects {
         
         set rec [dict create]
         set propnames [lsearch -glob -inline -all $propnames[set propnames {}] -*]
+
+        if {"-logonsession" in $propnames} {
+            lappend propnames -tssession; # Might need it
+        }
 
         if {"-description" in $propnames} {
             set want_desc 1
@@ -280,7 +285,13 @@ oo::class create wits::app::process::Objects {
         }
 
         if {[llength $propnames]} {
-            set rec [dict merge $rec[set rec {}] [twapi::get_process_info $id {*}$propnames]]
+            set rec [dict merge $rec[set rec {}] [twapi::get_process_info $id -noaccess $_unknown_token {*}$propnames]]
+        }
+
+        if {[dict exists $rec -logonsession] &&
+            [dict get $rec -logonsession] eq $_unknown_token &&
+            [dict exists $rec -tssession]} {
+            dict set rec -logonsession [my map_tssession_to_logonsession [dict get $rec -tssession]]
         }
 
         if {$want_groups} {
@@ -430,7 +441,7 @@ ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount 
             }
 
 
-            set optvals [twapi::get_multiple_process_info -noaccess (unknown) {*}$opts]
+            set optvals [twapi::get_multiple_process_info -noaccess $_unknown_token {*}$opts]
 
             # Do not just merge, we want a consistent view so only
             # pick up entries that existed in above call
@@ -444,39 +455,16 @@ ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount 
                     # session. Try to get from previous retrieval, or if
                     # first time, try to match against terminal session.
                     if {[dict exists $optvals $pid -logonsession] &&
-                        [dict get $optvals $pid -logonsession] eq "(unknown)" &&
+                        [dict get $optvals $pid -logonsession] eq $_unknown_token &&
                         [dict exists $optvals $pid -tssession]} {
                         # Could not get logonsession from token. See if
                         # we already retrieved it before
                         # Buglet - recycled PID ?
                         if {[dict exists $_records $pid -logonsession] &&
-                            [dict get $_records $pid -logonsession] ne "(unknown)" } {
+                            [dict get $_records $pid -logonsession] ne $_unknown_token } {
                             dict set optvals $pid -logonsession [dict get $_records $pid -logonsession]
                         } else {
-                            # Do not have it. But we do have the terminal
-                            # session. If we can get the logonsessions for
-                            # that, and there is only one, then this process
-                            # must belong to that logonsession. First though,
-                            # we check if we already went through this process
-                            # TBD - for efficiency, we should cache this
-                            # with a timeout
-                            set ts [dict get $optvals $pid -tssession]
-                            if {! [info exists _ts2logonsession($ts)]} {
-                                if {[catch {
-                                    twapi::find_logon_sessions -tssession $ts
-                                } _ts2logonsession($ts)]} {
-                                    set _ts2logonsession($ts) (unknown)
-                                } else {
-                                    if {[llength $_ts2logonsession($ts)] == 1} {
-                                        # Exactly one logon for the ts. Good!
-puts FOUND!
-                                        set _ts2logonsession($ts) [lindex $_ts2logonsession($ts) 0]
-                                    } else {
-                                        set _ts2logonsession($ts) (unknown)
-                                    }
-                                }
-                            }
-                            dict set optvals $pid -logonsession $_ts2logonsession($ts)
+                            dict set optvals $pid -logonsession [my map_tssession_to_logonsession [dict get $optvals $pid -tssession]]
                         }
                     }
                 }
@@ -512,10 +500,32 @@ puts FOUND!
         return [list updated [linsert $retrieved_properties end {*}$opts] $new]
     }
 
+    # Used to figure out logon session based on terminal session for a process
+    # if possible
+    method map_tssession_to_logonsession {ts} {
+
+        if {! [info exists _ts2logonsession($ts)]} {
+            if {[catch {
+                twapi::find_logon_sessions -tssession $ts
+            } _ts2logonsession($ts)]} {
+                set _ts2logonsession($ts) $_unknown_token
+            } else {
+                if {[llength $_ts2logonsession($ts)] == 1} {
+                    # Exactly one logon for the ts. Good! Has to be the one
+                    set _ts2logonsession($ts) [lindex $_ts2logonsession($ts) 0]
+                } else {
+                    # 0 or more than one. Can't pick if more than one
+                    set _ts2logonsession($ts) $_unknown_token
+                }
+            }
+        }
+        return $_ts2logonsession($ts)
+    }
+
     method housekeeping {args} {
         # Gets called every 60 seconds
 
-        # Get rid of terminal session to logonsession cache
+        # Clear terminal session to logonsession cache
         unset -nocomplain _ts2logonsession
 
         next {*}$args
