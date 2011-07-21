@@ -646,6 +646,7 @@ oo::class create util::PublisherMixin {
     }
 
     destructor {
+
         # Deletes the object after notifying subscribers
 
         # Notify subscribers of the publisher being deleted
@@ -662,6 +663,8 @@ oo::class create util::PublisherMixin {
         # Note object scheduler is automatically destroyed so
         # do not call [scheduler destroy]. AND this will also
         # cancel any scheduled notifications (other than the _DELETE_ above)
+
+        next
     }
 
     method subscribe {cmd args} {
@@ -1294,6 +1297,15 @@ proc util::hexify {data {width 1} {count -1} {linewidth 8}} {
         lappend result [format "%s %-${linewidth}s" $hex $row]
     }
     return [join $result \n]
+}
+
+
+# Secs since 1970 -> YYYY/MM/DD HH:MM:SS
+# [clock format] is much slower
+# tzoff is (localtime - utc) in minutes
+# This can be obtained from twapi::GetTimeZoneInformation
+proc util::format_localtime {secs tzoff} {
+    return [format "%d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d" {*}[twapi::FileTimeToSystemTime [expr {(($secs - ($tzoff*60)) * 10000000) + 116444736000000000}]]]
 }
 
 
