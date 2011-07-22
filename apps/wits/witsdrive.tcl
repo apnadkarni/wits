@@ -204,20 +204,20 @@ oo::class create wits::app::drive::Objects {
             if {$vals(-type) ne "remote"} {
                 set vals(-volumename) [twapi::get_mounted_volume_name $drv]
             }
-        } onerror {TWAPI_WIN32 2} {
-            # ERROR_NO_SUCH_FILE
-            set vals(-status) "No such device"
-        } onerror {TWAPI_WIN32 3} {
-            # ERROR_NO_SUCH_PATH
-            set vals(-status) "No such device"
-        } onerror {TWAPI_WIN32 15} {
-            # ERROR_INVALID_DRIVE
-            set vals(-status) "No such device"
         } onerror {TWAPI_WIN32 21} {
             set vals(-status) "Device not ready"
         } onerror {TWAPI_WIN32} {
-            # Ignore
+            lassign $errorCode fac code
+            if {$code == 2 || $code == 3 || $code == 15} {
+                # ERROR_NO_SUCH_FILE
+                # ERROR_NO_SUCH_PATH
+                # ERROR_INVALID_DRIVE
+                error $errorResult $errorInfo $errorCode
+            }
+            # Other errors, just set the status
+            set vals(-status) "Error: $errorResult"
         }
+
         return [array get vals]
     }
 

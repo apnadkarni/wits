@@ -245,7 +245,6 @@ oo::class create wits::app::process::Objects {
         # The "collective" properties do not start with "-" so
         # easy enough to tell 
         
-        set rec [dict create]
         set propnames [lsearch -glob -inline -all $propnames[set propnames {}] -*]
 
         if {"-logonsession" in $propnames} {
@@ -284,8 +283,11 @@ oo::class create wits::app::process::Objects {
             set want_restrictedgroups 0
         }
 
-        if {[llength $propnames]} {
-            set rec [dict merge $rec[set rec {}] [twapi::get_process_info $id -noaccess $_unknown_token {*}$propnames]]
+        # We always make this call to check pid even if $propnames is empty
+        set rec [twapi::get_process_info $id -noaccess $_unknown_token -noexist "" -pid {*}$propnames]
+
+        if {[dict get $rec -pid] eq ""} {
+            error "The specified process does not exist or is inaccessible."
         }
 
         if {[dict exists $rec -logonsession] &&
@@ -557,7 +559,7 @@ proc wits::app::process::viewlist {args} {
                 -colattrs {-path {-squeeze 1} ProcessName {-squeeze 1} -description {-squeeze 1}} \
                 -nameproperty ProcessName \
                 -descproperty -description \
-                -detailfields {ProcessId -user -commandline CPUPercent ThreadCount HandleCount VmCounters.VirtualSize VmCounters.WorkingSetSize -elapsedtime} \
+                -detailfields {ProcessName -description ProcessId -user -commandline CPUPercent ThreadCount HandleCount VmCounters.VirtualSize VmCounters.WorkingSetSize -elapsedtime} \
                 {*}$args
                ]
 }

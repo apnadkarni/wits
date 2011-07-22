@@ -560,6 +560,9 @@ oo::class create util::PropertyRecordCollection {
         #
         # The returned dictionary may not have all (or any) of the
         # requested properties.
+        #
+        # If it is known the object does not exist, the method
+        # should an empty list or raise error. It must not return any defaults.
 
         return {}
     }

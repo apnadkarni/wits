@@ -5732,7 +5732,9 @@ snit::widgetadaptor wits::widget::listframe {
     # Tool links for the tool dropdown
     option -tooltitle -readonly true -default "Tools"
 
-    # Properties to dissplay in details dropdown
+    # Properties to dissplay in details dropdown.
+    # NOTE THESE MUST ALSO BE INCLUDED IN the -detailfields OPTION
+    # TBD - automatically include them
     delegate option -nameproperty to _detailsframe
     delegate option -descproperty to _detailsframe
     delegate option -objlinkcommand to _detailsframe as -command
