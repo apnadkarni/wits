@@ -6518,7 +6518,14 @@ snit::widgetadaptor wits::widget::listframe {
         #   call the open/closed methods again as the case may be
         if {[llength $sel] == 1} {
             set _details_recid [lindex $sel 0]
-            set proplist [$_records_provider get_formatted_record $_details_recid $options(-detailfields) $_refreshinterval]
+            if {[catch {
+                set proplist [$_records_provider get_formatted_record $_details_recid $options(-detailfields) $_refreshinterval]
+            } msg]} {
+                after 0 [list wits::widget::showerrordialog $msg -title "No such object."]
+            }
+        }
+
+        if {[info exists proplist]} {
             $_detailsframe open
         } else {
             set _details_recid ""
