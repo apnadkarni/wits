@@ -699,6 +699,7 @@ proc wits::app::process::getviewer {pid} {
 
     set objects [get_objects [namespace current]]
     set name [$objects get_field $pid ProcessName]
+
     if {$name ne ""} {
         set title "$name (PID $pid)"
     } else {
