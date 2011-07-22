@@ -2,6 +2,6 @@
 namespace eval ::wits::app { 
 variable name "WiTS" 
 variable long_name "Windows Inspection Tool Set" 
-variable version "3.0.11" 
+variable version "3.0.13" 
 variable release_type "b" 
 } 
