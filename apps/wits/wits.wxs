@@ -105,8 +105,6 @@
     <!-- Prevent downgrading -->
     <CustomAction Id="PreventDowngrading"
                   Error="Newer version of this product is already installed." />
-    <!-- Command to launch the program after completion of setup -->
-    <CustomAction Id='LaunchFile' FileKey='WitsEXE' ExeCommand='' Return="asyncNoWait" />
 
     <!-- Terminate any existing copies of the program -->
     <CustomAction Id="KillWiTS" ExeCommand='"[INSTALLDIR]wits.exe" -killall' Directory='INSTALLDIR' Return="ignore" />
@@ -204,7 +202,9 @@
 
     <!-- USER INTERFACE -->
 
-    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.WitsName)" />
+    <!-- Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.WitsName)" -->
+    <SetProperty Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.WitsName)" After="CostFinalize" Sequence="ui">NOT REMOVE</SetProperty>
+    <SetProperty Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" After="CostFinalize" Sequence="ui">NOT REMOVE</SetProperty>
     <CustomAction Id="LaunchApplication" FileKey="WitsEXE" ExeCommand='' Return='asyncNoWait' Impersonate="yes" />
 
     <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
@@ -212,10 +212,10 @@
       <Publish Dialog="ExitDialog"
 	       Control="Finish" 
 	       Event="DoAction" 
-	       Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
+	       Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1</Publish>
       <InstallUISequence>
          <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWERVERSIONDETECTED</Custom>
-       </InstallUISequence>
+      </InstallUISequence>
     </UI>
     <UIRef Id="WixUI_Minimal" />
 
