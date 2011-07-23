@@ -3,7 +3,7 @@ UILONGNAME=Windows Inspection Tool Set
 UISHORTNAME=WiTS
 APPVERSIONMAJOR=3
 APPVERSIONMINOR=0
-APPVERSIONPATCH=15
+APPVERSIONPATCH=16
 RELEASETYPE=b
 # NOTE - the order of files here is important. It must be the same order
 # as required to be stored in the concatenated .tm file
@@ -146,12 +146,14 @@ MSIPATH="$(DISTBUILDDIR)\$(MSINAME)"
         cd $(DISTBUILDDIR) && $(ZIP) -r nuvola.zip nuvola
 
 
-$(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" wits.wxs $(APPICO) binary-license.rtf "$(TREECTRLDIR)\treectrl24.dll"
+$(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" wits.wxs $(APPICO) binary-license.rtf "$(TREECTRLDIR)\treectrl24.dll" images\icons\witsinstalldialog.bmp images\icons\witsinstallbanner.bmp
 	-mkdir "$(DISTBUILDDIR)"
 	copy /b /y "$(BUILDDIR)\$(APPTARGET).exe" "$(DISTBUILDDIR)\$(APPNAME).exe"
 	copy "$(TREECTRLDIR)\treectrl24.dll" "$(DISTBUILDDIR)"
         copy /y $(APPICO) "$(DISTBUILDDIR)"
         copy /y binary-license.rtf "$(DISTBUILDDIR)\License.rtf"
+        copy /y images\icons\witsinstalldialog.bmp "$(DISTBUILDDIR)"
+        copy /y images\icons\witsinstallbanner.bmp "$(DISTBUILDDIR)"
         set PRODUCT_LONG_NAME=$(UILONGNAME)
         set PRODUCT_SHORT_NAME=$(UISHORTNAME)
         set PRODUCT_VERSION=$(PRODUCTVERSION)

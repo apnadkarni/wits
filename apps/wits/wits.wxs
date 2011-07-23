@@ -208,7 +208,8 @@
     <CustomAction Id="LaunchApplication" FileKey="WitsEXE" ExeCommand='' Return='asyncNoWait' Impersonate="yes" />
 
     <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
-    <WixVariable Id="WixUIDialogBmp" Value="icon7.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="witsinstalldialog.bmp" />
+    <WixVariable Id="WixUIBannerBmp" Value="witsinstallbanner.bmp" />
     <UI>
       <Publish Dialog="ExitDialog"
 	       Control="Finish" 
