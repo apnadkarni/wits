@@ -79,7 +79,7 @@
     <Property Id='ARPHELPLINK' Value='http://wits.magicsplat.com/support.html' />
     <Property Id='ARPCOMMENTS' Value='Utility for inspecting Windows components' />
     <Property Id='ARPPRODUCTICON' Value='wits.ico' />
-    <Property Id="ALLUSERS">1</Property>
+    <!-- Property Id="ALLUSERS">1</Property -->
 
     <Property Id="LAUNCHPRODUCT">1</Property>
 
@@ -107,12 +107,14 @@
                   Error="Newer version of this product is already installed." />
 
     <!-- Terminate any existing copies of the program -->
-    <CustomAction Id="KillWiTS" ExeCommand='"[INSTALLDIR]wits.exe" -killall' Directory='INSTALLDIR' Return="ignore" />
+    <CustomAction Id="KillWiTS" ExeCommand='"[APPLICATIONFOLDER]wits.exe" -killall' Directory='APPLICATIONFOLDER' Return="ignore" />
 
 
+    <Property Id="ApplicationFolderName"  Value="$(var.WitsName)" />
+    <Property Id="WixAppFolder" Value="WixPerUserFolder" />
     <Directory Id='TARGETDIR' Name='SourceDir'>
       <Directory Id='$(var.WitsProgramFilesFolder)' Name='PFiles'>
-        <Directory Id='INSTALLDIR' ShortName='WiTS' Name='$(var.WitsName)'>
+        <Directory Id='APPLICATIONFOLDER' ShortName='WiTS' Name='$(var.WitsName)'>
           <Component Id='MainExecutable'
 		     Guid='$(var.WitsGuidMainExecutable)'
 		     Win64='$(var.WitsWin64)'>
@@ -125,14 +127,14 @@
               <Shortcut Id="startmenuWits"
                         Directory="ProgramMenuDir"
                         Name="WiTS"
-                        WorkingDirectory='INSTALLDIR'
+                        WorkingDirectory='APPLICATIONFOLDER'
 			Advertise='yes'
                         Icon="wits.ico"
                         IconIndex="0" />
               <Shortcut Id="desktopWits"
                         Directory="DesktopFolder"
                         Name="WiTS"
-                        WorkingDirectory='INSTALLDIR'
+                        WorkingDirectory='APPLICATIONFOLDER'
 			Advertise='yes'
                         Icon="wits.ico"
                         IconIndex="0" />
@@ -159,13 +161,13 @@
 	      <RegistryValue
 		  Name="WiTS"
 		  Type="string"
-		  Value='"[INSTALLDIR]wits.exe" -iconify'/>
+		  Value='"[APPLICATIONFOLDER]wits.exe" -iconify'/>
 	    </RegistryKey>
             <RegistryKey Root="HKCU"
 			 Key="Software\$(var.WitsName)"
 			 Action="createAndRemoveOnUninstall">
 	      <RegistryKey Key="General" Action="create">
-		<RegistryValue Name='InstallDir' Type='string' Value='[INSTALLDIR]' />
+		<RegistryValue Name='InstallDir' Type='string' Value='[APPLICATIONFOLDER]' />
 		<RegistryValue Name="RunAtLogon" Type="integer" Value='1' />
 	      </RegistryKey>
 	      <RegistryKey Key="Software Updates" Action='create'>
@@ -192,7 +194,7 @@
     </Directory>
 
     <Feature Id='Complete' Title='$(var.WitsName)' Description='Complete package.'
-      Display='expand' Level='1' ConfigurableDirectory='INSTALLDIR'>
+      Display='expand' Level='1' ConfigurableDirectory='APPLICATIONFOLDER'>
       <Feature Id='MainProgram' Title='Program' Description='The main executable.' Level='1'>
         <ComponentRef Id='MainExecutable' />
         <ComponentRef Id='Settings' />
@@ -219,7 +221,7 @@
          <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWERVERSIONDETECTED</Custom>
       </InstallUISequence>
     </UI>
-    <UIRef Id="WixUI_Minimal" />
+    <UIRef Id="Wits_InstallUI" />
 
     <Icon Id="wits.ico" SourceFile="wits.ico" />
 

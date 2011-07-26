@@ -146,7 +146,7 @@ MSIPATH="$(DISTBUILDDIR)\$(MSINAME)"
         cd $(DISTBUILDDIR) && $(ZIP) -r nuvola.zip nuvola
 
 
-$(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" wits.wxs $(APPICO) binary-license.rtf "$(TREECTRLDIR)\treectrl24.dll" images\icons\witsinstalldialog.bmp images\icons\witsinstallbanner.bmp
+$(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" wits.wxs witsinstallui.wxs $(APPICO) binary-license.rtf "$(TREECTRLDIR)\treectrl24.dll" images\icons\witsinstalldialog.bmp images\icons\witsinstallbanner.bmp
 	-mkdir "$(DISTBUILDDIR)"
 	copy /b /y "$(BUILDDIR)\$(APPTARGET).exe" "$(DISTBUILDDIR)\$(APPNAME).exe"
 	copy "$(TREECTRLDIR)\treectrl24.dll" "$(DISTBUILDDIR)"
@@ -159,8 +159,9 @@ $(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" wits.wxs $(APPICO) binary-license.rtf
         set PRODUCT_VERSION=$(PRODUCTVERSION)
         set PRODUCT_RELEASE_NAME=$(UILONGNAME) $(PRODUCTVERSIONSTR) $(UIPLATFORM) 
         set APP_SHORT_NAME=$(UISHORTNAME)
-        "$(WIXDIR)\bin\candle.exe" wits.wxs -out "$(DISTBUILDDIR)\wits-$(PLATFORM).wixobj" -dWitsPlatform=$(PLATFORM)
-	"$(WIXDIR)\bin\light.exe" -ext WixUIExtension -cultures:en-us "$(DISTBUILDDIR)\wits-$(PLATFORM).wixobj" -out $(MSIPATH)
+        "$(WIXDIR)\bin\candle.exe" wits.wxs -out "$(DISTBUILDDIR)\wits.wixobj" -dWitsPlatform=$(PLATFORM)
+        "$(WIXDIR)\bin\candle.exe" witsinstallui.wxs -out "$(DISTBUILDDIR)\witsinstallui.wixobj" -dWitsPlatform=$(PLATFORM)
+	"$(WIXDIR)\bin\light.exe" "$(DISTBUILDDIR)\wits.wixobj" "$(DISTBUILDDIR)\witsinstallui.wixobj" -ext WixUIExtension -cultures:en-us -out $(MSIPATH)
         cd "$(DISTDIR)" && del license.rtf wits.wixobj license.rtf nuvola.zip wits.ico *.wixobj *.wixpdb
 
 "$(DISTDIR)\$(MSINAME)": $(MSIPATH)
