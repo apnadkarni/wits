@@ -226,7 +226,12 @@
     <Icon Id="wits.ico" SourceFile="wits.ico" />
 
     <InstallExecuteSequence>
-      <Custom Action='KillWiTS' Before='InstallValidate'>Installed</Custom>
+      <!--
+	  Commented out - let the Windows installer take care of this else
+	  we would need to figure out which processes to kill when installed
+	  on a per-user basis
+	  Custom Action='KillWiTS' Before='InstallValidate' Installed /Custom
+	-->
       <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWERVERSIONDETECTED</Custom>
       <RemoveExistingProducts After="InstallInitialize" />
     </InstallExecuteSequence>
