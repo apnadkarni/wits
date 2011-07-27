@@ -78,12 +78,8 @@ Todo:
 
             <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
             
-	    <!--
-		Only show License after Welcome if new install or a
-		patch or if upgrading older version.
-	    -->
-            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg" Order="1">NOT Installed OR PATCH OR OLDERVERSIONUPGRADED</Publish>
-	    <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="2">Installed</Publish>
+	    <!-- Always show license -->
+            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg" Order="1">1</Publish>
 
 	    <!--
 		After license agreement, if package supports both per-machine 

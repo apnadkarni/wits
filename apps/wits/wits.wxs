@@ -53,15 +53,9 @@
 
     <!-- UPGRADE INFORMATION -->
 
-    <Upgrade Id='$(var.WitsUpgradeCode)'>
-      <UpgradeVersion  Property='NEWERVERSIONDETECTED'
-	  Minimum='$(var.WitsVersion)' IncludeMinimum='yes'
-	  OnlyDetect='yes' />
-      <UpgradeVersion Property='OLDERVERSIONBEINGUPGRADED'
-	  Minimum='1.0.0'  IncludeMinimum='yes'
-	  Maximum='$(var.WitsVersion)'  IncludeMaximum='no'
-	  OnlyDetect='no' />
-    </Upgrade>
+    <MajorUpgrade
+       DowngradeErrorMessage="A later version of [ProductName] is already installed. Setup will now exit."
+       />
 
     <!-- MEDIA DEFINITIONS -->
 
@@ -79,7 +73,13 @@
     <Property Id='ARPHELPLINK' Value='http://wits.magicsplat.com/support.html' />
     <Property Id='ARPCOMMENTS' Value='Utility for inspecting Windows components' />
     <Property Id='ARPPRODUCTICON' Value='wits.ico' />
-    <!-- Property Id="ALLUSERS">1</Property -->
+
+    <!-- 
+	 ALLUSERS must be set to 1, else Wits 2.1.1 upgrades are skipped
+	 as they are treated as per-machine while this would be per-user
+	 even though later the user may select as per-machine
+      -->
+    <Property Id="ALLUSERS">1</Property>
 
     <Property Id="LAUNCHPRODUCT">1</Property>
 
@@ -234,18 +234,13 @@
 	       Control="Finish" 
 	       Event="DoAction" 
 	       Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1</Publish>
-      <InstallUISequence>
-         <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWERVERSIONDETECTED</Custom>
-      </InstallUISequence>
     </UI>
-    <UIRef Id="Wits_InstallUI" />
+    <UIRef Id="WixUI_Minimal" />
 
     <Icon Id="wits.ico" SourceFile="wits.ico" />
 
     <InstallExecuteSequence>
       <Custom Action='KillWiTS' Before='InstallValidate'>Installed</Custom>
-      <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWERVERSIONDETECTED</Custom>
-      <RemoveExistingProducts After="InstallInitialize" />
     </InstallExecuteSequence>
 
   </Product>
