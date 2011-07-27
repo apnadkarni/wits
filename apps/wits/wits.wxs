@@ -219,6 +219,12 @@
     <!-- Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.WitsName)" -->
     <SetProperty Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.WitsName)" After="CostFinalize" Sequence="ui">NOT REMOVE</SetProperty>
     <SetProperty Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" After="CostFinalize" Sequence="ui">NOT REMOVE</SetProperty>
+    <!--
+	InstallScopeDialog uses [USERNAME] to identify user installing.
+	It should really use [LogonUser] since the former refers to whatever
+	is stored as the "owner" of the system, not the current account.
+    -->
+    <SetProperty Id="USERNAME" Value="[LogonUser]" After="CostFinalize" Sequence="both">1</SetProperty>
 
     <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
     <WixVariable Id="WixUIDialogBmp" Value="witsinstalldialog.bmp" />
