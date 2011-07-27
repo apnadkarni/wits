@@ -20,6 +20,7 @@ makefile = native
 
 **.lzma = BIN
 **.zip = BIN
+**.7z  = BIN
 **.kit = BIN
 **.exe = BIN
 **.dll = BIN

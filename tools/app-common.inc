@@ -157,7 +157,7 @@ MT="$(PROGRAMFILES)\Microsoft SDKs\Windows\v7.0\bin\mt.exe"
 !endif
 
 !ifndef 7ZIPDIR
-7ZIPDIR=$(PROGRAMFILES)\7-zip
+7ZIPDIR=$(TOOLDIR)\7-zip
 !endif
 
 # Define standard targets
