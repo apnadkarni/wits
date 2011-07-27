@@ -37,8 +37,8 @@ Todo:
 
         <PropertyRef Id="ApplicationFolderName" />
 
-        <CustomAction Id="WitsSetDefaultPerUserFolder" Property="WixPerUserFolder" Value="[LocalAppDataFolder]Apps\[ApplicationFolderName]" Execute="immediate" />
-        <CustomAction Id="WitsSetDefaultPerMachineFolder" Property="WixPerMachineFolder" Value="[ProgramFilesFolder][ApplicationFolderName]" Execute="immediate" />
+        <CustomAction Id="WitsSetDefaultPerUserFolder" Property="WixPerUserFolder" Value="[LocalAppDataFolder]Apps\[ApplicationFolderName]\" Execute="immediate" />
+        <CustomAction Id="WitsSetDefaultPerMachineFolder" Property="WixPerMachineFolder" Value="[ProgramFilesFolder][ApplicationFolderName]\" Execute="immediate" />
         <CustomAction Id="WitsSetPerUserFolder" Property="APPLICATIONFOLDER" Value="[WixPerUserFolder]" Execute="immediate" />
         <CustomAction Id="WitsSetPerMachineFolder" Property="APPLICATIONFOLDER" Value="[WixPerMachineFolder]" Execute="immediate" />
 
@@ -89,7 +89,7 @@ Todo:
 		After license agreement, if package supports both per-machine 
 		and per-user, give the user a choice. TBD - what if unprivileged ?
             -->
-	    <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="InstallScopeDlg" Order="1">!(wix.WixUISupportPerMachine) AND !(wix.WixUISupportPerUser) AND LicenseAccepted = "1"</Publish>
+	    <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="InstallScopeDlg" Order="1">!(wix.WixUISupportPerMachine) AND !(wix.WixUISupportPerUser) AND LicenseAccepted = "1" AND Privileged</Publish>
             <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="2">(NOT !(wix.WixUISupportPerMachine) OR NOT !(wix.WixUISupportPerUser)) AND LicenseAccepted = "1"</Publish>
 	    <Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="1">1</Publish>
 

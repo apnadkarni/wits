@@ -106,9 +106,21 @@
     <CustomAction Id="PreventDowngrading"
                   Error="Newer version of this product is already installed." />
 
-    <!-- Terminate any existing copies of the program -->
-    <CustomAction Id="KillWiTS" ExeCommand='"[APPLICATIONFOLDER]wits.exe" -killall' Directory='APPLICATIONFOLDER' Return="ignore" />
+    <!--
+	Custom actions for launching processes.
+	NOTE that the Directory attribute is set to TARGETDIR and not 
+	APPLICATIONFOLDER because the latter is not always the same depending
+	on when the custom action is invoked. In particular, the
+	Directory attribute references the Directory table and the value
+	there may not be the actual value at runtime, and in the case
+	of per-user/per-machine installation may not even exist causing
+	the program launch to fail.
+      -->
 
+    <!-- Terminate any existing copies of the program -->
+    <CustomAction Id="KillWiTS" ExeCommand='"[APPLICATIONFOLDER]wits.exe" -killall' Directory='TARGETDIR' Return="ignore" />
+    <!-- Launch the app after installation -->
+    <CustomAction Id="LaunchApplication" ExeCommand='"[APPLICATIONFOLDER]wits.exe"' Directory='TARGETDIR' Return='asyncNoWait' Impersonate="yes" />
 
     <Property Id="ApplicationFolderName"  Value="$(var.WitsName)" />
     <Property Id="WixAppFolder" Value="WixPerUserFolder" />
@@ -207,7 +219,6 @@
     <!-- Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.WitsName)" -->
     <SetProperty Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.WitsName)" After="CostFinalize" Sequence="ui">NOT REMOVE</SetProperty>
     <SetProperty Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" After="CostFinalize" Sequence="ui">NOT REMOVE</SetProperty>
-    <CustomAction Id="LaunchApplication" FileKey="WitsEXE" ExeCommand='' Return='asyncNoWait' Impersonate="yes" />
 
     <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
     <WixVariable Id="WixUIDialogBmp" Value="witsinstalldialog.bmp" />
@@ -226,12 +237,7 @@
     <Icon Id="wits.ico" SourceFile="wits.ico" />
 
     <InstallExecuteSequence>
-      <!--
-	  Commented out - let the Windows installer take care of this else
-	  we would need to figure out which processes to kill when installed
-	  on a per-user basis
-	  Custom Action='KillWiTS' Before='InstallValidate' Installed /Custom
-	-->
+      <Custom Action='KillWiTS' Before='InstallValidate'>Installed</Custom>
       <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWERVERSIONDETECTED</Custom>
       <RemoveExistingProducts After="InstallInitialize" />
     </InstallExecuteSequence>
