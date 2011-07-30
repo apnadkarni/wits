@@ -2380,7 +2380,7 @@ proc wits::widget::showconfirmdialog {args} {
 #
 # Show an error dialog
 proc wits::widget::showerrordialog {message args} {
-    eval [list showconfirmdialog -message $message -title Error -icon error -type ok -modal local] $args
+    showconfirmdialog -message $message -title Error -icon error -type ok -modal local {*}$args
     return
 }
 
