@@ -1892,7 +1892,7 @@ proc ::wits::app::main {} {
         set pids [twapi::get_process_ids -name $exename]
         foreach pid $pids {
             if {$pid == $me} continue
-            twapi::end_process $pid -force -wait 2000 -force
+            catch {twapi::end_process $pid -force -wait 2000 -force}
         }
         exit 0
     }
