@@ -40,7 +40,7 @@ if {[string compare -nocase [file extension [info script]] ".tm"]} {
 proc ::wits::app::initialize_preferences {} {
     # Initialize preferences destroying them in case they already existed.
     catch {::wits::app::prefs destroy}
-    util::Preferences create prefs $::wits::app::name
+    util::Preferences create prefs $::wits::app::long_name
 
     # TBD - postpone mapping preferences to properties until the time it is actually needed
     set props [dict create]
@@ -543,7 +543,7 @@ proc ::wits::app::check_multiple_instances {{retries 1}} {
     # Yes, there is a race condition here but what the heck...
     set mutex_name "$wits::app::long_name $::wits::app::version Exist"
     twapi::trap {
-        set instance_mutex_handle [twapi::get_mutex_handle $mutex_name]
+        set instance_mutex_handle [twapi::open_mutex $mutex_name]
     } onerror {TWAPI_WIN32 2} {
         # It does not exist so we're the only one.
         set ::wits::app::multiple_instances false
@@ -565,6 +565,7 @@ proc ::wits::app::check_multiple_instances {{retries 1}} {
 
     # Find the main window of the other instance and raise it
     set hwin [lindex [twapi::find_windows -toplevel true -text $wits::app::long_name] 0]
+
     # If we cannot find the window, retry after waiting 100ms, if still
     # not found, assume other guy has shut down
     if {$hwin eq ""} {
@@ -577,7 +578,8 @@ proc ::wits::app::check_multiple_instances {{retries 1}} {
         catch {
             twapi::show_window $hwin -normal -activate
             twapi::set_foreground_window $hwin
-            twapi::close_handles $h
+            twapi::close_handle $instance_mutex_handle
+            unset instance_mutex_handle
             die
         }
     }
