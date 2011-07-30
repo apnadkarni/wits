@@ -1406,12 +1406,22 @@ snit::type ::wits::app::eventmanager {
             return
         }
 
-        set _logfd [open $_logfile a]
-        $self _handleoneevent [list "WiTS logging started. Log file is $_logfile." \
+        if {[catch {
+            set _logfd [open $_logfile a]
+        } msg]} {
+            after 0 [list ::wits::widget::showerrordialog "Error opening log file. Logging to file will be disabled." -detail $msg -modal none]
+            $self _handleoneevent [list "WiTS logging disabled because of error opening log file." \
+                                       "WiTS logging disabled because of error opening log file." \
+                                       [clock seconds] \
+                                       info \
+                                       general]
+        } else {
+            $self _handleoneevent [list "WiTS logging started. Log file is $_logfile." \
                                    "WiTS logging started. Log file is $_logfile." \
                                    [clock seconds] \
                                    info \
                                    general]
+        }
     }
 
     method _prefs_handler {args} {
@@ -1702,7 +1712,7 @@ snit::type ::wits::app::eventmanager {
 
         # _enabled AND _logfile is not empty
         if {$_logfd eq ""} {
-            $_logfile_statusl configure -text "Event monitor running. Logging to file stopped due to limited disk space."
+            $_logfile_statusl configure -text "Event monitor running. Logging to file stopped due to limited disk space or invalid log file path."
             return
         }
 
