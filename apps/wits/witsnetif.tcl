@@ -347,12 +347,19 @@ oo::class create wits::app::netif::Objects {
     method _retrieve {propnames force} {
         set recs {}
         
-        foreach i [twapi::get_netif_indices] {
-            dict set recs [list 4 $i] [my _get_one 4 $i]
+        # We use catch because twapi may throw error if no interfaces
+        # of that ip version exist.
+
+        if {![catch {set indices [twapi::get_netif_indices]}]} {
+            foreach i $indices {
+                dict set recs [list 4 $i] [my _get_one 4 $i]
+            }
         }
 
-        foreach i [twapi::get_netif6_indices] {
-            dict set recs [list 6 $i] [my _get_one 6 $i]
+        if {![catch {set indices [twapi::get_netif6_indices]}]} {
+            foreach i $indices {
+                dict set recs [list 6 $i] [my _get_one 6 $i]
+            }
         }
 
         # Actually we are not returning all propnames as they differ
