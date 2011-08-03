@@ -7,10 +7,12 @@
 <?define WitsSKUName= "$(env.APP_SHORT_NAME)" ?>
 <?define WitsReleaseName= $(env.PRODUCT_RELEASE_NAME) ?>
 
+<!-- Always generate a new product id. Smoothest way for updates -->
+<?define WitsProductId = '*' ?>
+
 <!-- Define plaform specific GUIDS and values. These are named as -->
 <!-- "Wits" followed by the corresponding Wix name -->
 <?if $(var.WitsPlatform)=x86 ?>
-  <?define WitsProductId =  'F323099D-015C-4370-A816-7980D18F8F14' ?>
   <?define WitsUpgradeCode = 'FD746785-3486-487D-83FD-D917EF67AA45' ?>
   <?define WitsProgramFilesFolder = 'ProgramFilesFolder'?>
   <?define WitsWin64 = 'no' ?>
@@ -19,7 +21,6 @@
   <?define WitsGuidIconSources = '3286BED3-22EC-4539-82DD-B7F953F6D798' ?>
   <?define WitsGuidProgramMenuDir = 'B0967DC0-5DCF-4b61-BD03-DB796313816F' ?>
 <?elseif $(var.WitsPlatform)=x64 ?>
-  <?define WitsProductId =  'C492D78D-C0B4-437B-A899-F021BE661A1B' ?>
   <?define WitsUpgradeCode = '3640464D-8664-4A5C-921E-C0A89663F7A8' ?>
   <?define WitsProgramFilesFolder = 'ProgramFiles64Folder'?>
   <?define WitsWin64 = 'yes' ?>
