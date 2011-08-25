@@ -227,7 +227,7 @@ proc wits::app::system::get_property_defs {} {
         InterruptTime     "Processor Interrupt time" "Interrupt time" "" ns100
         InterruptCount    "Interrupt count" "Interrupt count" "" int
         KernelTime        "Processor kernel time" "Kernel time" "" ns100
-        cpuid             "Processor Id" "Processor" "" text
+        cpuid             "CPU Id" "CPU Id" "" text
         CPUPercent        "CPU %" "CPU%" "" int
         UserPercent       "User %" "User%" "" int
         KernelPercent     "Kernel %" "Kernel%" "" int
