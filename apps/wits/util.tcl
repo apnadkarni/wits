@@ -300,13 +300,28 @@ proc util::timeleft_to_secs {timeleft} {
 #
 # Convert to MB and GB respectively
 proc util::toKB {val {suffix " KB"}} {
-    return "[twapi::format_number [expr {(wide($val)+512)/wide(1024)}] [twapi::get_user_default_lcid] -idigits 0]$suffix"
+    if {0} {
+        # Formatting numbers screws up our -dictionary sorting in tables
+        return "[twapi::format_number [expr {(wide($val)+512)/wide(1024)}] [twapi::get_user_default_lcid] -idigits 0]$suffix"
+    } else {
+        return "[expr {($val+512)/1024}]$suffix"
+    }
 }
 proc util::toMB {val {suffix " MB"}} {
-    return "[twapi::format_number [expr {(wide($val)+524288)/wide(1048576)}] [twapi::get_user_default_lcid] -idigits 0]$suffix"
+    if {0} {
+        # Formatting numbers screws up our -dictionary sorting in tables
+        return "[twapi::format_number [expr {(wide($val)+524288)/wide(1048576)}] [twapi::get_user_default_lcid] -idigits 0]$suffix"
+    } else {
+        return "[expr {($val+524288)/1048576}]$suffix"
+    }
 }
 proc util::toGB {val {suffix " GB"}} {
-    return "[twapi::format_number [expr {(wide($val)+536870912)/wide(1073741824)}] [twapi::get_user_default_lcid] -idigits 0]$suffix"
+    if {0} {
+        # Formatting numbers screws up our -dictionary sorting in tables
+        return "[twapi::format_number [expr {(wide($val)+536870912)/wide(1073741824)}] [twapi::get_user_default_lcid] -idigits 0]$suffix"
+    } else {
+        return "[expr {($val+536870912)/1073741824}]$suffix"
+    }
 }
 # Convert to KB MB or GB as approriate
 proc util::toXB val {
