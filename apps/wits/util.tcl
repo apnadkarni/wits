@@ -1078,30 +1078,35 @@ oo::class create util::WmiInstanceTracker {
 
         set wmi [twapi::_wmi]
 
-        # Create an WMI event sink
-        set _sink [twapi::comobj wbemscripting.swbemsink]
+        twapi::trap {
+            # Create an WMI event sink
+            set _sink [twapi::comobj wbemscripting.swbemsink]
 
-        # Attach our handler to it
-        set _sink_id [$_sink -bind [list [self] change_handler]]
+            # Attach our handler to it
+            set _sink_id [$_sink -bind [list [self] change_handler]]
 
-        # Associate the sink with a query
-        if {$options(clause) eq ""} {
-            $wmi ExecNotificationQueryAsync [$_sink -interface] "select * from $wmi_change_class within $poll_secs where TargetInstance ISA '$wmi_target_class'"
-        } else {
-            $wmi ExecNotificationQueryAsync [$_sink -interface] "select * from $wmi_change_class within $poll_secs where TargetInstance ISA '$wmi_target_class' and $options(clause)"
+            # Associate the sink with a query
+            if {$options(clause) eq ""} {
+                $wmi ExecNotificationQueryAsync [$_sink -interface] "select * from $wmi_change_class within $poll_secs where TargetInstance ISA '$wmi_target_class'"
+            } else {
+                $wmi ExecNotificationQueryAsync [$_sink -interface] "select * from $wmi_change_class within $poll_secs where TargetInstance ISA '$wmi_target_class' and $options(clause)"
+            }
+        } finally {
+            $wmi -destroy;                  # Don't need WMI toplevel obj anymore
         }
-        $wmi -destroy;                  # Don't need WMI toplevel obj anymore
     }
 
     destructor {
-        # Cancel event notifications
-        catch {$_sink Cancel}
+        if {[info exists _sink]} {
+            # Cancel event notifications
+            catch {$_sink Cancel}
 
-        # Unbind our callback
-        catch {$_sink -unbind $_sink_id}
+            # Unbind our callback
+            catch {$_sink -unbind $_sink_id}
 
-        # Get rid of all objects
-        catch {$_sink -destroy}
+            # Get rid of all objects
+            catch {$_sink -destroy}
+        }
     }
 
     method change_handler {wmi_event args} {
