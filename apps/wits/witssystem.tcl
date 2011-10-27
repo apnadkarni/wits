@@ -501,6 +501,14 @@ oo::class create wits::app::system::Objects {
             dict set newdata $::wits::app::system::_all_cpus_label CPUPercent [expr {((100*($all_elapsed_cpu-$all_idle_cpu))+$all_elapsed_cpu-1)/$all_elapsed_cpu}]
             dict set newdata $::wits::app::system::_all_cpus_label UserPercent [expr {((100*$all_user_cpu)+$all_elapsed_cpu-1)/$all_elapsed_cpu}]
             dict set newdata $::wits::app::system::_all_cpus_label KernelPercent [expr {[dict get $newdata $::wits::app::system::_all_cpus_label CPUPercent] - [dict get $newdata $::wits::app::system::_all_cpus_label UserPercent]}]
+        } else {
+            # Clock has not ticked since last tick. Reuse last known data.
+            # If no previous data, will default to 0
+            foreach percent {CPUPercent UserPercent KernelPercent} {
+                if {[dict exists $_records $::wits::app::system::_all_cpus_label $percent]} {
+                    dict set newdata $::wits::app::system::_all_cpus_label $percent [dict get $_records $::wits::app::system::_all_cpus_label $percent]
+                }
+            }
         }
 
         return [list updated [dict keys [dict get $newdata $::wits::app::system::_all_cpus_label]] $newdata]
