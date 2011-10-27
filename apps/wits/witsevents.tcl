@@ -63,11 +63,9 @@ snit::type ::wits::app::eventmanager {
     # List of times events were logged. Array indexed by log message
     variable _last_log_time
 
-    # Process tracking
-    variable _process_sink;          # XP and above
-    variable _process_sink_id;       # XP and above
-    variable _process_start_tracker; # Win2K
-    variable _process_stop_tracker;  # Win2K
+    # Process tracking. WMI sink object
+    variable _process_sink
+    variable _process_sink_id
 
     # Windows Event log tracking
     variable _winlog_handles;           # Array indexed by event log source
@@ -129,7 +127,8 @@ snit::type ::wits::app::eventmanager {
     method register_callback {cmd {categories ""}} {
         set _callbacks($cmd) $categories
 
-        # Start WMI trackers if necessary
+        # Start WMI trackers if necessary. Note we do not stop existing
+        # ones since others may be listening. That is done in housekeeping.
         foreach cat {process service share} {
             if {[lsearch -exact $categories "*"] >= 0 ||
                 [lsearch -exact $categories $cat] >= 0} {
@@ -170,6 +169,11 @@ snit::type ::wits::app::eventmanager {
         $self reportevent $event $event_txt $time $severity $category
     }
 
+    # Report an error as an event
+    method reporterror {msg {category general}} {
+        $self reportevent $msg $msg [clock seconds] error $category
+    }
+
     # Start tracking processes
     method _start_process_tracking {} {
 
@@ -177,13 +181,24 @@ snit::type ::wits::app::eventmanager {
             return;                     # Already tracking
         }
 
+        set wmi [::wits::app::get_wmi]; # Do not need to release this
+
         # Create an WMI event sink
         set _process_sink [::twapi::comobj wbemscripting.swbemsink]
 
-        # Attach our handler to it
-        set _process_sink_id [$_process_sink -bind [mymethod _process_handler]]
-
-        [::wits::app::get_wmi] ExecNotificationQueryAsync [$_process_sink -interface] "select * from Win32_ProcessTrace"
+        if {[catch {
+            # Attach our handler to it
+            set _process_sink_id [$_process_sink -bind [mymethod _process_handler]]
+            $wmi ExecNotificationQueryAsync [$_process_sink -interface] "select * from Win32_ProcessTrace"
+        } msg]} {
+            if {[info exists _process_sink_id]} {
+                $_process_sink -unbind $_process_sink_id
+            }
+            $_process_sink -destroy
+            unset _process_sink
+            unset _process_sink_id
+            $self reporterror "Error creating WMI Win32_ProcessTrace tracker ($msg). Related events will not be logged." process
+        }
     }
 
     # Stop tracking processes
@@ -197,7 +212,7 @@ snit::type ::wits::app::eventmanager {
         $_process_sink Cancel
 
         # Unbind our callback
-        $_process_sink -unbind $_process_sink_id
+        catch {$_process_sink -unbind $_process_sink_id}
 
         # Get rid of all objects
         $_process_sink -destroy
@@ -277,7 +292,11 @@ snit::type ::wits::app::eventmanager {
         if {$poll == 0} {
             set poll 1
         }
-        set _service_tracker [util::WmiInstanceTracker new __InstanceModificationEvent Win32_Service $poll -callback [mymethod _service_handler] -clause "(TargetInstance.State <> PreviousInstance.State)"]
+        if {[catch {
+            set _service_tracker [util::WmiInstanceTracker new __InstanceModificationEvent Win32_Service $poll -callback [mymethod _service_handler] -clause "(TargetInstance.State <> PreviousInstance.State)"]
+        } msg]} {
+            $self reporterror "Error creating WMI Win32_Service tracker ($msg). Related events will not be logged." service
+        }
     }
 
     method _stop_service_tracking {} {
@@ -303,24 +322,44 @@ snit::type ::wits::app::eventmanager {
 
     # Tracking of shares
     method _start_share_tracking {} {
-        if {[info exists _share_tracker]} {
-            return
-        }
         set poll [expr {$options(-monitorinterval)/1000}]
         if {$poll == 0} {
             set poll 1
         }
-        set _share_tracker [util::WmiInstanceTracker new __InstanceOperationEvent Win32_Share $poll -callback [mymethod _share_handler]]
-        set _share_connection_tracker [util::WmiInstanceTracker new __InstanceOperationEvent Win32_ServerConnection $poll -callback [mymethod _share_connection_handler]]
-        set _remote_share_tracker [util::WmiInstanceTracker new __InstanceOperationEvent Win32_NetworkConnection $poll -callback [mymethod _remote_share_handler]]
+        if {! [info exists _share_tracker]} {
+            if {[catch {
+                set _share_tracker [util::WmiInstanceTracker new __InstanceOperationEvent Win32_Share $poll -callback [mymethod _share_handler]]
+            } msg]} {
+                $self reporterror "Error creating WMI Win32_Share tracker ($msg). Related events will not be logged." share
+            }
+        }
+        if {! [info exists _share_connection_tracker]} {
+            if {[catch {
+                set _share_connection_tracker [util::WmiInstanceTracker new __InstanceOperationEvent Win32_ServerConnection $poll -callback [mymethod _share_connection_handler]]
+            } msg]} {
+                $self reporterror "Error creating WMI Win32_ServerConnection share tracker ($msg). Related events will not be logged." share
+            }
+        }
+
+        if {! [info exists _remote_share_tracker]} {
+            if {[catch {
+                set _remote_share_tracker [util::WmiInstanceTracker new __InstanceOperationEvent Win32_NetworkConnection $poll -callback [mymethod _remote_share_handler]]
+            } msg ]} {
+                $self reporterror "Error creating WMI Win32_NetworkConnection share tracker ($msg). Related events will not be logged." share
+            }
+        }
     }
 
     method _stop_share_tracking {} {
         if {[info exists _share_tracker]} {
             $_share_tracker destroy
             unset _share_tracker
+        }
+        if {[info exists _share_connection_tracker]} {
             $_share_connection_tracker destroy
             unset _share_connection_tracker
+        }
+        if {[info exists _remote_share_tracker]} {
             $_remote_share_tracker destroy
             unset _remote_share_tracker
         }
@@ -1106,10 +1145,12 @@ snit::type ::wits::app::eventmanager {
             set categories_of_interest [concat $categories_of_interest $categories]
         }
 
-        # If no one cares about process tracking, clean it up.
-        if {[lsearch -exact $categories_of_interest "process"] < 0 &&
-            [lsearch -exact $categories_of_interest "*"] < 0} {
-            $self _stop_process_tracking
+        # If no one cares about process/share/service tracking, clean it up.
+        foreach cat {process service share} {
+            if {[lsearch -exact $categories_of_interest $cat] < 0 &&
+                [lsearch -exact $categories_of_interest "*"] < 0} {
+                $self _stop_${cat}_tracking
+            }
         }
 
         # Ditto for network connections
@@ -1289,6 +1330,7 @@ snit::type ::wits::app::eventmanager {
         $self _update_statusbar
 
         set _eventmgr [::wits::app::eventmanager %AUTO%]
+
         $self configurelist $args
         $self _configure_eventmanager
         # Tell prefs package to let us know when event monitor prefs change
