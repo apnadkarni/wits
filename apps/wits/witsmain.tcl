@@ -1911,7 +1911,7 @@ proc ::wits::app::main {} {
             if {[twapi::get_process_elevation] eq "limited"} {
                 # Ask user whether to elevate
                 set answer [wits::widget::showconfirmdialog \
-                                -message "You are currently running in an administrator account with privileges disabled. This will limit the information displayed and some features will not work properly. Would you like to elevate privileges for full functionality ?" \
+                                -message "You are currently running in an administrator account with privileges disabled. This will limit the information displayed and some features will not work properly. Would you like to elevate privileges for full functionality?" \
                                 -detail "Click Yes to run with elevated privileges. Click No to continue with existing privileges." \
                                 -icon question \
                                 -type yesno \
