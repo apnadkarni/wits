@@ -5,4 +5,4 @@ if {![info exists ::env(TREECTRL_LIBRARY)]
     append script "[list set ::treectrl_library $dir]\n"
 }
 append script [list load [file join $dir treectrl24.dll] treectrl]
-package ifneeded treectrl 2.4 $script
+package ifneeded treectrl 2.4.1 $script

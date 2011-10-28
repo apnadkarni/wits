@@ -2,9 +2,23 @@
 <html><head>
 
 
+
+
   <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>What's New in TkTreeCtrl</title>
   <meta content="Tim Baker" name="author"></head><body>
-<h1>What's New in TkTreeCtrl 2.4</h1><span style="font-weight: bold;">Changes since 2.4b1:</span><br>
+<h1>What's New in TkTreeCtrl 2.4.1</h1>
+<h2>Bug Fixes</h2>
+<ul>
+  <li>[BUG 3421503] Creating a new treectrl widget would crash the application if the default value of either of the <span style="font-weight: bold;">-buttonbitmap</span> or <span style="font-weight: bold;">-buttonimage</span> options was changed using the Tk option database.</li>
+  <li>[BUG 3421503] Random crashes could result when using hidden columns due to writing past the end of an array.<br>
+  </li>
+</ul>
+<hr style="width: 100%; height: 2px;"><h1>What's New in TkTreeCtrl 2.4</h1><span style="font-weight: bold;">Changes since 2.4b2:<br>
+</span>
+<ul>
+  <li>There were no changes since 2.4b2.</li>
+</ul>
+<span style="font-weight: bold;">Changes since 2.4b1:</span><br>
 <ul>
   <li>Fixed the header config option <span style="font-weight: bold;">-text</span> being treated like a per-state option.</li>
   <li>Fixed rectangle and 3D border drawing on X11 due to 16-bit
