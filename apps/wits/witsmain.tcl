@@ -477,10 +477,11 @@ snit::widgetadaptor ::wits::app::mainview {
 
     # Update the status bar
     method _updateStatusBar {} {
-        if {$::wits::app::available_update ne ""} {
+        set interval 2000
+
+        if {0 && $::wits::app::available_update ne ""} {
             set _system_status_summary "A new version of the software is available. Update from the Help and Support menu."
         } else {
-            set interval 2000
             # TBD - optimize by opening a PDH query and keeping it open
             # instead of using high level twapi functions
             set cpu [[wits::app::get_objects ::wits::app::system] get_field $wits::app::system::_all_cpus_label CPUPercent $interval 0]
