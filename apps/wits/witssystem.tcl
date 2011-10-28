@@ -289,7 +289,7 @@ proc wits::app::system::get_property_defs {} {
 oo::class create wits::app::system::Objects {
     superclass util::PropertyRecordCollection
 
-    variable _fixed_cpu_properties _fixed_system_properties _semistatic_properties _semistatic_properties_timestamp _cpu_timestamps _records 
+    variable _fixed_cpu_properties _fixed_system_properties _semistatic_properties _semistatic_properties_timestamp _cpu_times _records 
 
     constructor {} {
         namespace path [concat [namespace path] [list [namespace qualifiers [self class]]]]
@@ -302,7 +302,19 @@ oo::class create wits::app::system::Objects {
         set _semistatic_properties_timestamp 0
         my _refresh_semistatic_properties
 
-        dict  set _cpu_timestamps timestamp 0
+        # _cpu_times keeps track of last cpu time values
+        set ncpu [twapi::get_processor_count]
+        while {$ncpu > 0} {
+            incr ncpu -1
+            dict set _cpu_times $ncpu {
+                IdleTime 0
+                KernelTime 0
+                UserTime 0
+                DpcTime 0
+                InterruptTime 0
+                InterruptCount 0
+            }
+        }
 
         next $propdefs -ignorecase 0 -refreshinterval 2000
     }
@@ -450,19 +462,34 @@ oo::class create wits::app::system::Objects {
 
         # Merge all this info for each cpu
         set system_properties [dict merge $_fixed_system_properties $system_properties[set system_properties {}]]
-        set old_cpu_timestamp [dict get $_cpu_timestamps timestamp]
-        dict set _cpu_timestamps timestamp [twapi::GetSystemTimeAsFileTime]
-        set elapsed [expr {[dict get $_cpu_timestamps timestamp] - $old_cpu_timestamp}]
+
+        # Now calculate the CPU usage. We used to do this based on elapsed time
+        # as returned by GetSystemTimeAsFileTime. However, that can lead to
+        # bogus results as that returns discrete values and the granularity
+        # is too coarse. Hence we now just add up all the CPU times returned
+        # in each category (user time, interrupt time etc.) to get total
+        # elapsed time for each CPU.
+
+        set prev_cpu_times $_cpu_times
+        set _cpu_times {}
+
         set all_idle_cpu    0
         set all_elapsed_cpu 0
         set all_user_cpu    0
         set cpu 0
         foreach cpudata [twapi::Twapi_SystemProcessorTimes] {
+            # Update the data across all CPU's
             dict for {key val} $cpudata {
                 dict incr allcpus $key $val
             }
+
+            #NOTE:  idle time is included in kernel time
+            set idle [expr {[dict get $cpudata IdleTime] - [dict get $prev_cpu_times $cpu IdleTime]}]
+            set user [expr {[dict get $cpudata UserTime] - [dict get $prev_cpu_times $cpu UserTime]}]
+            set elapsed [expr {$user + [dict get $cpudata KernelTime] - [dict get $prev_cpu_times $cpu KernelTime]}]
+
             if {$elapsed == 0} {
-                # Can happen if called quickly before clock has clicked.
+                # Can happen if called in succession before any counts have been updated.
                 # In this case use the old values if present. Otherwise
                 # leave empty - viewers will use appropriate defaults
                 foreach field {KernelPercent UserPercent CPUPercent} {
@@ -471,26 +498,22 @@ oo::class create wits::app::system::Objects {
                     }
                 }
             } else {
-                if {$old_cpu_timestamp} {
-                    set idle [expr {[dict get $cpudata IdleTime] - [dict get $_cpu_timestamps $cpu lastidle]}]
-                    set user [expr {[dict get $cpudata UserTime] - [dict get $_cpu_timestamps $cpu lastuser]}]
-                    set all_idle_cpu [expr {$all_idle_cpu + $idle}]
-                    set all_user_cpu [expr {$all_user_cpu + $user}]
-                    set all_elapsed_cpu [expr {$all_elapsed_cpu + $elapsed}]
-                    # We want to round up
-                    dict set cpudata CPUPercent  [expr {((100*($elapsed-$idle))+$elapsed-1)/$elapsed}]
-                    dict set cpudata UserPercent [expr {((100*$user)+$elapsed-1)/$elapsed}]
-                } else {
-                    # First time we are measuring CPU
-                    dict set cpudata CPUPercent 0
-                    dict set cpudata UserPercent 0
-                }
+                # Update totals for calculating overall cpu usage
+                incr all_idle_cpu $idle
+                incr all_user_cpu $user
+                incr all_elapsed_cpu $elapsed
+
+                # Calculate percents for this cpu
+                # We want to round up
+                dict set cpudata CPUPercent [expr {((100*($elapsed-$idle))+$elapsed-1)/$elapsed}]
+                dict set cpudata UserPercent [expr {((100*$user)+$elapsed-1)/$elapsed}]
                 dict set cpudata KernelPercent [expr {[dict get $cpudata CPUPercent] - [dict get $cpudata UserPercent]}]
-                dict set _cpu_timestamps $cpu lastidle [dict get $cpudata IdleTime]
-                dict set _cpu_timestamps $cpu lastuser [dict get $cpudata UserTime]
             }
 
             dict set newdata $cpu [dict merge $system_properties [dict get $_fixed_cpu_properties $cpu] $cpudata]
+
+            # Remember for next time
+            dict set _cpu_times $cpu $cpudata
 
             incr cpu
         }
@@ -515,7 +538,7 @@ oo::class create wits::app::system::Objects {
     }
 
     method dump {} {
-        return [list $_cpu_timestamps $_records]
+        return [list $_cpu_times $_records]
     }
 
 }
