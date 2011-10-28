@@ -11,7 +11,10 @@ package require http
 package require uri
 
 namespace eval ::wits::app {
-    variable update_url "http://wits.magicsplat.com/wits-update.txt"
+    # Update file used to be wits-update.txt. Sadly, in V3 betas, an error
+    # is generated when updating the status bar if the update available
+    # is displayed. Changed file name so betas will ignore.
+    variable update_url "http://wits.magicsplat.com/wits-update-meta.txt"
 
     # Section/name of prefs/registry where we store the version updates
     # that user has already responded to and does not want to be asked again
@@ -215,6 +218,7 @@ proc ::wits::app::get_update_manifest {args} {
 # Parse the update data. Returns version number and url of update or ""
 # if no update available or on errors
 proc ::wits::app::parse_update_data {data} {
+
     # The parse data is of the form <versionstring url>
     if {[regexp {^\s*([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\s+(\S+)\s*$} $data notused major minor patch url]} {
         # See if the version is greater than what we have
