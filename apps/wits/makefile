@@ -3,8 +3,8 @@ UILONGNAME=Windows Inspection Tool Set
 UISHORTNAME=WiTS
 APPVERSIONMAJOR=3
 APPVERSIONMINOR=0
-APPVERSIONPATCH=23
-RELEASETYPE=b
+APPVERSIONPATCH=24
+RELEASETYPE=
 # NOTE - the order of files here is important. It must be the same order
 # as required to be stored in the concatenated .tm file
 APPFILES= \
@@ -102,7 +102,7 @@ witslibraries: "$(VFSDIR)\lib\snit-$(SNITVER)" \
 	copy "$(THIRDPARTYDIR)\struct-2.2.3\sets_tcl.tcl" $@
 
 
-TREECTRLDIR=$(THIRDPARTYDIR)\treectrl-2.4-beta\$(PLATFORM)
+TREECTRLDIR=$(THIRDPARTYDIR)\treectrl-2.4.1\$(PLATFORM)
 
 "$(VFSDIR)\lib\treectrl": 
 	-mkdir $@
