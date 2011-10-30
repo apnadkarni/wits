@@ -1,4 +1,4 @@
-Version 3.0.22 Beta 2 of Windows Inspection Tool Set (WiTS)
+Version 3.0.25 of Windows Inspection Tool Set (WiTS)
 has been released.
 
 Home page -  http://wits.magicsplat.com.
@@ -44,14 +44,6 @@ Desktop: Windows XP SP2 or later, Windows Vista or Windows 7
 Server:  Windows Server 2003, Windows Server 2008 and 
          Windows Server 2008 R2.
 
-Changes since V3.0.8 Beta 1
----------------------------
-
-  * Improved performance and memory usage
-  * Support for Windows Server Core
-  * Bug fixes.
-
-
 Changes since V2.1
 -------------------------
 
@@ -60,8 +52,8 @@ include
 
 New platforms:
 
-- support for Vista, Windows Server 2008 and 2008R2, and
-  Windows 7
+- support for Vista, Windows 7, 
+  Windows Server 2008 and 2008R2 (including Server Core)
 
 - 64-bit version (note the 32-bit version will refuse
   installation on 64-bit version)
