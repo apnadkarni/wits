@@ -692,7 +692,10 @@ oo::class create util::PropertyRecordCollection {
     }
 
     method refresh_callback {} {
-        my _refresh_cache 1
+        # Only bother refreshing if anyone is actually interested
+        if {[my have_subscribers]} {
+            my _refresh_cache 1
+        }
         if {$_refresh_interval} {
             $_scheduler after1 $_refresh_interval [list [self] refresh_callback]
         }
@@ -700,14 +703,8 @@ oo::class create util::PropertyRecordCollection {
 
     method housekeeping {} {
         
-        # If we have not updated for a while and do not have subscribers
-        # stop the update and clear out caches.
-        if {([clock milliseconds] - $_last_update) > (10*$_refresh_interval) &&
-            ! [my have_subscribers]} {
-            # Do not keep updating
-            $_scheduler cancel [list [self] refresh_callback]
-
-            # Reset state
+        # If we do not have subscribers reset state
+        if { ! [my have_subscribers]} {
             my discard
         }
 
