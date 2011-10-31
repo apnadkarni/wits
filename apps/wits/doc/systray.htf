@@ -1,7 +1,7 @@
 <h1>Accessing WiTS through the system tray</h1>
 <p>
   When WiTS is running, its icon
-  <img src='mycomputer+viewmag16.png' alt='WiTS icon' />
+  <img src='systray-icon.png' alt='WiTS icon' />
   appears in the system tray area. Clicking the left mouse on the icon
   will alternately show and hide the WiTS main window.
 </p>

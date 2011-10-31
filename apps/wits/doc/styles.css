@@ -1,18 +1,4 @@
-/* WiTS website customization */
-
-/* Yahoo copyrighted section - base-min.css. See base.css for readable version */
-
-/*
-Copyright (c) 2008, Yahoo! Inc. All rights reserved.
-Code licensed under the BSD License:
-http://developer.yahoo.net/yui/license.txt
-version: 2.5.1
-*/
-h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em 0;}h1,h2,h3,h4,h5,h6,strong{font-weight:bold;}abbr,acronym{border-bottom:1px dotted #000;cursor:help;} em{font-style:italic;}blockquote,ul,ol,dl{margin:1em;}ol,ul,dl{margin-left:2em;}ol li{list-style:decimal outside;}ul li{list-style:disc outside;}dl dd{margin-left:1em;}th,td{border:1px solid #000;padding:.5em;}th{font-weight:bold;text-align:center;}caption{margin-bottom:.5em;text-align:center;}p,fieldset,table,pre{margin-bottom:1em;}input[type=text],input[type=password],textarea{width:12.25em;*width:11.9em;}
-
-/* End Yahoo copyright */
-
-/* WiTS customization */
+/* WiTS website customization - built on top of on YUI CSS */
 
 h1,h2 {
   color: #888888;
@@ -26,17 +12,22 @@ h1,h2 {
     border-bottom-style: solid;
     border-bottom-width: 4px;
     border-bottom-color: #aaaaaa;
-    margin-right: 180px;
+    margin-right: 150px;
 }
 #hd p {
     margin-bottom: 0px;
+}
+
+#bd {
+    padding-left: 120px;
+    padding-right: 150px;
 }
 
 #ft {
     font-size: 77%;
     text-align: center;
     border-top: 1px solid #aaaaaa;
-    margin-right: 180px;
+    margin-right: 150px;
     margin-top: 10px;
 }
 
@@ -46,7 +37,7 @@ div.headingbar {
     font-weight: bold;
     color: #888888;
     line-height: 64px;
-    background-image: url(mycomputer+viewmag.png);
+    background-image: url(logo.png);
     background-position: center left;
     background-repeat: no-repeat;
     text-indent: 60px;
@@ -71,11 +62,16 @@ div.headingads {
 }
 
 div.sideads {
+  width: 140px;
+  margin-left: 10px;
+  margin-right: -150px;
   margin-top: 4em;
-  margin-left: 1em;
+  color:red;
 }
 
 div.navigation {
+  width: 120px;
+  margin-left: -120px;
   margin-top: 0.5em;
 }
 
@@ -133,4 +129,6 @@ div.navigation {
 .content {
   font-family: Verdana;
   font-size: 108%;
+  width: 100%;
 }
+

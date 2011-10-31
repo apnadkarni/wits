@@ -59,8 +59,8 @@ IMGFILES= \
 	listview3-nodetail.png \
         magicsplat.png \
         mainwindow.png \
-        mycomputer+viewmag.png \
-        mycomputer+viewmag16.png \
+        logo.png \
+	systray-icon.png \
         navigation.png \
         preferences.png \
         processpage.png \

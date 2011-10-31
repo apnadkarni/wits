@@ -22,12 +22,15 @@ proc transform_file {infile {adfile ""} {adfile2 ""} {outfile ""}} {
 <html>
   <head>
     <title>Windows Inspection Tool Set</title>
-    <link rel="shortcut icon" href="favicon.ico" />
-    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.5.1/build/reset-fonts-grids/reset-fonts-grids.css"/>
+      <link rel="shortcut icon" href="favicon.ico" />
+      <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.4.1/build/cssreset/cssreset-min.css"/>
+      <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.4.1/build/cssfonts/cssfonts-min.css"/>
+      <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.4.1/build/cssbase/cssbase-min.css"/>
+      <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.4.1/build/cssgrids/grids-min.css"/>
     <link rel="stylesheet" type="text/css" href="styles.css" />
   </head>
   <body>
-    <div id="doc3" class="yui-t4">
+  <div style='margin-left:10px; margin-right:10px;'>
     }
 
     # Put the page header
@@ -39,7 +42,7 @@ proc transform_file {infile {adfile ""} {adfile2 ""} {outfile ""}} {
         </div>
     }
 
-    # Insert the horzintal ad
+    # Insert the horizontal ad
     if {$adfile2 ne ""} {
         set adfd [open $adfile2 r]
         set addata [read $adfd]
@@ -52,24 +55,13 @@ proc transform_file {infile {adfile ""} {adfile2 ""} {outfile ""}} {
       </div>
     }
 
-    # Put the main area headers
-    puts $outfd {
-      <div id="bd">
-        <div id="yui-main">
-          <div class="yui-b">
-            <div class="yui-gf">
-    }
+    #
+    # Put the main area - navigation, content, side ads
+    puts $outfd "<div id='bd' class='yui3-g'>"
 
-    # Put the actual text
+    # Navigation
     puts $outfd {
-        <div class="yui-u content">
-    }
-    puts -nonewline $outfd  $frag
-    puts "</div>"
-
-    # Put the navigation pane
-    puts $outfd {
-        <div class="yui-u first navigation">
+        <div class="yui3-u navigation">
         <ul>
         <li><a href="index.html" target="_top">Introduction</a></li>
         <li><a href="features.html" target="_top">Features</a></li>
@@ -80,26 +72,26 @@ proc transform_file {infile {adfile ""} {adfile2 ""} {outfile ""}} {
         </ul>
         </div>
     }
-
-    # Terminate the yui-main, yui-b and yui-gf above
+    
+    # Main content
     puts $outfd {
-        </div>
-        </div>
-        </div>
+        <div class="yui3-u content">
     }
+    puts -nonewline $outfd  $frag
+    puts "</div>"
 
+    # Side ads
     # Insert the ad pane
     if {$adfile ne ""} {
         set adfd [open $adfile r]
         set addata [read $adfd]
         close $adfd
-        puts $outfd "<div class='yui-b'>"
-        puts -nonewline $outfd "<div class='sideads'>$addata</div>"
+        puts $outfd "<div class='yui3-u sideads'>"
+        puts -nonewline $outfd "$addata"
         puts $outfd "</div>"
     }
 
-    # Terminate the main body bd
-    puts $outfd "</div>"
+    puts $outfd "</div>";       # Terminate div id=bd
 
     # Insert the footer
     puts $outfd {
