@@ -57,6 +57,7 @@ IMGFILES= \
         hotkeyprefs.png \
 	listview3-detail-labeled.png \
 	listview3-nodetail.png \
+	listview3-filter-labeled.png \
         magicsplat.png \
         mainwindow.png \
         logo.png \

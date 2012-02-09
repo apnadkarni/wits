@@ -65,10 +65,10 @@ proc transform_file {infile {adfile ""} {adfile2 ""} {outfile ""}} {
         <ul>
         <li><a href="index.html" target="_top">Introduction</a></li>
         <li><a href="features.html" target="_top">Features</a></li>
-        <li><a href="license.html" target="_top">License</a></li>
-        <li><a href="sourcecode.html" target="_top">Sources</a></li>
         <li><a href="download.html" target="_top">Download</a></li>
         <li><a href="support.html" target="_top">Support</a></li>
+        <li><a href="license.html" target="_top">License</a></li>
+        <li><a href="sourcecode.html" target="_top">Sources</a></li>
         </ul>
         </div>
     }

@@ -132,3 +132,32 @@ div.navigation {
   width: 100%;
 }
 
+.news {
+  color: red;
+  font-size: 93%;
+  margin: 0px;
+}
+
+div.news {
+  margin-top: 2 em;
+}
+
+.news dl {
+  margin: 0px;
+}
+
+
+.news h2 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-size: 100%;
+}
+
+.news a:link, .news a:visited {
+  color: red;
+  text-decoration: underline;
+}
+
+.news a:hover {
+  /* color: #00f; */
+}

@@ -1289,6 +1289,7 @@ proc util::save_file {data args} {
 
 proc util::hexify {data {width 1} {count -1} {linewidth 8}} {
     # Adapted from AMG at http://wiki.tcl.tk/1599
+    # TBD - WTF? Why is the switch necessary when regex/repl is overwritten below?
     switch -exact -- $width {
         1 {
             set regex "(..)"
