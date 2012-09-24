@@ -467,7 +467,7 @@ proc wits::app::service::changestate {svclist newstate parentwin} {
     $pbdlg display
     event generate $pbdlg <Map>
     update idletasks
-    ::twapi::try {
+    ::twapi::trap {
         # We do it this way instead of a foreach because we want
         # to keep track of remaining services for error processing
         while {[llength $svcorder]} {

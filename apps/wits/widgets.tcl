@@ -57,35 +57,37 @@ proc wits::widget::_init_styles {{force false}} {
 
     # Cache colors based on Explorer colors.
 
-    # List of {class part state itemindexlist} that we need
+    # List of {class part partval state itemindexlist} that we need
+    # part -> partval comes from SDK tmsschema.h
     set theme_default_data {
-        EXPLORERBAR EBP_NORMALGROUPBACKGROUND 0 {
-            BORDERCOLOR     \#ffffff           FILLCOLOR       \#d6dff7
-            TEXTCOLOR       \#265cc0           EDGELIGHTCOLOR  \#f1efe2
-            EDGESHADOWCOLOR \#aca899           EDGEFILLCOLOR   \#ece9d8
-            GRADIENTCOLOR1  \#8caae6           GRADIENTCOLOR2  \#6487dc
-        } TAB TABP_BODY 0 {
-            FILLCOLORHINT   SystemButtonFace
-        } LISTVIEW LVP_LISTITEM 0 {
-            FILLCOLOR \#ffffff
+        EXPLORERBAR EBP_NORMALGROUPBACKGROUND 5 0 {
+            BORDERCOLOR     3801  \#ffffff
+            FILLCOLOR       3802  \#d6dff7
+            TEXTCOLOR       3803  \#265cc0
+            EDGELIGHTCOLOR  3804  \#f1efe2
+            EDGESHADOWCOLOR 3806  \#aca899
+            EDGEFILLCOLOR   3808  \#ece9d8
+            GRADIENTCOLOR1  3810  \#8caae6
+            GRADIENTCOLOR2  3811  \#6487dc
+        } TAB TABP_BODY 10 0 {
+            FILLCOLORHINT   3821  SystemButtonFace
+        } LISTVIEW LVP_LISTITEM 1 0 {
+            FILLCOLOR 3802 \#ffffff
         }
     }
 
 
-    foreach {class part state indices} $theme_default_data {
+    foreach {class part partval state indices} $theme_default_data {
         # Get theme values if possible. Ignore if we can't
         unset -nocomplain -- themeH ;# Because we close it below for each iter
         if {[catch {
             set themeH [twapi::OpenThemeData [twapi::tkpath_to_hwnd .] $class]
-            set partval [twapi::TwapiGetThemeDefine $part]
-            set stateval $state
-            if {![string is integer $stateval]} {
-                set stateval [twapi::TwapiGetThemeDefine $state]
+            if {![string is integer $state]} {
+                error "state must be an integer"
             }
-            foreach {index color} $indices {
-                set prop [::twapi::TwapiGetThemeDefine TMT_$index]
+            foreach {index prop color} $indices {
                 set osthemecolors($class,$part,$state,$index) \
-                    [twapi::GetThemeColor $themeH $partval $stateval $prop]
+                    [twapi::GetThemeColor $themeH $partval $state $prop]
             }
         } msg]} {
             # In case of errors, just use default colors
@@ -6641,7 +6643,7 @@ snit::widgetadaptor wits::widget::listframe {
             lappend data [join [$_listframe item text $row_id] \t]
         }
         twapi::open_clipboard
-        twapi::try {
+        twapi::trap {
             twapi::empty_clipboard
             twapi::write_clipboard_text [join $data \r\n]
         } finally {
@@ -6681,7 +6683,7 @@ snit::widgetadaptor wits::widget::listframe {
         }
 
         set fd [open $file w]
-        twapi::try {
+        twapi::trap {
             puts -nonewline $fd [::csv::joinlist [concat [list $cols] $data] $opts(csvseparator)]
         } finally {
             close $fd

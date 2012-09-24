@@ -348,7 +348,7 @@ oo::class create wits::app::system::Objects {
         }
 
         # Get WMI properties (these are all static)
-        twapi::try {
+        twapi::trap {
             set wmi [::wits::app::get_wmi]
             foreach {propname wmiprop} [array get ::wits::app::system::_wmi_Win32_BIOS] {
                 if {[catch {::wits::app::wmi_invoke_item "" Win32_BIOS -get $wmiprop} propval]} {
@@ -450,7 +450,7 @@ oo::class create wits::app::system::Objects {
         if {[lsearch -exact $propnames -swapfiles]} {
             dict set system_properties -swapfiles {}
             foreach item [twapi::Twapi_SystemPagefileInformation] {
-                dict lappend system_properties -swapfiles  [twapi::_normalize_path [dict get $item FileName]]
+                dict lappend system_properties -swapfiles  [lindex $item 3]
             }
         }
 

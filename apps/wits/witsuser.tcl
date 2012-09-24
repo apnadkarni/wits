@@ -457,7 +457,7 @@ proc wits::app::user::changeaccountstatus {sids newstate viewer} {
     set pb_maximum [llength $users]
     set pbdlg [::wits::widget::progressdialog .%AUTO% -title "Changing user account status" -maximum $pb_maximum]
     $pbdlg display
-    ::twapi::try {
+    ::twapi::trap {
         # We do it this way instead of a foreach because we want
         # to keep track of remaining users for error processing
         while {[llength $users]} {

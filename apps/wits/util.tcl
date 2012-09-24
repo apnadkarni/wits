@@ -1117,7 +1117,7 @@ oo::class create util::WmiInstanceTracker {
             twapi::IUnknown_AddRef $ifc;   # Must hold ref before creating comobj
             set event_obj [twapi::comobj_idispatch $ifc]
 
-            ::twapi::try {
+            ::twapi::trap {
                 if {$options(callback) ne ""} {
                     uplevel #0 [linsert $options(callback) end $event_obj]
                 }
@@ -1278,7 +1278,7 @@ proc util::save_file {data args} {
     if {[llength $opts(fileopts)]} {
         eval [list fconfigure $fd] $opts(fileopts)
     }
-    twapi::try {
+    twapi::trap {
         puts -nonewline $fd $data
     } finally {
         close $fd

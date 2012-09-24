@@ -105,7 +105,7 @@ if {[catch {
     # Built into the starpack
     load {} twapi
 }]} {
-    package require twapi 3.1
+    package require twapi 4.0
 }
 if {![llength [info commands twapi::min_os_version]]} {
     tk_messageBox -message "twapi not loaded"

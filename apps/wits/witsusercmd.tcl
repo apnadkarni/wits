@@ -217,7 +217,7 @@ proc ::wits::app::run_user_command {cmdline parent} {
 
     # Run through ShellExecute
     set sh [wits::app::get_shell]
-    twapi::try {
+    twapi::trap {
         set cmdargs ""
         set space ""
         foreach cmdarg [lrange $cmdlist 1 end] {

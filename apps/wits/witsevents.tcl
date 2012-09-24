@@ -530,7 +530,7 @@ snit::type ::wits::app::eventmanager {
     method _monitor_winlog {} {
         foreach source {Application System Security} {
             if {![info exists _winlog_handles($source)]} {
-                ::twapi::try {
+                ::twapi::trap {
                     set h [::twapi::eventlog_open -source $source]
                 } onerror {TWAPI_WIN32 1314} {
                     # Do not have privileges for this source. Ignore
@@ -1688,7 +1688,7 @@ snit::type ::wits::app::eventmanager {
         # stamp
         set mod "_"
         set fd [open $_logfile r]
-        twapi::try {
+        twapi::trap {
             if {[gets $fd line] > 0} {
                 # Try and parse the line to check the name
                 if {[regexp {^....(\d\d\d\d)/(\d\d)/(\d\d) (\d\d):(\d\d):(\d\d) } $line timestamp year month day hour min sec]} {
