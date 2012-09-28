@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011, Ashok P. Nadkarni
+# Copyright (c) 2011-2012, Ashok P. Nadkarni
 # All rights reserved.
 #
 # See the file LICENSE for license
@@ -26,17 +26,16 @@ namespace eval wits::app::wineventlog {
                          ]
 
         set fields {
-            {label -logsource}
-            {label -source}
-            {label -timegenerated}
+            {label -channel}
+            {label -providername}
+            {label -timecreated}
             {textbox -message}
-            {label -category}
+            {label -taskname}
             {label -eventcode}
             {label -account}
             {textbox  -data {-font {{Courier New} 8} -width 35}}
-            {label -recordnum}
-            {label -timewritten}
-            {label -type}
+            {label -eventrecordid}
+            {label -levelname}
         }
         set nbpages [list [list "General" [list frame $fields]]]
 
@@ -65,18 +64,17 @@ proc wits::app::wineventlog::get_property_defs {} {
     set _property_defs [dict create]
 
     foreach {propname desc shortdesc objtype format} {
-        -logsource "Event log" "Log" "" text
-        -source "Source" "Source" "" text
-        -category "Category" "Category" "" text
+        -channel "Event log" "Log" "" text
+        -providername "Source" "Source" "" text
+        -taskname "Category" "Category" "" text
         -eventid "Id" "Id" "" int
         -eventcode "Event code" "Code" "" int
-        -sid "SID" "SID" ::wits::app::account text
+        -userid "SID" "SID" ::wits::app::account text
         -account "Account" "Account" ::wits::app::account text
         -data "Additional data" "Data" "" blob
-        -recordnum "Record number" "Record number" "" int
-        -timegenerated "Time generated" "Generated" "" text
-        -timewritten "Time logged" "Logged" "" text
-        -type "Severity" "Severity" "" text
+        -eventrecordid "Record number" "Record number" "" int
+        -timecreated "Timestamp" "Timestamp" "" text
+        -levelname "Level" "Level" "" text
         -message "Message" "Message" "" text
     } {
         dict set _property_defs $propname \
@@ -92,18 +90,20 @@ proc wits::app::wineventlog::get_property_defs {} {
         }
     }
 
-    dict set _property_defs -type displayformat {
-        map {
-            "success" "Success"
-            "error" "Error"
-            "warning" "Warning"
-            "information" "Information"
-            "auditsuccess"  "Audit Success"
-            "auditfailure"  "Audit Failure"
+    # With Vista and later show level names as returned for event
+    # For XP / 2003 map them
+    if {![twapi::min_os_version 6]} {
+        dict set _property_defs -levelname displayformat {
+            map {
+                "success" "Success"
+                "error" "Error"
+                "warning" "Warning"
+                "information" "Information"
+                "auditsuccess"  "Audit Success"
+                "auditfailure"  "Audit Failure"
+            }
         }
     }
-
-    # For now, allow all properties to be in table
 
     # Redefine ourselves now that we've done initialization
     proc [namespace current]::get_property_defs {} {
@@ -119,13 +119,13 @@ oo::class create wits::app::wineventlog::Objects {
 
     variable  _events  _hevents  _messages_formatted  _ordered_events  _atoms
 
-
     constructor {args} {
         set ns [namespace qualifier [self class]]
         namespace path [concat [namespace path] [list $ns [namespace parent $ns]]]
 
         set _events [dict create]
 
+        # TBD - use twapi built-in atom table
         array set _atoms {}
 
         # Flat list of timestamp, event key used for traversing forward
@@ -140,7 +140,7 @@ oo::class create wits::app::wineventlog::Objects {
 
     destructor {
         foreach {src h} [array get _hevents] {
-            twapi::eventlog_close $h
+            twapi::winlog_close $h
         }
         next
     }
@@ -148,6 +148,7 @@ oo::class create wits::app::wineventlog::Objects {
     method _retrieve1 {key propnames} {
         if {[dict exists $_events $key]} {
             # Format message field if necessary
+            # TBD - currently -message is always present. Need we check?
             if {![dict exists $_events $key -message]} {
                 dict set _events $key -message [string map {\r\n \n} [twapi::eventlog_format_message [dict get $_events $key] -width -1]]
             }
@@ -162,6 +163,8 @@ oo::class create wits::app::wineventlog::Objects {
         # If property names contains -message, and we have not
         # previously formatted the message, need to do so
 
+        # TBD - currently winlog_read always includes -message. 
+        set _messages_formatted 1
         if {! $_messages_formatted} {
             if {[lsearch -exact $propnames -message] >= 0} {
                 set status updated
@@ -179,46 +182,53 @@ oo::class create wits::app::wineventlog::Objects {
         binary scan [lindex [twapi::GetTimeZoneInformation] 1] i@84i@168i tzoff stdoff daylightoff
         incr tzoff $stdoff
         incr tzoff $daylightoff
+        set tzoff [expr {$tzoff * 10000000}]; #  In 100ns units
 
         foreach src {Application System Security} {
             if {![info exists _hevents($src)]} {
-                set _hevents($src) [twapi::eventlog_open -source $src]
+                set _hevents($src) [twapi::winlog_open -channel $src]
             }
 
             set hevl $_hevents($src)
 
             # Just add any new events starting with the last ones we read
-            while {[llength [set events [twapi::eventlog_read $hevl]]]} {
+            while {[llength [set events [twapi::winlog_read $hevl]]]} {
                 set status updated
                 # print out each record
                 foreach eventrec $events {
                     # Note category cannot be cached as it is dependent
                     # on application, source and category file
-                    dict set eventrec -type [my atomize [dict get $eventrec -type]]
-                    dict set eventrec -source [my atomize [dict get $eventrec -source]]
-                    dict set eventrec -category [my atomize [twapi::eventlog_format_category $eventrec -width -1]]
-                    if {$_messages_formatted} {
-                        dict set eventrec -message [my atomize [string map {\r\n \n} [twapi::eventlog_format_message $eventrec -width -1]]]
-                    }                    
-                    dict set eventrec -account [my atomize [dict get $eventrec -sid]]
-                    if {[dict get $eventrec -sid] ne ""} {
+                    
+                    # TBD - atomize whatever can be atomized from
+                    # event fields
+                    # TBD - use K operator to set dictionary ?
+
+                    dict set eventrec -account [my atomize [dict get $eventrec -userid]]
+                    if {[dict get $eventrec -userid] ne ""} {
                         catch {
-                            dict set eventrec -account [wits::app::sid_to_name [dict get $eventrec -sid]]
+                            dict set eventrec -account [wits::app::sid_to_name [dict get $eventrec -userid]]
                         }
                     }
-                    dict set eventrec -logsource [my atomize $src]
                     # For compatibility with Windows event viewer only
                     # display low 16 bits
-                    dict set eventrec -eventcode [my atomize [expr {0xffff & [dict get $eventrec -eventid]}]]
-                    set timegenerated [dict get $eventrec -timegenerated]
+                    dict set eventrec -eventcode [expr {0xffff & [dict get $eventrec -eventid]}]
+                    
                     # clock format is slow so do it now rather than display
-                    # time
-                    dict set eventrec -timegenerated [util::format_localtime $timegenerated $tzoff]
-                    dict set eventrec -timewritten [util::format_localtime [dict get $eventrec -timewritten] $tzoff]
+                    # time.
+                    dict set eventrec -timecreated [util::format_large_system_time [dict get $eventrec -timecreated] $tzoff]
 
-                    set key [list $src [dict get $eventrec -recordnum]]
+                    # TBD - is this the correct key to use ?
+                    # Or should we generate an artificial key ?
+                    set key [list $src [dict get $eventrec -eventrecordid]]
                     dict set _events $key $eventrec
-                    lappend _ordered_events [list $timegenerated $key]
+
+                    # TBD - we should probably want to use the integer
+                    # unformatted timecreated value for sorting ordered
+                    # events so that faster lsort -integer can be used.
+                    # Unfortunately lsort -integer as of 8.6b3 fails
+                    # for 64-bit ints so for now stick to formatted
+                    # string value.
+                    lappend _ordered_events [list [dict get $eventrec -timecreated] $key]
                 }
             }
         }
@@ -240,7 +250,7 @@ oo::class create wits::app::wineventlog::Objects {
         # Sort in order of time stamp. We do not keep the list sorted on
         # insertions since this method not likely to be called often
 
-        set _ordered_events [lsort -integer -increasing -index 0 $_ordered_events[set _ordered_events {}]]
+        set _ordered_events [lsort -ascii -increasing -index 0 $_ordered_events[set _ordered_events {}]]
         switch -exact -- $motion {
             first {
                 set pos 0
@@ -276,13 +286,7 @@ oo::class create wits::app::wineventlog::Objects {
         # Returns potential number of records without actually reading them
         set count 0
         foreach src {Application System Security} {
-            if {![info exists _hevents($src)]} {
-                set _hevents($src) [twapi::eventlog_open -source $src]
-            }
-
-            set hevl $_hevents($src)
-            incr count [twapi::eventlog_count $hevl]
-            # Note we keep hevl open
+            incr count [twapi::winlog_event_count -channel $src]
         }        
         return $count
     }
@@ -342,9 +346,9 @@ proc wits::app::wineventlog::viewlist {args} {
                               [list view "View details of selected events" $viewdetailimg] \
                              ] \
                 -availablecolumns $_table_properties \
-                -displaycolumns {-timegenerated -logsource -source -type -eventcode } \
-                -colattrs {-message {-squeeze 1} -source {-squeeze 1}} \
-                -detailfields {-logsource -message -timegenerated -source -category -type -account} \
+                -displaycolumns {-timecreated -channel -providername -levelname -eventcode } \
+                -colattrs {-message {-squeeze 1} -providername {-squeeze 1}} \
+                -detailfields {-channel -message -timecreated -providername -taskname -levelname -account} \
                 -nameproperty {-eventcode} \
                 -descproperty {-message} \
                 -comparerecordvalues 0 \

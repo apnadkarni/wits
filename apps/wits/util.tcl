@@ -1323,12 +1323,15 @@ proc util::hexify {data {width 1} {count -1} {linewidth 8}} {
 
 # Secs since 1970 -> YYYY/MM/DD HH:MM:SS
 # [clock format] is much slower
-# tzoff is (localtime - utc) in minutes
+# tzoff is utc offset in minutes
 # This can be obtained from twapi::GetTimeZoneInformation
 proc util::format_localtime {secs tzoff} {
     return [format "%d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d" {*}[twapi::FileTimeToSystemTime [expr {(($secs - ($tzoff*60)) * 10000000) + 116444736000000000}]]]
 }
 
+proc util::format_large_system_time {ns100 tzoffns100} {
+    return [format "%d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%3.3d" {*}[twapi::FileTimeToSystemTime [expr {$ns100 - $tzoffns100}]]]
+}
 
 namespace eval util::filter {
     # A filter is a dictionary with the following keys:
