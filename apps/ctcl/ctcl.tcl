@@ -901,18 +901,11 @@ proc ctcl::pp {l args} {
     }
 
     set first [lindex $l 0]
-    set elemtype [twapi::tcltype $first]
 
-    # If element is itself a list or dict so toplevel not likely a dict
-    switch -exact -- $elemtype {
-        "list" {
-            pplistoflists $l {*}$args
-            return
-        }
-        "dict" {
-            pplistofdicts $l {*}$args
-            return
-        }
+    # If element is itself a dict dict so toplevel not likely a dict
+    if {[twapi::tcltype $first] eq "dict"} {
+        pplistofdicts $l {*}$args
+        return
     }
 
     # No internal typing information at all.
@@ -1260,7 +1253,7 @@ proc ctcl::files {args} {
 proc ctcl::funnel {} {
     set result ""
     while {[set line [gets stdin]] ne ""} {
-        set result [uplevel 1 [list apply [list [list _] $line] $result]]
+        set result [uplevel 1 [list apply [list [list R] $line] $result]]
     }
     return $result
 }
