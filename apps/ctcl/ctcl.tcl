@@ -1,6 +1,6 @@
 package require Tcl 8.6
 
-# GENEREAL NOTE: use of implicit variables ($_ etc.) in looping commands
+# GENEREAL NOTE: use of implicit variables ($V etc.) in looping commands
 # means they have to be evaluated in a new school with apply, not just
 # with an uplevel since otherwise they cannot be nested.
 
@@ -1021,7 +1021,7 @@ proc ctcl::ask {question {responses "YN"}} {
 
 # List eval and print with confirmation
 proc ctcl::leap? {items body {confirm ""}} {
-    set lambda [list _ $body]
+    set lambda [list I $body]
 
     foreach item $items {
         if {$confirm ne "A"} {
@@ -1109,11 +1109,11 @@ proc ctcl::collect {items args} {
     }
 
     if {[info exists collect(if)] && [info exists collect(eval)]} {
-        set lambda [list _l "set _r {} ; foreach _ \$_l {if {$collect(if)} {lappend _r \[$collect(eval)\]}} ; return \$_r"]
+        set lambda [list L "set R {} ; foreach V \$L {if {$collect(if)} {lappend R \[$collect(eval)\]}} ; return \$R"]
     } elseif {[info exists collect(eval)]} {
-        set lambda [list _l "set _r {} ; foreach _ \$_l {lappend _r \[$collect(eval)\]} ; return \$_r"]
+        set lambda [list L "set R {} ; foreach V \$L {lappend R \[$collect(eval)\]} ; return \$R"]
     } elseif {[info exists collect(if)]} {
-        set lambda [list _l "set _r {} ; foreach _ \$_l {if {$collect(if)} {lappend _r \$_}} ; return \$_r"]
+        set lambda [list L "set R {} ; foreach V \$L {if {$collect(if)} {lappend R \$V}} ; return \$R"]
     } else {
         return $items
     }
@@ -1141,9 +1141,9 @@ proc ctcl::fold {items args} {
     }
     
     if {[info exists fold(if)] && [info exists fold(eval)]} {
-        set lambda [list [list _l _r] "foreach _ \$_l {if {$fold(if)} {set _r \[$fold(eval)\]}} ; return \$_r"]
+        set lambda [list [list L R] "foreach V \$L {if {$fold(if)} {set R \[$fold(eval)\]}} ; return \$R"]
     } elseif {[info exists fold(eval)]} {
-        set lambda [list [list _l _r] "foreach _ \$_l {set _r \[$fold(eval)\]} ; return \$_r"]
+        set lambda [list [list L R] "foreach V \$L {set R \[$fold(eval)\]} ; return \$R"]
     } else {
         error "Value for 'eval' argument missing."
     }
@@ -1434,4 +1434,47 @@ proc ctcl::main {} {
         set cmdline [string map {\\ \\\\} [string trimleft [string range $cmdline $pos end]]]
         interact $cmdline 1
     }
+}
+
+
+# TBD - various performance comparisons for lists
+if {0} {
+    proc l {} {
+        for {set i 0} {$i < 10000} {incr i} {lappend l $i}
+        return $l
+    }
+
+    proc m {} {
+        set l [l]
+        time {
+            set l [lassign $l x]
+        } 1000
+    }
+
+    proc n {} {
+        set l [l]
+        time {
+            set l [lassign $l[set l ""] x]
+        } 1000
+    }
+
+    proc o {} {
+        set l [l]
+        time {
+            set x [lindex $l 0]
+            set l [lrange $l 1 end]
+        } 1000
+    }
+
+    proc p {} {
+        set l [l]
+        time {
+            set x [lindex $l 0]
+            set l [lrange $l[set l ""] 1 end]
+        } 1000
+    }
+
+
+
+
 }
