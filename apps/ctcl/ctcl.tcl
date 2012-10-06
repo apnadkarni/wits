@@ -617,9 +617,44 @@ proc ctcl::fromclip {} {
     }
 }
 
-proc ctcl::toclip {text} {
+proc ctcl::_deduce_input {args} {
+    set nargs [llength $args]
+    if {$nargs == 0} {
+        return [read stdin]
+    } elseif {$nargs > 2} {
+        # Make error as from caller
+        return -level 1 -code error "Syntax error."
+    }
+
+    lassign $args input type
+    if {$type eq ""} {
+        if {$input in [chan names]} {
+            set type -channel
+        } elseif {[file exists $input]} {
+            set type -file
+        } else {
+            set type -data
+        }
+    }
+
+    switch -exact -- $type {
+        "-channel" { return [read $input] }
+        "-file" {
+            set fd [open $input rb]
+            return [read $fd][close $fd]
+        }
+        "-data" { return $input }
+        default {
+            return -level 1 -code "Input type must be -data, -file or -channel or an empty string"
+        }
+    }
+}
+
+proc ctcl::toclip {args} {
+    set text [_deduce_input {*}$args]
     twapi::open_clipboard
     twapi::trap {
+        twapi::empty_clipboard
         twapi::write_clipboard_text $text
     } finally {
         twapi::close_clipboard
@@ -831,6 +866,29 @@ proc ctcl::pp {l args} {
         header.arg
     } -ignoreunknown]
 
+
+    # Figure out what kind of list
+    # - a dictionary of dictionaries (keyed lists)
+    # - a list of dictionaries (keyed lists), or
+    # - a list of lists
+
+    # If underlying type is a dictionary, treat it as such.
+    if {[twapi::tcltype $l] eq "dict"} {
+        # See if it is a dict of dicts by checking any element
+        # Empty dict will just fall through
+        dict for {k elem} $l {
+            if {[twapi::tcltype $elem] eq "dict"} {
+                ppdictofdicts $l {*}$args
+                return
+            } else {
+                break
+            }
+        }
+    }
+    
+    # Top level is not a dict. Use heuristics because it could still
+    # be a dict built as a list for efficiency
+
     set nelems [llength $l]
 
     # Special case - empty list
@@ -842,32 +900,44 @@ proc ctcl::pp {l args} {
         return
     }
 
-    # Figure out what kind of list
-    # - a dictionary of dictionaries (keyed lists)
-    # - a list of dictionaries (keyed lists), or
-    # - a list of lists
+    set first [lindex $l 0]
+    set elemtype [twapi::tcltype $first]
 
-    # If there is exactly one element, we have to guess 
+    # If element is itself a list or dict so toplevel not likely a dict
+    switch -exact -- $elemtype {
+        "list" {
+            pplistoflists $l {*}$args
+            return
+        }
+        "dict" {
+            pplistofdicts $l {*}$args
+            return
+        }
+    }
+
+    # No internal typing information at all.
+
+    # If there is exactly one element, we have to guess without
+    # being able to look for commonality
     if {$nelems == 1} {
-        set elem [lindex $l 0]
-        if {[llength $elem] == 0 || [llength $elem] & 1} {
+        if {[llength $first] == 0 || [llength $first] & 1} {
             # Odd number, cannot be a dict, or
             # Empty list, in which case does not matter
             pplistoflists $l {*}$args
             return
         }
         if {[info exists opts(headers)]} {
-            if {[llength $opts(headers)] == [llength $elem]} {
+            if {[llength $opts(headers)] == [llength $first]} {
                 pplistoflists $l {*}$args
                 return
             }
-            if {[llength $opts(headers)] == ([llength $elem] / 2)} {
+            if {[llength $opts(headers)] == ([llength $first] / 2)} {
                 pplistofdicts $l {*}$args
                 return
             }
         }
         # Still no clue. Check possible field names
-        set fields [twapi::kl_fields $elem]
+        set fields [twapi::kl_fields $first]
         foreach field $fields {
             # If field name has whitespace or is numeric, not likely to be
             # a field name
@@ -889,23 +959,29 @@ proc ctcl::pp {l args} {
         return
     }
 
+    # At this point,
+    # There are at least two elements in $l. We do not have any
+    # explicit typing information about either $l or its elements
+    # but we can look for commonality between elements.
 
-    # More heuristics
-    # First check list of dictionaries
-    if {([llength [lindex $l 0]] & 1) == 0 &&
+    # Now check list of dictionaries. First and last should be even
+    # length (hence possible dictionaries) and have the same key fields
+    if {([llength $first] & 1) == 0 &&
         ([llength [lindex $l end]] & 1) == 0 &&
         [lsort [twapi::kl_fields [lindex $l 0]]] eq [lsort [twapi::kl_fields [lindex $l end]]]} {
         pplistofdicts $l {*}$args
         return
     }
         
-    # Now check dictionary of dictionaries. 
+    # Now check for dictionary of dictionaries. 
     # Must have even number of elements and second and last elements
-    # must be lists with even number and the same fields (like above)
+    # must be lists with even number and the same fields 
     # If only two elements in the list (ie. one key/value pair)
     # then the length of the two elements must be different else it
     # could be just a list of lists
     if {($nelems & 1) == 0} {
+        # Even number of elements so top level could be dict posing
+        # as a list with alternating key value pairs
         if {$nelems > 2 &&
             ([llength [lindex $l 1]] & 1) == 0 &&
             ([llength [lindex $l end]] & 1) == 0 &&
@@ -922,6 +998,8 @@ proc ctcl::pp {l args} {
             return
         }
     }
+
+
 
     pplistoflists $l {*}$args
 
@@ -1058,6 +1136,10 @@ proc ctcl::fold {items args} {
         }
     }
 
+    if {![info exists fold(init)]} {
+        set items [lassign $items fold(init)]
+    }
+    
     if {[info exists fold(if)] && [info exists fold(eval)]} {
         set lambda [list [list _l _r] "foreach _ \$_l {if {$fold(if)} {set _r \[$fold(eval)\]}} ; return \$_r"]
     } elseif {[info exists fold(eval)]} {
@@ -1066,10 +1148,6 @@ proc ctcl::fold {items args} {
         error "Value for 'eval' argument missing."
     }
 
-    if {![info exists fold(init)]} {
-        set fold(init) ""
-    }
-    
     return [uplevel 1 [list apply $lambda $items $fold(init)]]
 }
 
@@ -1178,7 +1256,6 @@ proc ctcl::files {args} {
     }        
     return $resultList
 }
-
 
 proc ctcl::funnel {} {
     set result ""
@@ -1318,11 +1395,18 @@ proc ctcl::main {} {
 
     uplevel #0 {
         namespace path {::ctcl ::tcl::mathop ::twapi}
+        rename unknown _ctcl_unknown
+        proc unknown {args} {
+            if {[info exists ::auto_index(::twapi::[lindex $args 0])]} {
+                set args [lreplace $args 0 0 ::twapi::[lindex $args 0]]
+            }
+            uplevel 1 [list _ctcl_unknown {*}$args]
+        }
     }
 
     # Not a script. Treat as a command or command fragment
     if {[llength $argv] == 0} {
-        puts stdout "[copyright]\nType command \"license\" for license information."
+        #puts stdout "[copyright]\nType command \"license\" for license information."
         interact
     } else {
         # Command is present on command line
