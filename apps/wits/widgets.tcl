@@ -2407,7 +2407,15 @@ proc wits::widget::errorstackdialog {message edict} {
                      ]
     
         if {$response eq "yes"} {
-            showerrordialog [string range [dict get $edict -errorinfo] 0 1000] -modal none
+            #showerrordialog [string range [dict get $edict -errorinfo] 0 1000] -modal none
+            set dlg [confirmdialog .%AUTO% -message $message -detail [string range [dict get $edict -errorinfo] 0 1000] -modal none -title Error -icon error]
+            $dlg add button -text Save -command [list util::save_file "$message\n[dict get $edict -errorinfo]" -extension .txt]
+            $dlg add button -text OK -command [list $dlg close ok]
+            # Make sure dialog is on top
+            wm deiconify $dlg
+            raise $dlg
+            set ret [$dlg display]
+            destroy $dlg
         }
     }
 
