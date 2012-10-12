@@ -2374,6 +2374,7 @@ proc wits::widget::showconfirmdialog {args} {
     set dlg [confirmdialog .%AUTO% {*}$args]
     # Make sure dialog is on top
     wm deiconify $dlg
+    wm attributes $dlg -topmost 1
     set ret [$dlg display]
     destroy $dlg
     return $ret
@@ -2383,6 +2384,34 @@ proc wits::widget::showconfirmdialog {args} {
 # Show an error dialog
 proc wits::widget::showerrordialog {message args} {
     showconfirmdialog -message $message -title Error -icon error -type ok -modal local {*}$args
+    return
+}
+
+# prototype must match interp bgerror
+proc wits::widget::errorstackdialog {message edict} {
+    variable inside_error_stack
+
+    # Note we show with -modal none because otherwise user cannot go
+    # close a window that is continuously generating an error.
+
+    # Protect against recursion
+    if {[incr inside_error_stack] == 1} {
+        set response [::wits::widget::showconfirmdialog \
+                          -title Error \
+                          -message $message \
+                          -detail "Do you want to see a detailed error stack?" \
+                          -modal none \
+                          -icon error \
+                          -defaultbutton no \
+                          -type yesno
+                     ]
+    
+        if {$response eq "yes"} {
+            showerrordialog [string range [dict get $edict -errorinfo] 0 1000] -modal none
+        }
+    }
+
+    incr inside_error_stack -1
     return
 }
 
@@ -2913,6 +2942,7 @@ snit::widget wits::widget::hotkeyeditor {
     }
 
     # Map a display key symbol to a VK code
+    # TBD - does TWAPI not already have a similar function ?
     typemethod sym_to_vk {sym} {
 
         $type _init_vk_sym_maps

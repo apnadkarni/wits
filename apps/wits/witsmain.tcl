@@ -14,7 +14,6 @@ if {[string compare -nocase [file extension [info script]] ".tm"]} {
 }
 
 
-
 tk appname $::wits::app::name
 wm withdraw .
 
@@ -34,6 +33,9 @@ if {[string compare -nocase [file extension [info script]] ".tm"]} {
     }
 }
 
+# Now that all files have been sourced, set the default Tcl error stack
+# dialog to be a bit more friendly.
+interp bgerror {} ::wits::widget::errorstackdialog
 
 #
 # Initialize preference settings
@@ -409,7 +411,7 @@ snit::widgetadaptor ::wits::app::mainview {
             }
             hotkey {
                 if {[::wits::app::configure_hotkeys]} {
-                    ::wits::app::assign_hotkey
+                    ::wits::app::assign_hotkeys
                 }
             }
             shutdown {
@@ -738,11 +740,24 @@ proc ::wits::app::assign_hotkeys {args} {
                 return
             }
             set hk_code [join [lreplace $keys end end $keycode] -]
-            set hotkeyIds($hk_tok) [::twapi::register_hotkey $hk_code $handler]
+            if {[catch {
+                set hotkeyIds($hk_tok) [::twapi::register_hotkey $hk_code $handler]
+            } emsg edict]} {
+                set hk_emsg $emsg; # Only track last error message
+                set hk_edict $edict
+                lappend hk_failures $hk
+            }
         }
 
         # Remember what we've assigned
         set hotkeyAssignments($hk_tok) $hk
+    }
+
+    if {[info exists hk_failures]} {
+        # TBD - any better way to send error to the background ?
+        # The after 50 (as opposed to 0 or idle) is to have dialog
+        # show up after the main window and above it.
+        after idle [list return -options $hk_edict "The following hotkeys could not be registered: [join $hk_failures {, }]. $hk_emsg"]
     }
 }
 
