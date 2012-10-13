@@ -506,7 +506,7 @@ proc ::wits::app::match_files {name} {
 # Returns a pair consising of object type and the list of their id's
 proc ::wits::app::_match_objects {objname {matchorder ""}} {
     if {$matchorder eq ""} {
-        set matchorder {service process remoteshare localshare printer file network}
+        set matchorder {service process remoteshare localshare file network}
     }
 
     foreach objtype $matchorder {
