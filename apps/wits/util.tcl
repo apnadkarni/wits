@@ -1534,7 +1534,15 @@ namespace eval util::filter {
     }
 }
 
-
+proc util::to_clipboard {text} {
+    twapi::open_clipboard
+    twapi::trap {
+        twapi::empty_clipboard
+        twapi::write_clipboard_text $text
+    } finally {
+        twapi::close_clipboard
+    }
+}
 
 
 

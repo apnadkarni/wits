@@ -2409,6 +2409,7 @@ proc wits::widget::errorstackdialog {message edict} {
         if {$response eq "yes"} {
             #showerrordialog [string range [dict get $edict -errorinfo] 0 1000] -modal none
             set dlg [confirmdialog .%AUTO% -message $message -detail [string range [dict get $edict -errorinfo] 0 1000] -modal none -title Error -icon error]
+            $dlg add button -text Copy -command [list util::to_clipboard "$message\n[dict get $edict -errorinfo]"]
             $dlg add button -text Save -command [list util::save_file "$message\n[dict get $edict -errorinfo]" -extension .txt]
             $dlg add button -text OK -command [list $dlg close ok]
             # Make sure dialog is on top
@@ -6680,13 +6681,7 @@ snit::widgetadaptor wits::widget::listframe {
         foreach row_id $row_ids {
             lappend data [join [$_listframe item text $row_id] \t]
         }
-        twapi::open_clipboard
-        twapi::trap {
-            twapi::empty_clipboard
-            twapi::write_clipboard_text [join $data \r\n]
-        } finally {
-            twapi::close_clipboard
-        }
+        util::to_clipboard [join $data \n]
     }
 
     # Exports rows to the specified file
