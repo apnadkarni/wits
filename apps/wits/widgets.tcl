@@ -1,6 +1,6 @@
 # TBD - check which evals should really be uplevels in global scope
 #
-# Copyright (c) 2011, Ashok P. Nadkarni
+# Copyright (c) 2011-2012 Ashok P. Nadkarni
 # All rights reserved.
 #
 # See the file LICENSE for license
@@ -4418,6 +4418,9 @@ snit::widget wits::widget::unmanagedtoplevel  {
         # install _notebookf using ttk::notebook $win.nb -style [get_style tab frame]
         install _notebookf using ::ttk::notebook $win.nb
         install _buttonf using ::ttk::frame $win.btn
+        ::wits::widget::fittedlabel $_buttonf.lstatus \
+            -justify left -anchor w -font WitsStatusFont
+
 
         # Parse any args (after we create the widgets)
         $self configurelist $args
@@ -4503,7 +4506,13 @@ snit::widget wits::widget::unmanagedtoplevel  {
     method _updatedisplay {{refresh false} {freshness 1000}} {
         if {$refresh} {
             set old_properties $_properties
-            set _properties [$_records_provider get_formatted_record $_record_id $_properties_of_interest $freshness]
+            if {[catch {
+                set _properties [$_records_provider get_formatted_record $_record_id $_properties_of_interest $freshness]
+            } msg]} {
+                $_buttonf.lstatus configure -text $msg -background red -foreground white
+                return
+            }
+            $_buttonf.lstatus configure -text "" -background "" -foreground ""
         }
         foreach {propname widgets} [array get _propertywidgets] {
             foreach elem $widgets {
@@ -4637,8 +4646,12 @@ snit::widget wits::widget::unmanagedtoplevel  {
 
         # Create the buttons
         set n 0
-        set filler [frame $_buttonf.filler -borderwidth 0]
-        pack $filler -side left -expand yes -fill both
+        if {0} {
+            set filler [frame $_buttonf.filler -borderwidth 0]
+            pack $filler -side left -expand yes -fill both
+        } else {
+            pack $_buttonf.lstatus -side left -expand yes -fill both
+        }
         foreach {label command} $buttonlist {
             set but [::ttk::button $_buttonf.b[incr _wctr] -text $label -command "$command $win"]
             # Padding chosen to match XP property sheet for files in Explorer
