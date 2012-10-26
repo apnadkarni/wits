@@ -5384,6 +5384,9 @@ snit::widgetadaptor wits::widget::listframe {
 
         # Configure the style for each field in row
         $_treectrl item style set $item {*}$_item_style_phrase
+
+        # TBD - check if it would be faster to build a (colid, text) 
+        # list and make a single call to $_treectrl item text
         foreach colname [dict keys $_columns] val $row {
             set col_id [dict get $_columns $colname id]
             $_treectrl item text $item $col_id $val
@@ -5400,6 +5403,8 @@ snit::widgetadaptor wits::widget::listframe {
             $_treectrl item state set $item {!deleted !new modified}
         }
 
+        # TBD - check if it would be faster to build a (colid, text) 
+        # list and make a single call to $_treectrl item text
         foreach colname [dict keys $_columns] val $row {
             $_treectrl item text $item [dict get $_columns $colname id] $val
         }
@@ -6269,6 +6274,11 @@ snit::widgetadaptor wits::widget::listframe {
         } else {
             set was_empty 0
         }
+
+        # TBD - if there is no highlighting and no change only mode
+        # would it be faster to clear the whole tktreectrl/listframe
+        # and put the new entries without all the diff'ing below?
+
 
         # Reset list highlights so new changes are shown AND our view
         # and underlying display view of deletions get in sync
