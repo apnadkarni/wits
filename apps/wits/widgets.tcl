@@ -5316,6 +5316,9 @@ snit::widgetadaptor wits::widget::listframe {
             set sort_col_name [$self column_id_to_name $_sort_column]
         }
         
+        unset -nocomplain _app_id_to_item
+        unset -nocomplain _item_to_app_id
+
         $_treectrl item delete all
         $_treectrl header delete all
         $_treectrl column delete all
