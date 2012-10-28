@@ -5401,8 +5401,7 @@ snit::widgetadaptor wits::widget::listframe {
 
         # TBD - check if it would be faster to build a (colid, text) 
         # list and make a single call to $_treectrl item text
-        foreach colname [dict keys $_columns] val $row {
-            set col_id [dict get $_columns $colname id]
+        foreach col_id [$_treectrl column list] val $row {
             $_treectrl item text $item $col_id $val
         }
 
@@ -5419,8 +5418,8 @@ snit::widgetadaptor wits::widget::listframe {
 
         # TBD - check if it would be faster to build a (colid, text) 
         # list and make a single call to $_treectrl item text
-        foreach colname [dict keys $_columns] val $row {
-            $_treectrl item text $item [dict get $_columns $colname id] $val
+        foreach col_id [$_treectrl column list] val $row {
+            $_treectrl item text $item $col_id $val
         }
 
         if {$options(-showchangesonly)} {
