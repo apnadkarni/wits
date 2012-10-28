@@ -5497,8 +5497,8 @@ snit::widgetadaptor wits::widget::listframe {
         }
     }
 
-    method getselected {} {
-        # Returns the list of currently selected row ids in the order they
+    method getselecteditems {} {
+        # Returns the list of currently selected item ids in the order they
         # are displayed
 
         # Neither [selection get], not [item id "state selected"]
@@ -5508,12 +5508,42 @@ snit::widgetadaptor wits::widget::listframe {
         foreach item [$_treectrl selection get] {
             lappend items [$_treectrl item order $item] $item
         }
-        set ids {}
+
+        set item_ids {}
         foreach {pos item} [lsort -integer -stride 2 $items] {
+            lappend item_ids $item
+        }
+        return $item_ids
+
+    }
+
+    method getselected {} {
+        # Returns the list of currently selected row ids in the order they
+        # are displayed
+
+        # Neither [selection get], not [item id "state selected"]
+        # return items in displayed order. So we have to sort that out
+        # ourselves.
+        set ids {}
+        foreach item [$self getselecteditems] {
             lappend ids $_item_to_app_id($item)
         }
         return $ids
     }
+
+    method getselectedcontent {} {
+        # Returns a nested list of currently selected cells
+
+        # Neither [selection get], not [item id "state selected"]
+        # return items in displayed order. So we have to sort that out
+        # ourselves.
+        set selection {}
+        foreach item [$self getselecteditems] {
+            lappend selection [$_treectrl item text $item]
+        }
+        return $selection
+    }
+
 
     method showtop {} {
         set first [$_treectrl item id "first visible"]
@@ -5725,7 +5755,6 @@ snit::widgetadaptor wits::widget::listframe {
 
         return [array size _app_id_to_item]
     }
-
 }
 
 ::snit::widget wits::widget::propertyrecordslistview {
@@ -6690,21 +6719,12 @@ snit::widgetadaptor wits::widget::listframe {
 
 
     # Copies selected rows to clipboard
-    method copytoclipboard {args} {
-        set row_ids [concat $args]
-        if {[llength $row_ids] == 0} {
-            set row_ids [$self _selected_row_ids]
+    method copytoclipboard {} {
+        set text {}
+        foreach row [$_listframe getselectedcontent] {
+            lappend text [join $row \t]
         }
-
-        if {[llength $row_ids] == 0} { 
-            return
-        }
-
-        set data [list ]
-        foreach row_id $row_ids {
-            lappend data [join [$_listframe item text $row_id] \t]
-        }
-        util::to_clipboard [join $data \n]
+        util::to_clipboard [join $text \n]
     }
 
     # Exports rows to the specified file
