@@ -5711,13 +5711,15 @@ snit::widgetadaptor wits::widget::listframe {
 
         if {$made_changes} {
             $self resort
-            if {$old_count > 0} {
+            if {$old_count == 0} {
                 # For some reason when data is first added to empty
                 # table, it shows the third row at the top. Make it
                 # show the top row instead. We do not always do this
                 # because if the table was scrolled, we do not want
-                # to move it to the top.
-                $self showtop
+                # to move it to the top. Also, need to do this after
+                # a delay so that the treectrl has updated, else
+                # top does not show for whatever reason.
+                after 100 [mymethod  showtop]
             }
         }
 
@@ -5957,10 +5959,6 @@ snit::widgetadaptor wits::widget::listframe {
 
     # Property record collection we are attached to
     variable _records_provider
-
-    # Maps record ids to row ids in table and vice versa
-    variable _id_to_rowid {}
-    variable _rowid_to_id {}
 
     # Properties being displayed. This is an dictionary of property
     # "metadata" as returned by $_records_provider
@@ -6356,123 +6354,6 @@ snit::widgetadaptor wits::widget::listframe {
                 $_scheduler after1 $when [mymethod display]
             }
         }
-    }
-
-    # Updates the list of objects we are displaying
-    method OBSOLETEdisplay {} {
-
-        # Remember and reset display state
-        set highlight $_highlight
-        set _highlight 1
-
-        set forcerefresh $_forcerefresh
-        set _forcerefresh 0
-
-        # Callers should generally use schedule_display_update for calling
-        # display so no more than one invocation will be pending. So
-        # update idletasks should not cause recursive entering of this code.
-        set _itemcounttext "Refreshing..."
-        update idletasks
-
-        set latest_records [$_records_provider get_formatted_dict $options(-displaycolumns)  [expr {$forcerefresh ? 0 : $_refreshinterval}] [expr {$options(-disablefilter) ? $_nullfilter : $options(-filter)}]]
-
-        if {[dict size $_records] == 0} {
-            # set highlight 0
-            set was_empty 1
-        } else {
-            set was_empty 0
-        }
-
-        # TBD - if there is no highlighting and no change only mode
-        # would it be faster to clear the whole tktreectrl/listframe
-        # and put the new entries without all the diff'ing below?
-
-
-        # Reset list highlights so new changes are shown AND our view
-        # and underlying display view of deletions get in sync
-        $_listframe resethighlights
-
-        set made_changes 0
-
-        if {$options(-comparerecordvalues)} {
-            dict for {id row} $latest_records {
-                if {[dict exists $_records $id]} {
-                    # See if any data in existing record has changed
-                    if {$row ne [dict get $_records $id]} {
-                        $_listframe modifyrow [dict get $_id_to_rowid $id] $row
-                        set made_changes 1
-                    }
-                    dict unset _records $id
-                } else {
-                    # New record
-                    set rowid [$_listframe insertrow $row]
-                    dict set _id_to_rowid $id $rowid
-                    dict set _rowid_to_id $rowid $id
-                    set made_changes 1
-                }
-            }
-        } else {
-            # Comparing keys is enough, no need to compare data
-            # TBD - maybe using intersect3 on keys would be faster ?
-            dict for {id row} $latest_records {
-                if {[dict exists $_records $id]} {
-                    # Existing
-                    dict unset _records $id
-                } else {
-                    # New record
-                    set rowid [$_listframe insertrow $row]
-                    dict set _id_to_rowid $id $rowid
-                    dict set _rowid_to_id $rowid $id
-                    set made_changes 1
-                }
-            }
-        }
-
-        # Any left over records are deleted ones
-        set deleted_rowids {}
-        foreach id [dict keys $_records] {
-            set rowid [dict get $_id_to_rowid $id]
-            lappend deleted_rowids $rowid
-            dict unset _id_to_rowid $id
-            dict unset _rowid_to_id $rowid
-        }
-        if {[llength $deleted_rowids]} {
-            incr made_changes
-            $_listframe deleterows $deleted_rowids
-        }
-
-        # Reset highlights added by above operations if so requested
-        # (eg. on filter change etc.)
-        if {! $highlight} {
-            $_listframe resethighlights
-        }
-
-        set _records $latest_records
-
-        if {$made_changes} {
-            $self _resort
-            if {$was_empty} {
-                # For some reason when data is first added to empty
-                # table, it shows the third row at the top. Make it
-                # show the top row instead. We do not always do this
-                # because if the table was scrolled, we do not want
-                # to move it to the top.
-                $_listframe showtop
-            }
-        }
-
-        # Note that active count is not same as number in table as
-        # the latter will include deleted items
-        if {$options(-hideitemcount)} {
-            set _itemcounttext ""
-        } else {
-            set n [dict size $_records]
-            set _itemcounttext [expr {$n == 1 ? "1 $options(-itemname)" : "$n $_itemname_plural"}]
-        }
-
-        # Also update the details widget - why rescheduled for later ? TBD
-        $_scheduler after1 idle [mymethod _updatedetailsfromsel $_listframe]
-        return
     }
 
     # Updates the list of objects we are displaying
