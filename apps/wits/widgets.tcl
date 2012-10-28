@@ -5402,11 +5402,13 @@ snit::widgetadaptor wits::widget::listframe {
         # Configure the style for each field in row
         $_treectrl item style set $item {*}$_item_style_phrase
 
-        # TBD - check if it would be faster to build a (colid, text) 
+        # It is faster to build a (colid, text) 
         # list and make a single call to $_treectrl item text
+        set vals {}
         foreach col_id [$_treectrl column list] val $row {
-            $_treectrl item text $item $col_id $val
+            lappend vals $col_id $val
         }
+        $_treectrl item text $item {*}$vals
 
         # Place child at end of table
         $_treectrl item lastchild root $item
@@ -5419,11 +5421,13 @@ snit::widgetadaptor wits::widget::listframe {
             $_treectrl item state set $item {!deleted !new modified}
         }
 
-        # TBD - check if it would be faster to build a (colid, text) 
+        # It is faster to build a (colid, text) 
         # list and make a single call to $_treectrl item text
+        set vals {}
         foreach col_id [$_treectrl column list] val $row {
-            $_treectrl item text $item $col_id $val
+            lappend vals $col_id $val
         }
+        $_treectrl item text $item {*}$vals
 
         if {$options(-showchangesonly)} {
             # Need to make it (potentially) hidden rows visible again
