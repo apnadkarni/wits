@@ -4927,6 +4927,12 @@ snit::widgetadaptor wits::widget::listframe {
 
     variable _scheduler
 
+    # Mappings for application row id to tktreectrl items and back
+    # TBD - maybe use speedtables instead ? Filtering and diffing might
+    # be faster ?
+    variable _app_id_to_item
+    variable _item_to_app_id
+
     # Stores various state info related to tooltips shown when mouse
     # hovers over an item
     variable _tooltip_state
@@ -4945,6 +4951,9 @@ snit::widgetadaptor wits::widget::listframe {
         # TBD -itemheight $height
 
         set _scheduler [util::Scheduler new]
+
+        # Map from application row ids to table item ids
+        array set _app_id_to_item {}
 
         # item and column identify where the mouse is hovering
         # -1 indicates invalid (ie mouse is outside an item)
@@ -5090,9 +5099,14 @@ snit::widgetadaptor wits::widget::listframe {
 
     method _dblclickhandler {winx winy screenx screeny} {
         if {$options(-pickcommand) ne ""} {
-            lassign [$_treectrl identify $winx $winy] type row_id col_id
+            lassign [$_treectrl identify $winx $winy] type item_id col_id
             if {$type eq "item"} {
-                uplevel #0 [linsert $options(-pickcommand) end $row_id $col_id $winx $winy $screenx $screeny]
+                if {[info exists _item_to_app_id($item_id)]} {
+                    set id $_item_to_app_id($item_id)
+                } else {
+                    set id ""
+                }
+                uplevel #0 [linsert $options(-pickcommand) end $id $item_id $col_id $winx $winy $screenx $screeny]
             }
         }
     }
@@ -5375,7 +5389,7 @@ snit::widgetadaptor wits::widget::listframe {
         }
     }
 
-    method insertrow {row} {
+    method _insertrow {row} {
         set item [$_treectrl item create -open no]
 
         if {$options(-highlight)} {
@@ -5398,7 +5412,7 @@ snit::widgetadaptor wits::widget::listframe {
         return $item
     }
 
-    method modifyrow {item row} {
+    method _modifyrow {item row} {
         if {$options(-highlight)} {
             $_treectrl item state set $item {!deleted !new modified}
         }
@@ -5415,7 +5429,7 @@ snit::widgetadaptor wits::widget::listframe {
         }
     }
 
-    method deleterow {item} {
+    method _deleterow {item} {
         if {$options(-highlight)} {
             $_treectrl item state set $item {!new !modified deleted}
             $_treectrl item enabled $item 0
@@ -5428,7 +5442,7 @@ snit::widgetadaptor wits::widget::listframe {
         }
     }
 
-    method deleterows {items} {
+    method _deleterows {items} {
         if {$options(-highlight)} {
             set items [list "list" $items]
             $_treectrl item state set  $items {!new !modified deleted}
@@ -5457,7 +5471,7 @@ snit::widgetadaptor wits::widget::listframe {
     }
 
     method _selecthandler {removedselections newselections} {
-        # Set the state for each column for the selected items so show
+        # Set the state for each column for the selected items to show
         # selection highlighting. Note we do not bother with the 
         # removedselections items. They can keep their state settings
         # since those anyways are unaffected if unselected.
@@ -5475,6 +5489,24 @@ snit::widgetadaptor wits::widget::listframe {
             # time, it does not get treated as a double click
             after 200 [linsert $options(-selectcommand) end $self]
         }
+    }
+
+    method getselected {} {
+        # Returns the list of currently selected row ids in the order they
+        # are displayed
+
+        # Neither [selection get], not [item id "state selected"]
+        # return items in displayed order. So we have to sort that out
+        # ourselves.
+        set items {}
+        foreach item [$_treectrl selection get] {
+            lappend items [$_treectrl item order $item] $item
+        }
+        set ids {}
+        foreach {pos item} [lsort -integer -stride 2 $items] {
+            lappend ids $_item_to_app_id($item)
+        }
+        return $ids
     }
 
     method showtop {} {
@@ -5511,6 +5543,15 @@ snit::widgetadaptor wits::widget::listframe {
                     $_treectrl see $first
                 }
             }
+        }
+    }
+
+    method count {{includedeleted 0}} {
+        if {$includedeleted} {
+            # -1 for implicit root item
+            return [expr {[$_treectrl item count {root children}] - 1}]
+        } else {
+            return [$_treectrl item count {root children state {!deleted}}]
         }
     }
 
@@ -5591,8 +5632,9 @@ snit::widgetadaptor wits::widget::listframe {
             return
         }
 
-        # Let client do the move else change highlighting gets confused
-        #APN $_treectrl column move $col_id $target_id
+        $_treectrl column move $col_id $target_id
+
+        # Work out the new order of column names
 
         # Remove the column being moved from the current list
         set order [lsearch -exact -inline -not -all [$_treectrl column list] $col_id]
@@ -5601,7 +5643,6 @@ snit::widgetadaptor wits::widget::listframe {
             set pos end
         } else {
             set pos [lsearch -exact $order $target_id]
-            
         }
 
         set colnames {}
@@ -5609,8 +5650,74 @@ snit::widgetadaptor wits::widget::listframe {
             lappend colnames [$self column_id_to_name $col_id]
         }
 
+        # Notify client of new column order
         uplevel #0 [linsert $options(-layoutchangecommand) end $colnames]
     }
+
+    method setrows {rows} {
+
+        # Set the table content to rows
+        #   rows - list of id value pairs where value is a list in same
+        #    order as columns
+        set made_changes 0
+
+        set old_count [array size _app_id_to_item]
+
+        # TBD - if no highlighting, is it faster to delete all and reinsert ?
+        
+        array set current_ids {}
+        foreach {id row} $rows {
+            set current_ids($id) 1
+            if {[info exists _app_id_to_item($id)]} {
+                # Existing item. Check if the data has changed.
+                set changed 0
+                foreach i $row j [$_treectrl item text $_app_id_to_item($id)] {
+                    if {$i ne $j} {
+                        set changed 1
+                        break
+                    }
+                }
+                if {$changed} {
+                    set made_changes 1
+                    $self _modifyrow $_app_id_to_item($id) $row
+                }
+            } else {
+                # New item
+                # TBD - maybe faster to insert new rows all at once ?
+                set _app_id_to_item($id) [$self _insertrow $row]
+                set _item_to_app_id($_app_id_to_item($id)) $id
+                set made_changes 1
+            }
+        }
+
+        # Now see which items need to be deleted
+        foreach {id item} [array get _app_id_to_item] {
+            if {![info exists current_ids($id)]} {
+                unset _item_to_app_id($_app_id_to_item($id))
+                unset _app_id_to_item($id)
+                lappend deleted $item
+            }
+        }
+        if {[info exists deleted]} {
+            set made_changes 1
+            $self _deleterows $deleted
+        }
+
+        if {$made_changes} {
+            $self resort
+            if {$old_count > 0} {
+                # For some reason when data is first added to empty
+                # table, it shows the third row at the top. Make it
+                # show the top row instead. We do not always do this
+                # because if the table was scrolled, we do not want
+                # to move it to the top.
+                $self showtop
+            }
+        }
+
+        return [array size _app_id_to_item]
+    }
+
 }
 
 ::snit::widget wits::widget::propertyrecordslistview {
@@ -5844,9 +5951,6 @@ snit::widgetadaptor wits::widget::listframe {
 
     # Property record collection we are attached to
     variable _records_provider
-
-    # Dictionary of record ids and corresponding values
-    variable _records {}
 
     # Maps record ids to row ids in table and vice versa
     variable _id_to_rowid {}
@@ -6248,10 +6352,8 @@ snit::widgetadaptor wits::widget::listframe {
         }
     }
 
-
-
     # Updates the list of objects we are displaying
-    method display {} {
+    method OBSOLETEdisplay {} {
 
         # Remember and reset display state
         set highlight $_highlight
@@ -6360,6 +6462,49 @@ snit::widgetadaptor wits::widget::listframe {
         } else {
             set n [dict size $_records]
             set _itemcounttext [expr {$n == 1 ? "1 $options(-itemname)" : "$n $_itemname_plural"}]
+        }
+
+        # Also update the details widget - why rescheduled for later ? TBD
+        $_scheduler after1 idle [mymethod _updatedetailsfromsel $_listframe]
+        return
+    }
+
+    # Updates the list of objects we are displaying
+    method display {} {
+
+        # Remember and reset display state
+        set highlight $_highlight
+        set _highlight 1
+
+        set forcerefresh $_forcerefresh
+        set _forcerefresh 0
+
+        # Callers should generally use schedule_display_update for calling
+        # display so no more than one invocation will be pending. So
+        # update idletasks should not cause recursive entering of this code.
+        set _itemcounttext "Refreshing..."
+        update idletasks
+
+        set records [$_records_provider get_formatted_dict $options(-displaycolumns)  [expr {$forcerefresh ? 0 : $_refreshinterval}] [expr {$options(-disablefilter) ? $_nullfilter : $options(-filter)}]]
+
+        # Reset list highlights so new changes are shown AND our view
+        # and underlying display view of deletions get in sync
+        $_listframe resethighlights
+
+        set count [$_listframe setrows $records]
+
+        # Reset highlights added by above operations if so requested
+        # (eg. on filter change etc.)
+        if {! $highlight} {
+            $_listframe resethighlights
+        }
+
+        # Note that active count is not same as number in table as
+        # the latter will include deleted items
+        if {$options(-hideitemcount)} {
+            set _itemcounttext ""
+        } else {
+            set _itemcounttext [expr {$count == 1 ? "1 $options(-itemname)" : "$count $_itemname_plural"}]
         }
 
         # Also update the details widget - why rescheduled for later ? TBD
@@ -6488,10 +6633,6 @@ snit::widgetadaptor wits::widget::listframe {
         set _details ""
         $_detailsframe configure -properties [dict create definitions $_properties values {}]
 
-        # On a column configuration change, reload all data so
-        # set current records as empty
-        set _records {}
-
         # Collect all the column information
         set coldefs {}
         foreach propname $options(-displaycolumns) {
@@ -6527,34 +6668,8 @@ snit::widgetadaptor wits::widget::listframe {
         $self _updatedetails [$self _selected_ids] true
     }
 
-    method _row_ids_in_display_order {row_ids} {
-        set unordered_ids {}
-        foreach row_id $row_ids {
-            lappend unordered_ids [$_listframe item order $row_id] $row_id
-        }
-        set row_ids {}
-        foreach {pos row_id} [lsort -integer -stride 2 $unordered_ids] {
-            lappend row_ids $row_id
-        }
-
-        return $row_ids
-    }
-
-    method _selected_row_ids {} {
-
-        set unordered_ids {}
-        # Neither [selection get], not [item id "state selected"]
-        # return items in displayed order. So we have to sort that out
-        # ourselves.
-        return [$self _row_ids_in_display_order [$_listframe selection get]]
-    }
-
     method _selected_ids {} {
-        set ids {}
-        foreach row_id [$self _selected_row_ids] {
-            lappend ids [dict get $_rowid_to_id $row_id]
-        }
-        return $ids
+        return [$_listframe getselected]
     }
 
     method _updatedetailsfromsel {tablewidget} {
@@ -6577,7 +6692,6 @@ snit::widgetadaptor wits::widget::listframe {
     }
 
     method _updatedetails {sel {propnames_changed false}} {
-        # TBD - why not get info from _records if it is there ?
         # TBD - if details frame was already open/closed do not
         #   call the open/closed methods again as the case may be
         if {[llength $sel] == 1} {
@@ -6612,10 +6726,9 @@ snit::widgetadaptor wits::widget::listframe {
     }
 
     # Called from ListFrame when a cell is double clicked
-    method _pickcommand {row_id col_id winx winy screenx screeny} {
-        if {$options(-pickcommand) != "" &&
-            [dict exists $_rowid_to_id $row_id]} {
-            {*}$options(-pickcommand) [dict get $_rowid_to_id $row_id]
+    method _pickcommand {id row_id col_id winx winy screenx screeny} {
+        if {$options(-pickcommand) != "" && $id ne ""} {
+            {*}$options(-pickcommand) $id
         }
     }
 
@@ -6749,7 +6862,14 @@ snit::widgetadaptor wits::widget::listframe {
     # Called when the table layout is changed by the user using listframe's
     # built-in drag'n'drop functions
     method _tablelayouthandler {neworder} {
-        $self configure -displaycolumns $neworder
+        # Calling configure will put in place complete reload of table
+        # Just directly note the new column order.
+        if {0} {
+            $self configure -displaycolumns $neworder
+        } else {
+            set options(-displaycolumns) $neworder
+        }
+        return
     }
 
     # Show table column editor. This code could have been part of the
