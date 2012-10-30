@@ -170,7 +170,7 @@ oo::class create wits::app::wineventlog::Objects {
                 set status updated
                 if {[info exists _events]} {
                     dict for {key eventrec} $_events {
-                        dict set _events $key -message [my atomize [string map {\r\n \n} [twapi::eventlog_format_message $eventrec -width -1]]]
+                        dict set _events $key -message [::twapi::atomize [string map {\r\n \n} [twapi::eventlog_format_message $eventrec -width -1]]]
                     }
                 }
                 set _messages_formatted 1
@@ -196,14 +196,21 @@ oo::class create wits::app::wineventlog::Objects {
                 set status updated
                 # print out each record
                 foreach eventrec $events {
+
                     # Note category cannot be cached as it is dependent
                     # on application, source and category file
                     
-                    # TBD - atomize whatever can be atomized from
+                    # TBD - atomize whatever else can be atomized from
                     # event fields
                     # TBD - use K operator to set dictionary ?
 
-                    dict set eventrec -account [my atomize [dict get $eventrec -userid]]
+                    dict set eventrec -message [::twapi::atomize [dict get $eventrec -message]]
+                    dict set eventrec -levelname [::twapi::atomize [dict get $eventrec -levelname]]
+                    dict set eventrec -channel [::twapi::atomize [dict get $eventrec -channel]]
+                    dict set eventrec -providername [::twapi::atomize [dict get $eventrec -providername]]
+                    dict set eventrec -taskname [::twapi::atomize [dict get $eventrec -taskname]]
+                    dict set eventrec -eventid [::twapi::atomize [dict get $eventrec -eventid]]
+                    dict set eventrec -account [twapi::atomize [dict get $eventrec -userid]]
                     if {[dict get $eventrec -userid] ne ""} {
                         catch {
                             dict set eventrec -account [wits::app::sid_to_name [dict get $eventrec -userid]]
@@ -211,7 +218,7 @@ oo::class create wits::app::wineventlog::Objects {
                     }
                     # For compatibility with Windows event viewer only
                     # display low 16 bits
-                    dict set eventrec -eventcode [expr {0xffff & [dict get $eventrec -eventid]}]
+                    dict set eventrec -eventcode [twapi::atomize [expr {0xffff & [dict get $eventrec -eventid]}]]
                     
                     # clock format is slow so do it now rather than display
                     # time.
@@ -228,6 +235,7 @@ oo::class create wits::app::wineventlog::Objects {
                     # Unfortunately lsort -integer as of 8.6b3 fails
                     # for 64-bit ints so for now stick to formatted
                     # string value.
+                    # TBD - can this be done lazily? Saves about 17MB on 146K events
                     lappend _ordered_events [list [dict get $eventrec -timecreated] $key]
                 }
             }
@@ -289,22 +297,6 @@ oo::class create wits::app::wineventlog::Objects {
             incr count [twapi::winlog_event_count -channel $src]
         }        
         return $count
-    }
-
-    method atomize {arg} {
-        # WHen reading very large event logs, reusing the same underlying Tcl object
-        # saves a lot of space. So we keep track of strings where _atom is an
-        # array that maps a string value to an existing Tcl_Obj with the same
-        # string value. On a 100,000 events system, this saves about 250MB of memory
-
-        if {![info exists _atoms($arg)]} {
-            set _atoms($arg) $arg
-        }
-        return $_atoms($arg)
-    }
-
-    method natoms {} {
-        return [array size _atoms]
     }
 
 }
