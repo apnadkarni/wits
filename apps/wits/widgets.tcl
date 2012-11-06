@@ -5723,7 +5723,11 @@ snit::widgetadaptor wits::widget::listframe {
             return
         }
 
-        $_treectrl column move $col_id $target_id
+        unset -nocomplain _itemvalues
+        if {0} {
+            Stubbed out because _itemvalues order no longer valid
+            $_treectrl column move $col_id $target_id
+        }
 
         # Work out the new order of column names
 
@@ -6836,13 +6840,7 @@ snit::widgetadaptor wits::widget::listframe {
     # Called when the table layout is changed by the user using listframe's
     # built-in drag'n'drop functions
     method _tablelayouthandler {neworder} {
-        # Calling configure will put in place complete reload of table
-        # Just directly note the new column order.
-        if {0} {
-            $self configure -displaycolumns $neworder
-        } else {
-            set options(-displaycolumns) $neworder
-        }
+        $self configure -displaycolumns $neworder
         return
     }
 
