@@ -5327,9 +5327,14 @@ snit::widgetadaptor wits::widget::listframe {
         }
         
         unset -nocomplain _app_id_to_item
+        array set _app_id_to_item {}
         unset -nocomplain _item_to_app_id
+        array set _item_to_app_id {}
         unset -nocomplain _itemvalues
+        array set _itemvalues {}
         unset -nocomplain _actually_displayed_items
+        array set _actually_displayed_items {}
+
 
         $_treectrl item delete all
         $_treectrl header delete all
@@ -5647,10 +5652,17 @@ snit::widgetadaptor wits::widget::listframe {
     }
 
     method _sort {col_id order} {
-        if {$_sort_column != $col_id &&
-            $_sort_column != -1} {
-            # Reset the sort arrow on existing sort column
-            $_treectrl column configure $_sort_column -arrow none -itembackground {}
+        if {$_sort_column != $col_id} {
+            if {$_sort_column != -1} {
+                # Reset the sort arrow on existing sort column
+                $_treectrl column configure $_sort_column -arrow none -itembackground {}
+            }
+            # Make sure that all cells in the sort column are updated with
+            # style and value
+            foreach {item row} [array get _itemvalues] {
+                $_treectrl item style set $item $col_id [dict get $_item_style_phrase $col_id]
+                $_treectrl item text $item $col_id [lindex $row $col_id]
+            }
         }
 
         if {$order eq "-increasing"} {
