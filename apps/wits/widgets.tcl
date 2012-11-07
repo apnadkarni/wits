@@ -5526,7 +5526,6 @@ snit::widgetadaptor wits::widget::listframe {
 
     method _visibilityhandler {invisible visible} {
         foreach item $invisible {
-            $self _initrow $item $_itemvalues($item)
             unset -nocomplain _actually_displayed_items($item)
         }
 
