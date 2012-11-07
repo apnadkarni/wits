@@ -4884,7 +4884,7 @@ snit::widgetadaptor wits::widget::listframe {
     }
 
     option -highlight -default 0
-    option -newhighlight -default green
+    option -newhighlight -default #00ff00; # Hex because Tk changed "green"
     option -deletedhighlight -default red
     option -modifiedhighlight -default yellow
 
