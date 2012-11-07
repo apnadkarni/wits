@@ -4932,6 +4932,12 @@ snit::widgetadaptor wits::widget::listframe {
     # be faster ?
     variable _app_id_to_item
     variable _item_to_app_id
+    
+    # app_id -> values for the item row
+    variable _itemvalues
+
+    # What items are actually visible ?
+    variable _actually_displayed_items
 
     # Stores various state info related to tooltips shown when mouse
     # hovers over an item
@@ -4954,6 +4960,9 @@ snit::widgetadaptor wits::widget::listframe {
 
         # Map from application row ids to table item ids
         array set _app_id_to_item {}
+        array set _item_to_app_id {}
+        array set _itemvalues {}
+        array set _actually_displayed_items {}
 
         # item and column identify where the mouse is hovering
         # -1 indicates invalid (ie mouse is outside an item)
@@ -4961,6 +4970,7 @@ snit::widgetadaptor wits::widget::listframe {
 
         $_treectrl header create -tags H2
 
+        $_treectrl notify bind $_treectrl <ItemVisibility> [mymethod _visibilityhandler %h %v]
         $_treectrl notify bind $_treectrl <Selection> [mymethod _selecthandler %D %S ]
         bind $_treectrl <Motion> [mymethod _motionhandler %x %y]
         # See comments in _leavehandler as to why this is commented out
@@ -5317,7 +5327,14 @@ snit::widgetadaptor wits::widget::listframe {
         }
         
         unset -nocomplain _app_id_to_item
+        array set _app_id_to_item {}
         unset -nocomplain _item_to_app_id
+        array set _item_to_app_id {}
+        unset -nocomplain _itemvalues
+        array set _itemvalues {}
+        unset -nocomplain _actually_displayed_items
+        array set _actually_displayed_items {}
+
 
         $_treectrl item delete all
         $_treectrl header delete all
@@ -5393,41 +5410,78 @@ snit::widgetadaptor wits::widget::listframe {
     }
 
     method _insertrow {row} {
-        set item [$_treectrl item create -open no]
-
-        if {$options(-highlight)} {
-            $_treectrl item state set $item new
-        }
-
-        # Configure the style for each field in row
-        $_treectrl item style set $item {*}$_item_style_phrase
-
-        # It is faster to build a (colid, text) 
-        # list and make a single call to $_treectrl item text
-        set vals {}
-        foreach col_id [$_treectrl column list] val $row {
-            lappend vals $col_id $val
-        }
-        $_treectrl item text $item {*}$vals
-
-        # Place child at end of table
-        $_treectrl item lastchild root $item
-
-        return $item
+        return [lindex [$self _insertrows [list $row]] 0]
     }
 
+    method _insertrows {rows} {
+        if {[llength $rows] == 0} {
+            return
+        }
+        set items [$_treectrl item create -open no -count [llength $rows]]
+
+        if {$options(-highlight)} {
+            $_treectrl item state set [list list $items] new
+        }
+
+        foreach item $items row $rows {
+            # We will initialize styles and contents of a row only
+            # when they are actually displayed. This is to save
+            # memory with large tables. However, tktreectrl does not
+            # seem to call us back when an item is displayed if none
+            # of the items have their styles set. Also, we have to
+            # make sure sorting works correctly, so we set the style
+            # and content of the sort column.
+            set _itemvalues($item) $row
+            if {$_sort_column == -1} {
+                set col [dict get $_columns [lindex [dict keys $_columns] 0] id]
+            } else {
+                set col $_sort_column
+            }
+            $_treectrl item style set $item $col [dict get $_item_style_phrase $col]
+            $_treectrl item text $item $col [lindex $row $col]
+        }
+
+        # Place at end of table
+        foreach item $items {
+            $_treectrl item lastchild root $item
+        }
+
+        return $items
+    }
+
+    method _initrow {item {row {}}} {
+        $_treectrl item style set $item {*}$_item_style_phrase
+
+        if {[llength $row]} {
+            # It is faster to build a (colid, text) 
+            # list and make a single call to $_treectrl item text
+            set vals {}
+            foreach col_id [$_treectrl column list] val $row {
+                lappend vals $col_id $val
+            }
+            $_treectrl item text $item {*}$vals
+        }
+    }
+
+    # TBD - also have a _modifyrows method ?
     method _modifyrow {item row} {
         if {$options(-highlight)} {
             $_treectrl item state set $item {!deleted !new modified}
         }
 
-        # It is faster to build a (colid, text) 
-        # list and make a single call to $_treectrl item text
-        set vals {}
-        foreach col_id [$_treectrl column list] val $row {
-            lappend vals $col_id $val
+        set _itemvalues($item) $row
+
+        # Only update treectrl if the item is actually displayed
+        # else even its style might not have been initialized
+        if {[info exists _actually_displayed_items($item)]} {
+            # It is faster to build a (colid, text) 
+            # list and make a single call to $_treectrl item text
+            set vals {}
+            foreach col_id [$_treectrl column list] val $row {
+                lappend vals $col_id $val
+            }
+            $_treectrl item text $item {*}$vals
         }
-        $_treectrl item text $item {*}$vals
 
         if {$options(-showchangesonly)} {
             # Need to make it (potentially) hidden rows visible again
@@ -5436,16 +5490,7 @@ snit::widgetadaptor wits::widget::listframe {
     }
 
     method _deleterow {item} {
-        if {$options(-highlight)} {
-            $_treectrl item state set $item {!new !modified deleted}
-            $_treectrl item enabled $item 0
-            if {$options(-showchangesonly)} {
-                # Need to make it (potentially) hidden rows visible again
-                $_treectrl item configure $item -visible 1
-            }
-        } else {
-            $_treectrl item delete $item
-        }
+        return [$self _deleterows [list $item]]
     }
 
     method _deleterows {items} {
@@ -5460,6 +5505,9 @@ snit::widgetadaptor wits::widget::listframe {
         } else {
             $_treectrl item delete [list "list" $items]
         }
+        foreach item $items {
+            unset -nocomplain _itemvalues($item)
+        }
     }
 
     method resethighlights {} {
@@ -5473,6 +5521,18 @@ snit::widgetadaptor wits::widget::listframe {
             if {[$_treectrl item count {root children}] > 0} {
                 $_treectrl item configure {root children} -visible 0
             }
+        }
+    }
+
+    method _visibilityhandler {invisible visible} {
+        foreach item $invisible {
+            $self _initrow $item $_itemvalues($item)
+            unset -nocomplain _actually_displayed_items($item)
+        }
+
+        foreach item $visible {
+            set _actually_displayed_items($item) 1
+            $self _initrow $item $_itemvalues($item)
         }
     }
 
@@ -5592,10 +5652,17 @@ snit::widgetadaptor wits::widget::listframe {
     }
 
     method _sort {col_id order} {
-        if {$_sort_column != $col_id &&
-            $_sort_column != -1} {
-            # Reset the sort arrow on existing sort column
-            $_treectrl column configure $_sort_column -arrow none -itembackground {}
+        if {$_sort_column != $col_id} {
+            if {$_sort_column != -1} {
+                # Reset the sort arrow on existing sort column
+                $_treectrl column configure $_sort_column -arrow none -itembackground {}
+            }
+            # Make sure that all cells in the sort column are updated with
+            # style and value
+            foreach {item row} [array get _itemvalues] {
+                $_treectrl item style set $item $col_id [dict get $_item_style_phrase $col_id]
+                $_treectrl item text $item $col_id [lindex $row $col_id]
+            }
         }
 
         if {$order eq "-increasing"} {
@@ -5668,7 +5735,11 @@ snit::widgetadaptor wits::widget::listframe {
             return
         }
 
-        $_treectrl column move $col_id $target_id
+        unset -nocomplain _itemvalues
+        if {0} {
+            Stubbed out because _itemvalues order no longer valid
+            $_treectrl column move $col_id $target_id
+        }
 
         # Work out the new order of column names
 
@@ -5707,7 +5778,7 @@ snit::widgetadaptor wits::widget::listframe {
             if {[info exists _app_id_to_item($id)]} {
                 # Existing item. Check if the data has changed.
                 set changed 0
-                foreach i $row j [$_treectrl item text $_app_id_to_item($id)] {
+                foreach i $row j $_itemvalues($_app_id_to_item($id)) {
                     if {$i ne $j} {
                         set changed 1
                         break
@@ -5720,9 +5791,21 @@ snit::widgetadaptor wits::widget::listframe {
             } else {
                 # New item
                 # TBD - maybe faster to insert new rows all at once ?
-                set _app_id_to_item($id) [$self _insertrow $row]
-                set _item_to_app_id($_app_id_to_item($id)) $id
-                set made_changes 1
+                lappend new_rows $row; # APN
+                lappend new_ids $id
+                # TBD - move this to _insertrow ?
+                #APN set _app_id_to_item($id) [$self _insertrow $row]
+                #APN set _item_to_app_id($_app_id_to_item($id)) $id
+                #APN set made_changes 1
+            }
+        }
+
+        #APN
+        if {[info exists new_rows]} {
+            set made_changes 1
+            foreach id $new_ids item [$self _insertrows $new_rows] {
+                set _app_id_to_item($id) $item
+                set _item_to_app_id($item) $id
             }
         }
 
@@ -6769,13 +6852,7 @@ snit::widgetadaptor wits::widget::listframe {
     # Called when the table layout is changed by the user using listframe's
     # built-in drag'n'drop functions
     method _tablelayouthandler {neworder} {
-        # Calling configure will put in place complete reload of table
-        # Just directly note the new column order.
-        if {0} {
-            $self configure -displaycolumns $neworder
-        } else {
-            set options(-displaycolumns) $neworder
-        }
+        $self configure -displaycolumns $neworder
         return
     }
 

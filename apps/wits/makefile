@@ -3,7 +3,7 @@ UILONGNAME=Windows Inspection Tool Set
 UISHORTNAME=WiTS
 APPVERSIONMAJOR=3
 APPVERSIONMINOR=1
-APPVERSIONPATCH=0
+APPVERSIONPATCH=1
 RELEASETYPE=a
 # NOTE - the order of files here is important. It must be the same order
 # as required to be stored in the concatenated .tm file
