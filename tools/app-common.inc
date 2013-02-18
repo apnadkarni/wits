@@ -149,11 +149,12 @@ ZIP="$(TOOLDIR)\zip.exe"
 !endif
 
 !ifndef WIXDIR
-WIXDIR=$(PROGRAMFILES)\Windows Installer XML v3.5
+WIXDIR=$(PROGRAMFILES)\WiX Toolset v3.7
 !endif
 
 !ifndef MT
-MT="$(PROGRAMFILES)\Microsoft SDKs\Windows\v7.0\bin\mt.exe"
+# MT="$(PROGRAMFILES)\Microsoft SDKs\Windows\v7.0\bin\mt.exe"
+MT = "c:\src\Microsoft SDKs\Windows\v7.0\bin\mt.exe"
 !endif
 
 !ifndef 7ZIPDIR
