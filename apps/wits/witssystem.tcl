@@ -464,7 +464,7 @@ oo::class create wits::app::system::Objects {
         set system_properties [dict merge $_fixed_system_properties $system_properties[set system_properties {}]]
 
         # Now calculate the CPU usage. We used to do this based on elapsed time
-        # as returned by GetSystemTimeAsFileTime. However, that can lead to
+        # as returned by get_system_time. However, that can lead to
         # bogus results as that returns discrete values and the granularity
         # is too coarse. Hence we now just add up all the CPU times returned
         # in each category (user time, interrupt time etc.) to get total

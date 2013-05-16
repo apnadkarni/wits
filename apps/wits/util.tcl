@@ -1205,7 +1205,7 @@ proc util::makename {{prefix x}} {
 }
 
 proc util::interval_mark {} {
-    return [::twapi::GetSystemTimeAsFileTime]
+    return [::twapi::get_system_time]
 }
 
 #
