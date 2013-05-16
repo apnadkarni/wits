@@ -335,7 +335,7 @@ ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount 
             # If we get one, we get all 3
             lappend retrieved_properties CPUPercent UserPercent KernelPercent
 
-            set now [twapi::GetSystemTimeAsFileTime]
+            set now [twapi::get_system_time]
             set elapsed [expr {$_processor_count * ($now - $_cpu_timestamp)}]
 
             if {$elapsed == 0} {
