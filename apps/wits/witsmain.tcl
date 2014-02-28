@@ -146,6 +146,9 @@ snit::widgetadaptor ::wits::app::mainview {
     # Whether we already showed the console message
     variable _console_message_shown false
 
+    # PDH query handle
+    variable _pdh_query ""
+
     # Command combo box
     component _runbox
 
@@ -153,6 +156,10 @@ snit::widgetadaptor ::wits::app::mainview {
 
     constructor args {
         set _scheduler [util::Scheduler new]
+
+        #
+        # Create the PDH query to retrieve basic system stats
+        set _pdh_query [twapi::pdh_system_performance_query processor_utilization disk_idle_percent memory_free_mb]
 
         # For now, background is white in all themes
         set bgcolor white
@@ -361,6 +368,7 @@ snit::widgetadaptor ::wits::app::mainview {
 
         bind $win <Escape> "+::wits::app::minimize $win"
 
+
         # The rest of the code below is simply to workaround a visual
         # bug where the open of the action frames causes a visual resizing
         # We draw offscreen (high offset), open and close the action
@@ -373,6 +381,9 @@ snit::widgetadaptor ::wits::app::mainview {
     # Destructor
     destructor {
         $_scheduler destroy
+        if {[llength $_pdh_query]} {
+            twapi::pdh_query_close $_pdh_query
+        }
     }
 
     # Deiconifies and sets focus in main window
@@ -484,20 +495,9 @@ snit::widgetadaptor ::wits::app::mainview {
         if {0 && $::wits::app::available_update ne ""} {
             set _system_status_summary "A new version of the software is available. Update from the Help and Support menu."
         } else {
-            # TBD - optimize by opening a PDH query and keeping it open
-            # instead of using high level twapi functions
-            set cpu [[wits::app::get_objects ::wits::app::system] get_field $wits::app::system::_all_cpus_label CPUPercent $interval 0]
-
-            array set systemstatus [twapi::get_system_info -processcount -threadcount]
-            array set systemstatus [twapi::get_memory_info -availcommit -totalcommit -availphysical -totalphysical]
-            set usedphysical [expr {$systemstatus(-totalphysical) - $systemstatus(-availphysical)}]
-            set usedphysical [expr {(wide($usedphysical)+524288)/wide(1048576)}]
-            set totalphysical [expr {(wide($systemstatus(-totalphysical))+524288)/wide(1048576)}]
-            set usedcommit [expr {$systemstatus(-totalcommit) - $systemstatus(-availcommit)}]
-            set usedcommit [expr {(wide($usedcommit)+524288)/wide(1048576)}]
-            set totalcommit [expr {(wide($systemstatus(-totalcommit))+524288)/wide(1048576)}]
+            array set data [twapi::pdh_query_get $_pdh_query]
             set _system_status_summary \
-                "CPU: $cpu%, Processes: $systemstatus(-processcount), Memory: $usedphysical/$totalphysical MB, Swap:  $usedcommit/$totalcommit MB"
+                "CPU: [format %5.2f $data(processor_utilization)]%, Free Memory: $data(memory_free_mb)MB, Disk: [format %5.2f [expr {100 - $data(disk_idle_percent)}]]%"
         }
 
         # Reschedule ourselves every 5 seconds - TBD
