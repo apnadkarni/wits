@@ -18,7 +18,7 @@ namespace eval ::wits::app::wfile {
     }
 
     proc getviewer {path} {
-        ::twapi::file_properties_dialog $path
+        ::twapi::shell_object_properties_dialog $path -type file
         return
     }
 }
