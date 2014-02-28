@@ -100,7 +100,6 @@ proc transform_file {infile {adfile ""} {adfile2 ""} {outfile ""}} {
         <div class="copyright">
           &copy; 2007-2011 Ashok P. Nadkarni
         </div>
-        <a href='http://www.magicsplat.com/privacy.html'>Privacy policy</a>
       </div>
     }
 
