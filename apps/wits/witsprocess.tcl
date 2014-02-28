@@ -328,7 +328,7 @@ oo::class create wits::app::process::Objects {
         set retrieved_properties {
 ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount ThreadCount CreateTime UserTime KernelTime VmCounters.PeakVirtualSize VmCounters.VirtualSize VmCounters.PageFaultCount VmCounters.PeakWorkingSetSize VmCounters.WorkingSetSize VmCounters.QuotaPeakPagedPoolUsage VmCounters.QuotaPagedPoolUsage VmCounters.QuotaPeakNonPagedPoolUsage VmCounters.QuotaNonPagedPoolUsage VmCounters.PagefileUsage VmCounters.PeakPagefileUsage IoCounters.ReadOperationCount IoCounters.WriteOperationCount IoCounters.OtherOperationCount IoCounters.ReadTransferCount IoCounters.WriteTransferCount IoCounters.OtherTransferCount
         }
-        set new [twapi::recordarray get [twapi::Twapi_GetProcessList -1 31]]
+        set new [twapi::recordarray -format dict -key ProcessId [twapi::Twapi_GetProcessList -1 31]]
 
         # Check if we need CPU%
         if {[lsearch -glob $propnames *Percent]} {
