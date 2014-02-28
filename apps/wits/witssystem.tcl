@@ -173,7 +173,7 @@ namespace eval ::wits::app::system {
 
 }
 
-proc wits::app::system::get_property_defs {} {
+twapi::proc* wits::app::system::get_property_defs {} {
     variable _property_defs
     variable _wmi_Win32_BIOS
 
@@ -221,12 +221,6 @@ proc wits::app::system::get_property_defs {} {
         -sid              "System SID" "SID" "" text
         -kernelpaged      "Kernel paged pool" "Paged pool" "" mb
         -kernelnonpaged   "Kernel nonpaged pool" "Nonpaged pool" "" mb
-        IdleTime          "Processor idle time" "Idle time" "" ns100
-        UserTime          "Processor user time" "User time" "" ns100
-        DpcTime           "Processor DPC time" "DPC time" "" ns100
-        InterruptTime     "Processor Interrupt time" "Interrupt time" "" ns100
-        InterruptCount    "Interrupt count" "Interrupt count" "" int
-        KernelTime        "Processor kernel time" "Kernel time" "" ns100
         cpuid             "CPU Id" "CPU Id" "" text
         CPUPercent        "CPU %" "CPU%" "" int
         UserPercent       "User %" "User%" "" int
@@ -276,23 +270,21 @@ proc wits::app::system::get_property_defs {} {
                  objtype $objtype]
         set _wmi_Win32_BIOS($propname) $wmiprop
     }
-
-    # Redefine ourselves now that we've done initialization
-    proc [namespace current]::get_property_defs {} {
-        variable _property_defs
-        return $_property_defs
-    }
-
-    return [get_property_defs]
+} {
+    variable _property_defs
+    return $_property_defs
 }
 
 oo::class create wits::app::system::Objects {
     superclass util::PropertyRecordCollection
 
-    variable _fixed_cpu_properties _fixed_system_properties _semistatic_properties _semistatic_properties_timestamp _cpu_times _records 
+    variable _fixed_system_properties _semistatic_properties _semistatic_properties_timestamp _records _pdh_query _pdh_query_timestamp
 
     constructor {} {
         namespace path [concat [namespace path] [list [namespace qualifiers [self class]]]]
+
+        set _pdh_query [twapi::pdh_system_performance_query processor_utilization_per_cpu user_utilization_per_cpu]
+        set _pdh_query_timestamp [twapi::get_system_time]
 
         # IMPORTANT - make sure properties initialized - needed by 
         # _init_fixed_properties
@@ -302,24 +294,13 @@ oo::class create wits::app::system::Objects {
         set _semistatic_properties_timestamp 0
         my _refresh_semistatic_properties
 
-        # _cpu_times keeps track of last cpu time values
-        set ncpu [twapi::get_processor_count]
-        while {$ncpu > 0} {
-            incr ncpu -1
-            dict set _cpu_times $ncpu {
-                IdleTime 0
-                KernelTime 0
-                UserTime 0
-                DpcTime 0
-                InterruptTime 0
-                InterruptCount 0
-            }
-        }
-
         next $propdefs -ignorecase 0 -refreshinterval 2000
     }
 
     destructor {
+        if {[info exists _pdh_query]} {
+            twapi::pdh_query_close $_pdh_query
+        }
         next
     }
 
@@ -328,40 +309,33 @@ oo::class create wits::app::system::Objects {
         set  _fixed_system_properties [twapi::get_memory_info -allocationgranularity -pagesize -minappaddr -maxappaddr]
         dict set _fixed_system_properties -os [twapi::get_os_description]
         dict set _fixed_system_properties -windir [twapi::GetSystemWindowsDirectory]
-        dict set _fixed_system_properties {*}[twapi::get_system_info -sid]
+        dict set _fixed_system_properties -sid [twapi::get_system_sid]
 
         set ncpu [twapi::get_processor_count]
         dict set _fixed_system_properties -processorcount $ncpu
 
-        while {[incr ncpu -1] >= 0} {
-            set cpuprops [twapi::get_processor_info $ncpu -arch -processorlevel -processormodel -processorname -processorrev -processorspeed -interval 0]
-            dict set cpuprops cpuid "CPU $ncpu"
+        # TBD - assumes all processors same
+        # TBD - is the processor id 0 ok for systems with > 64 cpus ?
+        set _fixed_system_properties [twapi::get_processor_info 0 -arch -processorlevel -processormodel -processorname -processorrev -processorspeed]
+        # Some prettying up for display
+        # For some reason processor name has leading whitespace
+        dict set _fixed_system_properties -processorname [string trim [dict get $_fixed_system_properties -processorname]]
 
-            # Some prettying up for display
-
-            # For some reason processor name has leading whitespace
-            dict set cpuprops -processorname [string trim [dict get $cpuprops -processorname]]
-
-            dict append cpuprops -processorspeed " Mhz"
+        dict set _fixed_system_properties -processorspeed " Mhz"
             
-            dict set _fixed_cpu_properties $ncpu $cpuprops
-        }
-
         # Get WMI properties (these are all static)
         twapi::trap {
             set wmi [::wits::app::get_wmi]
             foreach {propname wmiprop} [array get ::wits::app::system::_wmi_Win32_BIOS] {
                 if {[catch {::wits::app::wmi_invoke_item "" Win32_BIOS -get $wmiprop} propval]} {
-                    # Skip errors
-                    puts $propval
-                    puts $::errorInfo
+                    # Skip errors. TBD - debug log
                 } else {
                     dict set _fixed_system_properties $propname $propval
                 }
             }
         } onerror {} {
             # Ignore errors - any data we can't get will just show up as N/A
-            puts $errorResult
+            # TBD  debug log - puts $errorResult
         }
 
         # Append minor SMBIOS version to major for display
@@ -382,15 +356,11 @@ oo::class create wits::app::system::Objects {
             dict set _fixed_system_properties -biosfeatures $features
         }
 
-        # Pseudo processor "all"
-        dict set _fixed_cpu_properties $::wits::app::system::_all_cpus_label [dict get $_fixed_cpu_properties 0]
-        # Fix up the CPU 0 -> CPU All
-        dict set _fixed_cpu_properties $::wits::app::system::_all_cpus_label cpuid $::wits::app::system::_all_cpus_label
     }
 
     method _refresh_semistatic_properties {} {
-        set now [clock seconds]
-        if {($now - $_semistatic_properties_timestamp) < 60} {
+        set now [twapi::get_system_time]
+        if {($now - $_semistatic_properties_timestamp) < 600000000} {
             # We will not update more than once a minute
             return
         }
@@ -460,87 +430,51 @@ oo::class create wits::app::system::Objects {
             set system_properties [dict merge $system_properties[set system_properties {}] [twapi::get_system_info -eventcount -mutexcount -sectioncount -semaphorecount]]
         }
 
-        # Merge all this info for each cpu
         set system_properties [dict merge $_fixed_system_properties $system_properties[set system_properties {}]]
 
-        # Now calculate the CPU usage. We used to do this based on elapsed time
-        # as returned by get_system_time. However, that can lead to
-        # bogus results as that returns discrete values and the granularity
-        # is too coarse. Hence we now just add up all the CPU times returned
-        # in each category (user time, interrupt time etc.) to get total
-        # elapsed time for each CPU.
-
-        set prev_cpu_times $_cpu_times
-        set _cpu_times {}
-
-        set all_idle_cpu    0
-        set all_elapsed_cpu 0
-        set all_user_cpu    0
-        set cpu 0
-        foreach cpudata [twapi::Twapi_SystemProcessorTimes] {
-            # Update the data across all CPU's
-            dict for {key val} $cpudata {
-                dict incr allcpus $key $val
+        set now [twapi::get_system_time]
+        set elapsed [expr {$now - $_pdh_query_timestamp}]
+        if {$elapsed < 10000000} {
+            # Less than 1 second elapsed
+            # Will get errors if we call pdh_query_get too frequently
+            # so return "nochange". We cannot do this if $force in which
+            # case we have to wait some specified amount of time.
+            if {! $force} {
+                return [list nochange]
             }
-
-            #NOTE:  idle time is included in kernel time
-            set idle [expr {[dict get $cpudata IdleTime] - [dict get $prev_cpu_times $cpu IdleTime]}]
-            set user [expr {[dict get $cpudata UserTime] - [dict get $prev_cpu_times $cpu UserTime]}]
-            set elapsed [expr {$user + [dict get $cpudata KernelTime] - [dict get $prev_cpu_times $cpu KernelTime]}]
-
-            if {$elapsed == 0} {
-                # Can happen if called in succession before any counts have been updated.
-                # In this case use the old values if present. Otherwise
-                # leave empty - viewers will use appropriate defaults
-                foreach field {KernelPercent UserPercent CPUPercent} {
-                    if {[dict exists $_records $cpu $field]} {
-                        dict set cpudata $field [dict get $_records $cpu $field]
-                    }
-                }
-            } else {
-                # Update totals for calculating overall cpu usage
-                incr all_idle_cpu $idle
-                incr all_user_cpu $user
-                incr all_elapsed_cpu $elapsed
-
-                # Calculate percents for this cpu
-                # We want to round up
-                dict set cpudata CPUPercent [expr {((100*($elapsed-$idle))+$elapsed-1)/$elapsed}]
-                dict set cpudata UserPercent [expr {((100*$user)+$elapsed-1)/$elapsed}]
-                dict set cpudata KernelPercent [expr {[dict get $cpudata CPUPercent] - [dict get $cpudata UserPercent]}]
-            }
-
-            dict set newdata $cpu [dict merge $system_properties [dict get $_fixed_cpu_properties $cpu] $cpudata]
-
-            # Remember for next time
-            dict set _cpu_times $cpu $cpudata
-
-            incr cpu
+            set wait_time [expr {(10000000 - $elapsed)/10000}]
+            after $wait_time
         }
-
-        # Add the "all" pseudo CPU to returned data.
-        dict set newdata $::wits::app::system::_all_cpus_label [dict merge $system_properties [dict get $_fixed_cpu_properties $::wits::app::system::_all_cpus_label] $allcpus]
-        if {$all_elapsed_cpu} {
-            dict set newdata $::wits::app::system::_all_cpus_label CPUPercent [expr {((100*($all_elapsed_cpu-$all_idle_cpu))+$all_elapsed_cpu-1)/$all_elapsed_cpu}]
-            dict set newdata $::wits::app::system::_all_cpus_label UserPercent [expr {((100*$all_user_cpu)+$all_elapsed_cpu-1)/$all_elapsed_cpu}]
-            dict set newdata $::wits::app::system::_all_cpus_label KernelPercent [expr {[dict get $newdata $::wits::app::system::_all_cpus_label CPUPercent] - [dict get $newdata $::wits::app::system::_all_cpus_label UserPercent]}]
-        } else {
-            # Clock has not ticked since last tick. Reuse last known data.
-            # If no previous data, will default to 0
-            foreach percent {CPUPercent UserPercent KernelPercent} {
-                if {[dict exists $_records $::wits::app::system::_all_cpus_label $percent]} {
-                    dict set newdata $::wits::app::system::_all_cpus_label $percent [dict get $_records $::wits::app::system::_all_cpus_label $percent]
-                }
+        
+        array set cpuperf {}
+        set pdh_data [pdh_query_get $_pdh_query]
+        set _pdh_query_timestamp [twapi::get_system_time]
+        dict for {cpu utilization} [dict get $pdh_data processor_utilization_per_cpu] {
+            set user_utilization [dict get $pdh_data user_utilization_per_cpu $cpu]
+            if {$user_utilization > $utilization} {
+                set user_utilization $utilization
             }
+            set kernel_utilization [expr {$utilization - $user_utilization}]
+
+            set cpuperf($cpu) [list cpuid "CPU $cpu" \
+                                   CPUPercent [format %.1f $utilization] \
+                                   UserPercent  [format %.1f $user_utilization] \
+                                   KernelPercent  [format %.1f $kernel_utilization]]
+
+        }
+                           
+        set cpuperf($::wits::app::system::_all_cpus_label) $cpuperf(_Total)
+        dict set cpuperf($::wits::app::system::_all_cpus_label) cpuid $::wits::app::system::_all_cpus_label
+
+        # Get rid of the _Total,N entries which correspond to processor groups
+        array unset cpuperf *_Total
+
+        foreach {cpu cpudata} [array get cpuperf] {
+            dict set newdata $cpu [dict merge $system_properties $cpudata]
         }
 
         return [list updated [dict keys [dict get $newdata $::wits::app::system::_all_cpus_label]] $newdata]
     }
-
-    method dump {} {
-        return [list $_cpu_times $_records]
-    }
-
 }
 
 proc wits::app::system::viewlist {args} {
