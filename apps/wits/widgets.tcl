@@ -5604,6 +5604,34 @@ snit::widgetadaptor wits::widget::listframe {
         return $selection
     }
 
+    method getdisplayeditems {} {
+        # Returns list of items in display order
+
+        # TBD - faster way to do this using some other treectrl command ?
+        set items {}
+        foreach item [$_treectrl item id visible] {
+            lappend items [$_treectrl item order $item] $item
+        }
+
+        set item_ids {}
+        foreach {pos item} [lsort -integer -stride 2 $items] {
+            lappend item_ids $item
+        }
+        return $item_ids
+    }
+
+    method getdisplayedcontent {} {
+        # Returns a nested list of currently displayed rows in display order
+        set content {}
+        foreach item [$self getdisplayeditems] {
+            if {[info exists _itemvalues($item)]} {
+                lappend content $_itemvalues($item)
+            } else {
+                puts "no value for $item: [$_treectrl item text $item]"
+            }
+        }
+        return $content
+    }
 
     method showtop {} {
         set first [$_treectrl item id "first visible"]
@@ -6830,10 +6858,7 @@ snit::widgetadaptor wits::widget::listframe {
             }
         }
 
-        set data [list ]
-        foreach row_id [$self _row_ids_in_display_order [$_listframe item id visible]] {
-            lappend data [$_listframe item text $row_id]
-        }
+        set data [$_listframe getdisplayedcontent]
 
         # Get the column titles
         set cols [list ]
