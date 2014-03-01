@@ -419,6 +419,7 @@ snit::widgetadaptor wits::widget::fittedlabel {
     delegate method * to hull
 }
 
+# TBD - see ttk::scrolledframe at bottom of http://wiki.tcl.tk/534
 snit::widget wits::widget::scrolledframe {
     ### Procs
 
