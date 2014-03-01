@@ -1812,7 +1812,7 @@ proc wits::app::map_addr_to_name {addr} {
     # do so
     if {![info exists ::wits::app::unresolved_addresses($addr)]} {
             set ::wits::app::unresolved_addresses($addr) ""
-            set name [twapi::address_to_hostname $addr -async ::wits::app::address_resolve_callback]
+            set name [twapi::resolve_address $addr -async ::wits::app::address_resolve_callback]
         }
 
     # Return address itself

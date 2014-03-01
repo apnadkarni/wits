@@ -475,7 +475,7 @@ snit::type ::wits::app::eventmanager {
     # Monitor disk freespace and log event
     method _monitor_disk_freespace {} {
         set culprits [list ]
-        foreach drive [twapi::get_logical_drives -type fixed] {
+        foreach drive [twapi::find_logical_drives -type fixed] {
             array set driveinfo [twapi::get_volume_info $drive -used -size]
             set threshold [expr {(wide($driveinfo(-size)) * $options(-useddiskpercent))/100}]
             if {$threshold <= $driveinfo(-used)} {
