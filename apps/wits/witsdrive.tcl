@@ -301,7 +301,7 @@ proc wits::app::drive::getviewer {drv} {
 proc wits::app::drive::pageviewhandler {drv button viewer} {
     switch -exact -- $button {
         windialog {
-            ::twapi::volume_properties_dialog $drv
+            ::twapi::shell_object_properties_dialog $drv -type volume
         }
         default {
             tk_messageBox -icon info -message "Function $button is not implemented"
@@ -317,7 +317,7 @@ proc wits::app::drive::getlisttitle {} {
 # Volume object
 namespace eval wits::app::volume {
     proc getviewer {path} {
-        ::twapi::volume_properties_dialog $path
+        ::twapi::shell_object_properties_dialog $path -type volume
         return
     }
 
