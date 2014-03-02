@@ -4934,7 +4934,7 @@ snit::widgetadaptor wits::widget::listframe {
     variable _app_id_to_item
     variable _item_to_app_id
     
-    # app_id -> values for the item row
+    # item -> values for the item row
     variable _itemvalues
 
     # What items are actually visible ?
@@ -5495,16 +5495,16 @@ snit::widgetadaptor wits::widget::listframe {
     }
 
     method _deleterows {items} {
+        set itemlist [list "list" $items]
         if {$options(-highlight)} {
-            set items [list "list" $items]
-            $_treectrl item state set  $items {!new !modified deleted}
-            $_treectrl item enabled $items 0
+            $_treectrl item state set $itemlist {!new !modified deleted}
+            $_treectrl item enabled $itemlist 0
             if {$options(-showchangesonly)} {
                 # Need to make it (potentially) hidden rows visible again
                 $_treectrl item configure $items -visible 1
             }
         } else {
-            $_treectrl item delete [list "list" $items]
+            $_treectrl item delete $itemlist
         }
         foreach item $items {
             unset -nocomplain _itemvalues($item)
