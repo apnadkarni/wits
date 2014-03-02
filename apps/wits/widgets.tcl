@@ -5501,18 +5501,25 @@ snit::widgetadaptor wits::widget::listframe {
             $_treectrl item enabled $itemlist 0
             if {$options(-showchangesonly)} {
                 # Need to make it (potentially) hidden rows visible again
-                $_treectrl item configure $items -visible 1
+                $_treectrl item configure $itemlist -visible 1
             }
         } else {
             $_treectrl item delete $itemlist
-        }
-        foreach item $items {
-            unset -nocomplain _itemvalues($item)
+            foreach item $items {
+                unset -nocomplain _itemvalues($item)
+            }
         }
     }
 
     method resethighlights {} {
-        catch {$_treectrl item delete {state deleted}}
+        set deleted_items [$_treectrl item id {state deleted}]
+        if {[llength $deleted_items]} {
+            foreach item $deleted_items {
+                unset -nocomplain _itemvalues($item)
+            }
+            $_treectrl item delete [list "list" $deleted_items]
+        }
+
         $_treectrl item state set all {!modified !new}
         if {$options(-showchangesonly)} {
             # Note this is {root children}, not "all" else root
@@ -6216,7 +6223,7 @@ snit::widgetadaptor wits::widget::listframe {
         $_toolbar add button fontenlarge -image [images::get_icon16 fontenlarge] -command [mymethod _change_font_size 1]
         tooltip::tooltip [$_toolbar itemid fontenlarge] "Increase font size (Ctrl++)"
         $_toolbar add button fontreduce -image [images::get_icon16 fontreduce] -command [mymethod _change_font_size -1]
-        tooltip::tooltip [$_toolbar itemid fontreduce] "Decrease font size (Ctrl+-"
+        tooltip::tooltip [$_toolbar itemid fontreduce] "Decrease font size (Ctrl+-)"
         set _splitwindowbuttonvar 1; # Since we start with window open
         $_toolbar add checkbutton splitwindow -image [images::get_icon16 splitwindow] -command [mymethod _setleftpanevisibility] -variable [myvar _splitwindowbuttonvar]
         tooltip::tooltip [$_toolbar itemid splitwindow] "Show summary pane"
