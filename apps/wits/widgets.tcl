@@ -1033,12 +1033,23 @@ snit::widgetadaptor wits::widget::collapsibleframeheader {
 
         $self lower gradient
 
-        # Redraw button
-        $self delete pushbutton
-
         if {$options(-command) eq ""} {
             return
         }
+
+        # Bind whole widget to change cursor and invoke command.
+        # This is how XP behaves
+        bind $win <Enter> "$win configure -cursor hand2"
+        bind $win <Leave> "$win configure -cursor {}"
+        bind $win <ButtonRelease-1> [mymethod _docommand]
+
+        return
+
+        Rest of code draws collapse buttons but looks ugly so
+        commented out. Perhaps add an icon instead - TBD
+
+        # Redraw button
+        $self delete pushbutton
 
         # Make button size consistent with font size
         array set metrics [font metrics [$self cget -font]]
@@ -1123,11 +1134,6 @@ snit::widgetadaptor wits::widget::collapsibleframeheader {
             $self create line $x $y [incr x] $y $x [incr y -1] [incr x] $y $x [incr y -1] [incr x] $y $x [incr y -1] $x [incr y] [incr x] $y $x [incr y] [incr x] $y $x [incr y] [incr x 2] [incr y] -tags pushbutton -fill $options(-fg)
         }
 
-        # Bind whole widget to change cursor and invoke command.
-        # This is how XP behaves
-        bind $win <Enter> "$win configure -cursor hand2"
-        bind $win <Leave> "$win configure -cursor {}"
-        bind $win <ButtonRelease-1> [mymethod _docommand]
     }
 
     method _docommand {} {
