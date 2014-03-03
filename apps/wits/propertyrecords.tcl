@@ -578,7 +578,7 @@ oo::class create util::PropertyRecordCollection {
         # The status field may either 'nochange' or 'updated' indicating 
         # whether the returned data is different from that returned by
         # the last call or not. Derived classes are always free to
-        # return 'updated' even if data has changed if they do not
+        # return 'updated' even if data has not changed if they do not
         # themselves track changes.
         #
         # The property names field contains the names of the properties
