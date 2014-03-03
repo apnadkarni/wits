@@ -1390,9 +1390,17 @@ snit::widgetadaptor wits::widget::collapsiblepropertyframe {
             -nameproperty {
                 # See if the property has a value AND there already exists
                 # a window. It's an error if the property name is invalid
-                if {[info exists _valuewidgets($propname)] &&
-                    [dict exists $options(-properties) values $propname]} {
-                    $_valuewidgets($propname) configure -text [dict get $options(-properties) values $propname]
+                if {1} {
+                    if {[dict exists $options(-properties) values $propname]} {
+                        $hull configure -title [dict get $options(-properties) values $propname]
+                    } else {
+                        $hull configure -title "Summary"; # TBD
+                    }
+                } else {
+                    if {[info exists _valuewidgets($propname)] &&
+                        [dict exists $options(-properties) values $propname]} {
+                        $_valuewidgets($propname) configure -text [dict get $options(-properties) values $propname]
+                    }
                 }
                 return partial
             }
@@ -1439,9 +1447,14 @@ snit::widgetadaptor wits::widget::collapsiblepropertyframe {
         # TBD - optimize below as follows:
         #   - do not special case -name and -descproperty
 
-        if {$options(-nameproperty) ne "" &&
-            [info exists _valuewidgets($options(-nameproperty))]} {
-            $_valuewidgets($options(-nameproperty)) configure -text [dict get $new_values $options(-nameproperty)]
+        if {$options(-nameproperty) ne ""} {
+            if {1} {
+                $win configure -title [dict get $new_values $options(-nameproperty)]
+            } else {
+                if {[info exists _valuewidgets($options(-nameproperty))]} {
+                    $_valuewidgets($options(-nameproperty)) configure -text [dict get $new_values $options(-nameproperty)]
+                }
+            }
         }
 
         if {$options(-descproperty) ne "" &&
@@ -1489,10 +1502,14 @@ snit::widgetadaptor wits::widget::collapsiblepropertyframe {
         if {$options(-nameproperty) ne "" &&
             [dict exists $options(-properties) values $options(-nameproperty)]} {
             set propname $options(-nameproperty)
-            set _valuewidgets($propname) $_clientf.w[incr _namectr]
-            set vwin [fittedlabel $_valuewidgets($propname) -text [dict get $options(-properties) values $propname] -anchor w -style $_labelstyle -font WitsCaptionFont]
-            grid $vwin -columnspan 2 -sticky nwe
-            set need_sep 1
+            if {1} {
+                $win configure -title [dict get $options(-properties) values $propname]
+            } else {
+                set _valuewidgets($propname) $_clientf.w[incr _namectr]
+                set vwin [fittedlabel $_valuewidgets($propname) -text [dict get $options(-properties) values $propname] -anchor w -style $_labelstyle -font WitsCaptionFont]
+                grid $vwin -columnspan 2 -sticky nwe
+                set need_sep 1
+            }
         }
 
         if {$options(-descproperty) ne "" &&
@@ -1561,8 +1578,12 @@ snit::widgetadaptor wits::widget::collapsiblepropertyframe {
         return
     }
 
+    method close args {
+        $hull configure -title "Summary"
+        $hull close {*}$args
+    }
+
     delegate method open to hull
-    delegate method close to hull
 
 }
 
