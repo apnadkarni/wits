@@ -399,7 +399,7 @@ proc ::wits::app::match_network_connections {name} {
         set match_field addr
     } else {
         # Try to resolve as hostname
-        set match_addrs [twapi::hostname_to_address $name]
+        set match_addrs [twapi::resolve_hostname $name]
         if {[llength $match_addrs]} {
             set match_field addr
         } else {
