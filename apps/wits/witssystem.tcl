@@ -131,7 +131,7 @@ namespace eval ::wits::app::system {
                         {label -peakcommit}
                         {label -allocationgranularity}
                         {label -pagesize}
-                        {textbox -swapfiles}
+                        {listbox -swapfiles}
                     }
                 }
             }
@@ -278,11 +278,12 @@ twapi::proc* wits::app::system::get_property_defs {} {
 oo::class create wits::app::system::Objects {
     superclass util::PropertyRecordCollection
 
-    variable _fixed_system_properties _semistatic_properties _semistatic_properties_timestamp _records _pdh_query _pdh_query_timestamp
+    variable _fixed_system_properties _semistatic_properties _semistatic_properties_timestamp _records _pdh_query _pdh_query_timestamp _pdh_counter_handles
 
     constructor {} {
         namespace path [concat [namespace path] [list [namespace qualifiers [self class]]]]
 
+        array set _pdh_counter_handles {}
         set _pdh_query [twapi::pdh_system_performance_query processor_utilization_per_cpu user_utilization_per_cpu]
         set _pdh_query_timestamp [twapi::get_system_time]
 
@@ -413,21 +414,39 @@ oo::class create wits::app::system::Objects {
             dict set system_properties -handlecount $meminfo(HandleCount)
         }
 
-        if {[lsearch -exact $propnames -uptime]} {
+        if {"-uptime" in $propnames} {
             dict set system_properties -uptime [twapi::get_system_uptime]
         }
 
-        if {[lsearch -exact $propnames -swapfiles]} {
+        if {"-swapfiles" in $propnames} {
             dict set system_properties -swapfiles {}
             foreach item [twapi::Twapi_SystemPagefileInformation] {
                 dict lappend system_properties -swapfiles  [lindex $item 3]
             }
         }
 
-        if {[util::lintersection_not_empty $propnames {
-            -eventcount -mutexcount -sectioncount -semaphorecount
-        }]} {
-            set system_properties [dict merge $system_properties[set system_properties {}] [twapi::get_system_info -eventcount -mutexcount -sectioncount -semaphorecount]]
+        foreach {propname ctrname} {
+            -eventcount Events
+            -mutexcount Mutexes
+            -sectioncount Sections
+            -semaphorecount Semaphores
+            -processcount Processes
+            -threadcount Threads
+        } {
+            if {$propname in $propnames} {
+                if {![info exists _pdh_counter_handles($propname)]} {
+                    set _pdh_counter_handles($propname) [twapi::pdh_add_counter $_pdh_query [pdh_counter_path Objects $ctrname] -name $propname]
+                }
+            } else {
+                # Getting counters is non-significant in cost so remove
+                # if not being asked for. TBD - is there a chance of
+                # toggling back and forth between adding and removing
+                # when called from multiple sources ?
+                if {[info exists _pdh_counter_handles($propname)]} {
+                    twapi::pdh_remove_counter $_pdh_query $propname
+                    unset _pdh_counter_handles($propname)
+                }
+            }
         }
 
         set system_properties [dict merge $_fixed_system_properties $system_properties[set system_properties {}]]
@@ -470,7 +489,9 @@ oo::class create wits::app::system::Objects {
         array unset cpuperf *_Total
 
         foreach {cpu cpudata} [array get cpuperf] {
-            dict set newdata $cpu [dict merge $system_properties $cpudata]
+            # Need pdhdata entries for -sectioncount etc.
+            # Does not matter if returned values contain extraneous keys
+            dict set newdata $cpu [dict merge $system_properties $pdh_data $cpudata]
         }
 
         return [list updated [dict keys [dict get $newdata $::wits::app::system::_all_cpus_label]] $newdata]
