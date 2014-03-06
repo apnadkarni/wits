@@ -1674,10 +1674,6 @@ proc wits::app::viewlist {objtype args} {
         set opts(actiontitle) "Tasks"
     }
 
-    if {![info exists opts(detailtitle)]} {
-        set opts(detailtitle) "Summary"
-    }
-
     # If we already have a matching view, show it (only for "all" filter)
     if {[util::filter null? $opts(filter)]} {
         set view [widget::propertyrecordslistview showmatchingview $objtype $opts(filter)]
@@ -1707,7 +1703,6 @@ proc wits::app::viewlist {objtype args} {
                  ${objtype}::objects \
                  -itemname $opts(itemname) \
                  -title $title \
-                 -detailtitle $opts(detailtitle) \
                  -filter $opts(filter) \
                  -prefscontainer $opts(prefscontainer) \
                  -actiontitle $opts(actiontitle) \
