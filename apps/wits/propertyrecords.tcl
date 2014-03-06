@@ -327,6 +327,12 @@ oo::class create util::PropertyRecordCollection {
         return [dict get $_records $id]
     }
 
+    method ids {{refresh 0}} {
+        if {$refresh} {
+            my _refresh_cache 0 1
+        }
+        return [dict keys $_records]
+    }
 
     method exists {id {freshness 0}} {
         return [expr {[dict size [my _getcachedrecord $id $freshness]] != 0}]
