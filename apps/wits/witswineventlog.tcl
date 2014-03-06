@@ -122,14 +122,11 @@ proc wits::app::wineventlog::get_property_defs {} {
 oo::class create wits::app::wineventlog::Objects {
     superclass util::PropertyRecordCollection
 
-    variable  _events  _hevents  _messages_formatted  _ordered_events _atoms
+    variable  _events  _hevents  _messages_formatted  _ordered_events 
 
     constructor {args} {
         set ns [namespace qualifier [self class]]
         namespace path [concat [namespace path] [list $ns [namespace parent $ns]]]
-
-        # TBD - use private atom table
-        array set _atoms {}
 
         set _events [dict create]
 
@@ -168,10 +165,18 @@ oo::class create wits::app::wineventlog::Objects {
         # If property names contains -message, and we have not
         # previously formatted the message, need to do so
 
+        # TBD - Note: We use twapi::atomize here to cut down memory
+        # usage. We could have used a private array or dict as well
+        # to do this, the advantage being that when this object
+        # is destroyed, the private array would be too. However,
+        # experiment shows that takes up an additional 5-10% memory
+        # so for now we stick to twapi::atomize but need to figure
+        # out how to release that memory when object is destroyed.
+
         # TBD - currently winlog_read always includes -message. 
         set _messages_formatted 1
         if {! $_messages_formatted} {
-            if {[lsearch -exact $propnames -message] >= 0} {
+            if {"-message" in $propnames} {
                 set status updated
                 if {[info exists _events]} {
                     dict for {key eventrec} $_events {
@@ -182,12 +187,9 @@ oo::class create wits::app::wineventlog::Objects {
             }
         }
 
-        # TBD - this call is a bit expensive see if we can limit it to every
-        # few minutes instead of every invocation
-        binary scan [lindex [twapi::GetTimeZoneInformation] 1] i@84i@168i tzoff stdoff daylightoff
-        incr tzoff $stdoff
-        incr tzoff $daylightoff
-        set tzoff [expr {$tzoff * 10000000}]; #  In 100ns units
+        # TBD - check if we are using the correct bias field from
+        # GetTimeZoneInformation
+        set tzoff [expr {[lindex [twapi::GetTimeZoneInformation] 1 0] * 600000000}]; #  In 100ns units
 
         foreach src {Application System Security} {
             if {![info exists _hevents($src)]} {
@@ -205,8 +207,6 @@ oo::class create wits::app::wineventlog::Objects {
                     # Note category cannot be cached as it is dependent
                     # on application, source and category file
                     
-                    # TBD - use private atomize
-
                     dict set ev -channel [::twapi::atomize [dict get $eventrec -channel]]
                     dict set ev -providername [::twapi::atomize [dict get $eventrec -providername]]
                     dict set ev -taskname [::twapi::atomize [dict get $eventrec -taskname]]
@@ -214,7 +214,7 @@ oo::class create wits::app::wineventlog::Objects {
                     dict set ev -eventrecordid [::twapi::atomize [dict get $eventrec -eventrecordid]]
                     dict set ev -levelname [::twapi::atomize [dict get $eventrec -levelname]]
                     dict set ev -message [::twapi::atomize [dict get $eventrec -message]]
-                    set userid [twapi::atomize [dict get $eventrec -userid]]
+                    set userid [::twapi::atomize [dict get $eventrec -userid]]
                     dict set ev -userid $userid
                     dict set ev -account $userid
                     if {$userid ne ""} {
@@ -226,7 +226,7 @@ oo::class create wits::app::wineventlog::Objects {
                     dict set ev -eventid [::twapi::atomize $eventid]
                     # For compatibility with Windows event viewer only
                     # display low 16 bits
-                    dict set ev -eventcode [twapi::atomize [expr {0xffff & $eventid}]]
+                    dict set ev -eventcode [::twapi::atomize [expr {0xffff & $eventid}]]
                     
                     # clock format is slow so do it now rather than display
                     # time. TBD
@@ -306,7 +306,6 @@ oo::class create wits::app::wineventlog::Objects {
         }        
         return $count
     }
-
 }
 
 
