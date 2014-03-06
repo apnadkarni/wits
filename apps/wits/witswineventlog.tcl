@@ -63,19 +63,24 @@ proc wits::app::wineventlog::get_property_defs {} {
 
     set _property_defs [dict create]
 
+    # TBD -data is present on older eventlog_* commands
+    # but not on evt_* and therefore may not be in
+    # winlog_* returned values. Does it contain 
+    # anything of importance?
+    # -data "Additional data" "Data" "" blob
+
     foreach {propname desc shortdesc objtype format} {
         -channel "Event log" "Log" "" text
         -providername "Source" "Source" "" text
         -taskname "Category" "Category" "" text
         -eventid "Id" "Id" "" int
         -eventcode "Event code" "Code" "" int
-        -userid "SID" "SID" ::wits::app::account text
-        -account "Account" "Account" ::wits::app::account text
-        -data "Additional data" "Data" "" blob
         -eventrecordid "Record number" "Record number" "" int
         -timecreated "Timestamp" "Timestamp" "" text
         -levelname "Level" "Level" "" text
         -message "Message" "Message" "" text
+        -userid "SID" "SID" ::wits::app::account text
+        -account "Account" "Account" ::wits::app::account text
     } {
         dict set _property_defs $propname \
             [dict create \
@@ -117,16 +122,16 @@ proc wits::app::wineventlog::get_property_defs {} {
 oo::class create wits::app::wineventlog::Objects {
     superclass util::PropertyRecordCollection
 
-    variable  _events  _hevents  _messages_formatted  _ordered_events  _atoms
+    variable  _events  _hevents  _messages_formatted  _ordered_events _atoms
 
     constructor {args} {
         set ns [namespace qualifier [self class]]
         namespace path [concat [namespace path] [list $ns [namespace parent $ns]]]
 
-        set _events [dict create]
-
-        # TBD - use twapi built-in atom table
+        # TBD - use private atom table
         array set _atoms {}
+
+        set _events [dict create]
 
         # Flat list of timestamp, event key used for traversing forward
         # and backward through event list
@@ -200,34 +205,37 @@ oo::class create wits::app::wineventlog::Objects {
                     # Note category cannot be cached as it is dependent
                     # on application, source and category file
                     
-                    # TBD - atomize whatever else can be atomized from
-                    # event fields
-                    # TBD - use K operator to set dictionary ?
+                    # TBD - use private atomize
 
-                    dict set eventrec -message [::twapi::atomize [dict get $eventrec -message]]
-                    dict set eventrec -levelname [::twapi::atomize [dict get $eventrec -levelname]]
-                    dict set eventrec -channel [::twapi::atomize [dict get $eventrec -channel]]
-                    dict set eventrec -providername [::twapi::atomize [dict get $eventrec -providername]]
-                    dict set eventrec -taskname [::twapi::atomize [dict get $eventrec -taskname]]
-                    dict set eventrec -eventid [::twapi::atomize [dict get $eventrec -eventid]]
-                    dict set eventrec -account [twapi::atomize [dict get $eventrec -userid]]
-                    if {[dict get $eventrec -userid] ne ""} {
+                    dict set ev -channel [::twapi::atomize [dict get $eventrec -channel]]
+                    dict set ev -providername [::twapi::atomize [dict get $eventrec -providername]]
+                    dict set ev -taskname [::twapi::atomize [dict get $eventrec -taskname]]
+                    #dict set ev -data [::twapi::atomize [dict get $eventrec -data]]
+                    dict set ev -eventrecordid [::twapi::atomize [dict get $eventrec -eventrecordid]]
+                    dict set ev -levelname [::twapi::atomize [dict get $eventrec -levelname]]
+                    dict set ev -message [::twapi::atomize [dict get $eventrec -message]]
+                    set userid [twapi::atomize [dict get $eventrec -userid]]
+                    dict set ev -userid $userid
+                    dict set ev -account $userid
+                    if {$userid ne ""} {
                         catch {
-                            dict set eventrec -account [wits::app::sid_to_name [dict get $eventrec -userid]]
+                            dict set ev -account [wits::app::sid_to_name $userid]
                         }
                     }
+                    set eventid [dict get $eventrec -eventid]
+                    dict set ev -eventid [::twapi::atomize $eventid]
                     # For compatibility with Windows event viewer only
                     # display low 16 bits
-                    dict set eventrec -eventcode [twapi::atomize [expr {0xffff & [dict get $eventrec -eventid]}]]
+                    dict set ev -eventcode [twapi::atomize [expr {0xffff & $eventid}]]
                     
                     # clock format is slow so do it now rather than display
-                    # time.
-                    dict set eventrec -timecreated [util::format_large_system_time [dict get $eventrec -timecreated] $tzoff]
+                    # time. TBD
+                    dict set ev -timecreated [util::format_large_system_time [dict get $eventrec -timecreated] $tzoff]
 
                     # TBD - is this the correct key to use ?
                     # Or should we generate an artificial key ?
-                    set key [list $src [dict get $eventrec -eventrecordid]]
-                    dict set _events $key $eventrec
+                    set key [list $src [dict get $ev -eventrecordid]]
+                    dict set _events $key $ev
 
                     # TBD - we should probably want to use the integer
                     # unformatted timecreated value for sorting ordered
@@ -236,7 +244,7 @@ oo::class create wits::app::wineventlog::Objects {
                     # for 64-bit ints so for now stick to formatted
                     # string value.
                     # TBD - can this be done lazily? Saves about 17MB on 146K events
-                    lappend _ordered_events [list [dict get $eventrec -timecreated] $key]
+                    lappend _ordered_events [list [dict get $ev -timecreated] $key]
                 }
             }
         }
@@ -246,7 +254,7 @@ oo::class create wits::app::wineventlog::Objects {
         } else {
             return [list $status {
                 -logsource -source -category -eventid -eventcode -sid
-                -account -data -recordnum -timegenerated -timewritten
+                -account -recordnum -timegenerated -timewritten
                 -type
             } $_events]
         }
