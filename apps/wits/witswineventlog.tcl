@@ -211,7 +211,7 @@ oo::class create wits::app::wineventlog::Objects {
                     dict set ev -providername [::twapi::atomize [dict get $eventrec -providername]]
                     dict set ev -taskname [::twapi::atomize [dict get $eventrec -taskname]]
                     #dict set ev -data [::twapi::atomize [dict get $eventrec -data]]
-                    dict set ev -eventrecordid [::twapi::atomize [dict get $eventrec -eventrecordid]]
+                    dict set ev -eventrecordid [dict get $eventrec -eventrecordid]
                     dict set ev -levelname [::twapi::atomize [dict get $eventrec -levelname]]
                     dict set ev -message [::twapi::atomize [dict get $eventrec -message]]
                     set userid [::twapi::atomize [dict get $eventrec -userid]]
