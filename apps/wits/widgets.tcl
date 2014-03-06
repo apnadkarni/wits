@@ -774,7 +774,7 @@ snit::widgetadaptor wits::widget::collapsibleframeheader {
     option -fg  -configuremethod _setopt
 
     # Location of title text. -1 means figure out based on widget size
-    option -titlex -default 10 -configuremethod _setopt
+    option -titlex -default 5 -configuremethod _setopt
     option -titley -default -1 -configuremethod _setopt
 
     # Corner style controls which corners are rounded
@@ -884,6 +884,10 @@ snit::widgetadaptor wits::widget::collapsibleframeheader {
 
         # Figure out the offset to show text if unspecified
         set titlex $options(-titlex)
+        if {$titlex < 0} {
+            set titlex 0
+        }
+
         set titley $options(-titley)
         if {$titley < 0} {
             # No y offset specified. Base it on the font height. Note the
@@ -893,7 +897,7 @@ snit::widgetadaptor wits::widget::collapsibleframeheader {
             set titley [expr {$height/2}]
         }
         set _anchory $titley
-        set id [$self create text 10 $_anchory -text [$self cget -title]  \
+        set id [$self create text $titlex $_anchory -text [$self cget -title]  \
                     -anchor w \
                     -fill [$self cget -fg] -tag [list text] -font $options(-font)]
     }
@@ -1308,9 +1312,6 @@ snit::widgetadaptor wits::widget::collapsiblepropertyframe {
 
     ### Option definitions
 
-    # Title to use for collapsible frame
-    delegate option -title to hull
-
     # List of properties to display in the frame
     # This is a pair containing the property definition dictionary and
     # the property value dictionary.
@@ -1449,7 +1450,7 @@ snit::widgetadaptor wits::widget::collapsiblepropertyframe {
 
         if {$options(-nameproperty) ne ""} {
             if {1} {
-                $win configure -title [dict get $new_values $options(-nameproperty)]
+                $hull configure -title [dict get $new_values $options(-nameproperty)]
             } else {
                 if {[info exists _valuewidgets($options(-nameproperty))]} {
                     $_valuewidgets($options(-nameproperty)) configure -text [dict get $new_values $options(-nameproperty)]
@@ -1503,7 +1504,7 @@ snit::widgetadaptor wits::widget::collapsiblepropertyframe {
             [dict exists $options(-properties) values $options(-nameproperty)]} {
             set propname $options(-nameproperty)
             if {1} {
-                $win configure -title [dict get $options(-properties) values $propname]
+                $hull configure -title [dict get $options(-properties) values $propname]
             } else {
                 set _valuewidgets($propname) $_clientf.w[incr _namectr]
                 set vwin [fittedlabel $_valuewidgets($propname) -text [dict get $options(-properties) values $propname] -anchor w -style $_labelstyle -font WitsCaptionFont]
@@ -5349,6 +5350,16 @@ snit::widgetadaptor wits::widget::listframe {
 
     method definecolumns {cols} {
 
+        # TBD - when no columns are in the table, 'item id {first visible}'
+        # returns 1 (?). The 'see' command then crashes wish.
+        # This is currently protected by forcing user to make
+        # at least one column visible in the table editor.
+        if {[llength $cols] == 0} {
+            error "At least one column must be included in table."
+        }
+        # Note that to account for this being fixed in the future,
+        # the code below dows not assume cols is non-empty
+
         # Note what column we had sorted on
         if {$_sort_column != -1} {
             set sort_col_name [$self column_id_to_name $_sort_column]
@@ -5416,23 +5427,23 @@ snit::widgetadaptor wits::widget::listframe {
             $_treectrl column configure "first visible" -lock left
         }
 
-        # Set up the first and last columns to have "closed" outlines
-        # for the selection rectangle.
-        dict set _columns [lindex $cols {0 0}] outline_state {!openWE !openW openE}
-        dict set _columns [lindex $cols {end 0}] outline_state {!openWE !openE openW}
+        if {[llength $cols]} {
+            # Set up the first and last columns to have "closed" outlines
+            # for the selection rectangle.
+            dict set _columns [lindex $cols {0 0}] outline_state {!openWE !openW openE}
+            dict set _columns [lindex $cols {end 0}] outline_state {!openWE !openE openW}
+        }
 
         # Build the secondary table header
         $self _populatefilter
 
-        # If the original sort column exists, resort using it
-        if {$_constructed} {
-            # If we were originally sorted and sort column is still visible,
-            # use it to sort.
+        if {$_constructed && [dict size $_columns]} {
+            # If the original sort column exists, resort using it
             if {[info exists sort_col_name] &&
                 [dict exists $_columns $sort_col_name id]} {
                 $self _sort [dict get $_columns $sort_col_name id] $_sort_order
             } else {
-                $self _sort [lindex [$_treectrl column id "first visible"]] $options(-defaultsortorder)
+                $self _sort_on_first_visible_column
             }
         }
     }
@@ -5451,22 +5462,24 @@ snit::widgetadaptor wits::widget::listframe {
             $_treectrl item state set [list list $items] new
         }
 
-        foreach item $items row $rows {
-            # We will initialize styles and contents of a row only
-            # when they are actually displayed. This is to save
-            # memory with large tables. However, tktreectrl does not
-            # seem to call us back when an item is displayed if none
-            # of the items have their styles set. Also, we have to
-            # make sure sorting works correctly, so we set the style
-            # and content of the sort column.
-            set _itemvalues($item) $row
-            if {$_sort_column == -1} {
-                set col [dict get $_columns [lindex [dict keys $_columns] 0] id]
-            } else {
-                set col $_sort_column
+        if {[dict size $_columns]} {
+            foreach item $items row $rows {
+                # We will initialize styles and contents of a row only
+                # when they are actually displayed. This is to save
+                # memory with large tables. However, tktreectrl does not
+                # seem to call us back when an item is displayed if none
+                # of the items have their styles set. Also, we have to
+                # make sure sorting works correctly, so we set the style
+                # and content of the sort column.
+                set _itemvalues($item) $row
+                if {$_sort_column == -1} {
+                    set col [dict get $_columns [lindex [dict keys $_columns] 0] id]
+                } else {
+                    set col $_sort_column
+                }
+                $_treectrl item style set $item $col [dict get $_item_style_phrase $col]
+                $_treectrl item text $item $col [lindex $row $col]
             }
-            $_treectrl item style set $item $col [dict get $_item_style_phrase $col]
-            $_treectrl item text $item $col [lindex $row $col]
         }
 
         # Place at end of table
@@ -5669,6 +5682,10 @@ snit::widgetadaptor wits::widget::listframe {
 
     method showtop {} {
         set first [$_treectrl item id "first visible"]
+        # TBD - when no columns are in the table, above command still
+        # returns 1 (?). The see command below then crashes wish.
+        # This is currently protected by forcing user to make
+        # at least one column visible in the table editor.
         if {$first ne ""} {
             $_treectrl see $first
         }
@@ -5676,6 +5693,9 @@ snit::widgetadaptor wits::widget::listframe {
 
     # Sorts in existing order
     method resort {} {
+        if {[dict size $_columns] == 0} {
+            return
+        }
         if {$_sort_column == -1 || $_sort_order eq ""} {
             $self _sort [dict get $_columns [lindex [dict keys $_columns] 0] id]  $options(-defaultsortorder); # Will recurse
             return
@@ -5713,11 +5733,19 @@ snit::widgetadaptor wits::widget::listframe {
         }
     }
 
+    method _sort_on_first_visible_column {} {
+        $self _sort [lindex [$_treectrl column id "first visible"]] $options(-defaultsortorder)
+    }
+
     method _sort {col_id order} {
         if {$_sort_column != $col_id} {
             if {$_sort_column != -1} {
-                # Reset the sort arrow on existing sort column
-                $_treectrl column configure $_sort_column -arrow none -itembackground {}
+                # Reset the sort arrow on existing sort column if the column
+                # is still visible
+                set old [$_treectrl column id $_sort_column]
+                if {[llength $old]} {
+                    $_treectrl column configure $_sort_column -arrow none -itembackground {}
+                }
             }
             # Make sure that all cells in the sort column are updated with
             # style and value
@@ -6086,7 +6114,6 @@ snit::widgetadaptor wits::widget::listframe {
     delegate option -nameproperty to _detailsframe
     delegate option -descproperty to _detailsframe
     delegate option -objlinkcommand to _detailsframe as -command
-    option -detailtitle -readonly true -default "Summary"; # Details is really a summary of property page
 
     # For some lists, item count does not make sense (e.g. system
     # since rows may include totals etc.)
@@ -6278,6 +6305,9 @@ snit::widgetadaptor wits::widget::listframe {
 
         set bgcolor [get_theme_setting bar frame normal bg]
 
+        # TBD - why are we using a scrollable frame here with autohide ?
+        # Doesn't seem to actually have an effect. Maybe it takes effect
+        # if *both* actionframe and detailframe are in use
         set use_scrollableframe 1
         if {$use_scrollableframe} {
             install _scroller using [namespace parent]::scrolledframe $win.f -background $bgcolor -scrollsides e -autohide true
@@ -6294,11 +6324,10 @@ snit::widgetadaptor wits::widget::listframe {
         # Calculate the width of the left pane based on the titles
         # for each collapsible dropdown
         set actiontitle [from args -actiontitle]
-        set detailtitle [from args -detailtitle]
 
-        # Figure out the widest header width
-        set headerfont [collapsibleactionframe::getheaderfont]
-        set caf_width [font measure $headerfont -displayof $win $detailtitle]
+        # Figure out rough header width
+        set headerfont [collapsibleframe::getheaderfont]
+        set caf_width [font measure $headerfont -displayof $win "Summary"]
 
         # Need to leave room for dropdown symbol and some padding
         incr caf_width 40
@@ -6319,8 +6348,7 @@ snit::widgetadaptor wits::widget::listframe {
             [namespace parent]::collapsiblepropertyframe $frame.propertyframe \
             -headerwidth $caf_width \
             -cornercolor $bgcolor \
-            -usercontrolled 0 \
-            -title $detailtitle
+            -usercontrolled 0
 
         $_detailsframe open
 
@@ -6682,6 +6710,11 @@ snit::widgetadaptor wits::widget::listframe {
     }
 
     method _setdisplaycolumns {opt val} {
+        if {[llength $val] == 0} {
+            # The listframe widget does not allow 0 columns
+            error "At least one column must be displayed in the table."
+        }
+
         set options(-displaycolumns) $val
 
         if {$_constructed} {
