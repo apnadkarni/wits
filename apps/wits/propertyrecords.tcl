@@ -200,7 +200,10 @@ oo::class create util::PropertyRecordCollection {
     # _current_propnames - list of properties that have been cached
     # _last_update - the last time *all* records were updated
     # _refresh_interval - refresh interval
-    variable _records  _property_defs  _requested_propnames _current_propnames  _last_update _ignore_case  _scheduler  _refresh_interval
+    # _update_id - incremented when data is actually updated so
+    #   subscribers no whether new data needs to be fetched
+    # _last_notification - last notification type sent
+    variable _records  _property_defs  _requested_propnames _current_propnames  _last_update _ignore_case  _scheduler  _refresh_interval _update_id _last_notification
 
     constructor {propdefs args} {
 
@@ -252,6 +255,8 @@ oo::class create util::PropertyRecordCollection {
         set _current_propnames [list ]
         set _requested_propnames [list ]
         set _last_update 0
+        set _update_id 0
+        set _last_notification ""
 
         dict for {propname propdef} $propdefs {
             if {![dict exists $propdef description]} {
@@ -667,15 +672,35 @@ oo::class create util::PropertyRecordCollection {
     method _refresh_cache {notify {force 0}} {
         # Updates the cache for the currently requested set of property names
         lassign [my _retrieve $_requested_propnames $force] status propnames records
-        # TBD - ideally we do not want to notify if there was no change
-        # but currently viewers rely on being notified to reset highlights
-        # Perhaps change them to have a separate reset highlight mechanism
-        if {$status in {updated nochange} || $force} {
-            my _update_cache $propnames $records
-            if {$notify} {
-                my notify {} update {}
+        # If status is "updated", send notification so subscribers can update
+        # values.
+        # If status is "nochange", and the previous one was different,
+        # send the notification to allow subscribers to update highlighting etc.
+        # If status is "inprogress", send notification to allow subscribers
+        # to update displayed status
+        set notify 1
+        switch -exact $status {
+            updated {
+                my _update_cache $propnames $records
+                incr _update_id
+            }
+            inprogress {
+            }
+            nochange {
+                if {$_last_notification eq "nochange"} {
+                    set notify $force
+                }
             }
         }
+                
+        if {$notify} {
+            set _last_notification $status
+            my notify {} $status {}
+        }
+    }
+
+    method get_update_id {} {
+        return $_update_id
     }
 
     method _refresh {propnames freshness notify {filter {}}} {
