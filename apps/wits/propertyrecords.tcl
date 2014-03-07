@@ -659,11 +659,18 @@ oo::class create util::PropertyRecordCollection {
         return $_refresh_interval
     }
 
-    method _refresh_cache {notify {force 0}} {
+    method refresh! {} {
+        # TBD - we are always forcing a notification ? Should we ?
+        my _refresh_cache 1 1
+    }
 
+    method _refresh_cache {notify {force 0}} {
         # Updates the cache for the currently requested set of property names
         lassign [my _retrieve $_requested_propnames $force] status propnames records
-        if {$status eq "updated" || $force} {
+        # TBD - ideally we do not want to notify if there was no change
+        # but currently viewers rely on being notified to reset highlights
+        # Perhaps change them to have a separate reset highlight mechanism
+        if {$status in {updated nochange} || $force} {
             my _update_cache $propnames $records
             if {$notify} {
                 my notify {} update {}
@@ -716,6 +723,11 @@ oo::class create util::PropertyRecordCollection {
 
         $_scheduler after1 60000 [list [self] housekeeping]
     }
+
+    method scheduler {} {
+        return $_scheduler
+    }
+
 }
 
 
