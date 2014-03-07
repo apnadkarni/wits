@@ -269,9 +269,9 @@ oo::class create wits::app::wineventlog::Objects {
             # The idea is to reschedule ourselves but this does not
             # work too well so for now set threshold for rescheduling
             # very high
-            if {$events_read > 1000} {
-                [my scheduler] after1 100 [list [self] refresh!]
-                return unchanged
+            if {$events_read > 10000} {
+                [my scheduler] after1 500 [list [self] refresh!]
+                return inprogress
             }
         }
 
@@ -379,7 +379,7 @@ proc wits::app::wineventlog::viewlist {args} {
     }
 
     return [::wits::app::viewlist [namespace current] \
-                -itemname "windows event" \
+                -itemname "event" \
                 -actions [list \
                               [list view "View details of selected events" $viewdetailimg] \
                              ] \

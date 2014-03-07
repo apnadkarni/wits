@@ -6169,6 +6169,8 @@ snit::widgetadaptor wits::widget::listframe {
     variable _details_recid ""
     variable _details ""
 
+    # The last update id that we displayed
+    variable _last_update_id -1
 
     # For scheduling callbacks and commands
     variable _scheduler
@@ -6561,12 +6563,15 @@ snit::widgetadaptor wits::widget::listframe {
     # Updates the list of objects we are displaying
     method display {} {
 
-        # Remember and reset display state
-        set highlight $_highlight
-        set _highlight 1
+        # Reset list highlights so new changes are shown AND our view
+        # and underlying display view of deletions get in sync
+        $_listframe resethighlights
 
-        set forcerefresh $_forcerefresh
-        set _forcerefresh 0
+        set update_id [$_records_provider get_update_id]
+        if {$_last_update_id == $update_id} {
+            # Data has not changed
+            return
+        }
 
         # Callers should generally use schedule_display_update for calling
         # display so no more than one invocation will be pending. So
@@ -6574,11 +6579,14 @@ snit::widgetadaptor wits::widget::listframe {
         set _itemcounttext "Refreshing..."
         update idletasks
 
-        set records [$_records_provider get_formatted_dict $options(-displaycolumns)  [expr {$forcerefresh ? 0 : $_refreshinterval}] [expr {$options(-disablefilter) ? $_nullfilter : $options(-filter)}]]
+        # Remember and reset display state. TBD - why do we need to use a temp here?
+        set highlight $_highlight
+        set _highlight 1
 
-        # Reset list highlights so new changes are shown AND our view
-        # and underlying display view of deletions get in sync
-        $_listframe resethighlights
+        set forcerefresh $_forcerefresh
+        set _forcerefresh 0
+
+        set records [$_records_provider get_formatted_dict $options(-displaycolumns)  [expr {$forcerefresh ? 0 : $_refreshinterval}] [expr {$options(-disablefilter) ? $_nullfilter : $options(-filter)}]]
 
         set count [$_listframe setrows $records]
 
@@ -7127,8 +7135,14 @@ snit::widgetadaptor wits::widget::listframe {
     method _provider_notification_handler {provider id event extra} {
         # Note if our refresh is off, we do not update the display
         switch -exact -- $event {
-            update {
+            inprogress {
+                set _itemcounttext "Reading ..."
+            }
+            nochange -
+            updated {
                 if {! $_freezedisplay} {
+                    # We call for nochange event as well so highlights
+                    # can be reset
                     $self display
                 }
             }
