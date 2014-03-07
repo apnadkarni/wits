@@ -144,6 +144,10 @@ oo::class create wits::app::wineventlog::Objects {
         foreach {src h} [array get _hevents] {
             twapi::winlog_close $h
         }
+        # Free up data so that purging the atom cache is effective
+        unset -nocomplain _events
+        unset -nocomplain _ordered_events
+        twapi::purge_atoms
         next
     }
 
@@ -191,61 +195,83 @@ oo::class create wits::app::wineventlog::Objects {
         # GetTimeZoneInformation
         set tzoff [expr {[lindex [twapi::GetTimeZoneInformation] 1 0] * 600000000}]; #  In 100ns units
 
-        foreach src {Application System Security} {
+        set srcs {Application System Security}
+        foreach src $srcs {
             if {![info exists _hevents($src)]} {
                 set _hevents($src) [twapi::winlog_open -channel $src]
             }
+        }
 
-            set hevl $_hevents($src)
+        # Just add any new events starting with the last ones we read
 
-            # Just add any new events starting with the last ones we read
-            while {[llength [set events [twapi::winlog_read $hevl]]]} {
-                set status updated
-                # print out each record
-                foreach eventrec $events {
+        set events_read 0
+        while {1} {
+            set events {}
+            foreach {src hevl} [array get _hevents] {
+                lappend events {*}[twapi::winlog_read $hevl]
+            }
+            if {[llength $events] == 0} {
+                break
+            }
+            incr events_read [llength $events]
+            set status updated
+            # print out each record
+            foreach eventrec $events {
 
-                    # Note category cannot be cached as it is dependent
-                    # on application, source and category file
+                # Note category cannot be cached as it is dependent
+                # on application, source and category file
                     
-                    dict set ev -channel [::twapi::atomize [dict get $eventrec -channel]]
-                    dict set ev -providername [::twapi::atomize [dict get $eventrec -providername]]
-                    dict set ev -taskname [::twapi::atomize [dict get $eventrec -taskname]]
-                    #dict set ev -data [::twapi::atomize [dict get $eventrec -data]]
-                    dict set ev -eventrecordid [dict get $eventrec -eventrecordid]
-                    dict set ev -levelname [::twapi::atomize [dict get $eventrec -levelname]]
-                    dict set ev -message [::twapi::atomize [dict get $eventrec -message]]
-                    set userid [::twapi::atomize [dict get $eventrec -userid]]
-                    dict set ev -userid $userid
-                    dict set ev -account $userid
-                    if {$userid ne ""} {
-                        catch {
-                            dict set ev -account [wits::app::sid_to_name $userid]
-                        }
+                dict set ev -channel [::twapi::atomize [dict get $eventrec -channel]]
+                dict set ev -providername [::twapi::atomize [dict get $eventrec -providername]]
+                dict set ev -taskname [::twapi::atomize [dict get $eventrec -taskname]]
+                #dict set ev -data [::twapi::atomize [dict get $eventrec -data]]
+                dict set ev -eventrecordid [dict get $eventrec -eventrecordid]
+                dict set ev -levelname [::twapi::atomize [dict get $eventrec -levelname]]
+                dict set ev -message [::twapi::atomize [dict get $eventrec -message]]
+                set userid [::twapi::atomize [dict get $eventrec -userid]]
+                dict set ev -userid $userid
+                dict set ev -account $userid
+                if {$userid ne ""} {
+                    catch {
+                        dict set ev -account [wits::app::sid_to_name $userid]
                     }
-                    set eventid [dict get $eventrec -eventid]
-                    dict set ev -eventid [::twapi::atomize $eventid]
-                    # For compatibility with Windows event viewer only
-                    # display low 16 bits
-                    dict set ev -eventcode [::twapi::atomize [expr {0xffff & $eventid}]]
-                    
-                    # clock format is slow so do it now rather than display
-                    # time. TBD
-                    dict set ev -timecreated [util::format_large_system_time [dict get $eventrec -timecreated] $tzoff]
-
-                    # TBD - is this the correct key to use ?
-                    # Or should we generate an artificial key ?
-                    set key [list $src [dict get $ev -eventrecordid]]
-                    dict set _events $key $ev
-
-                    # TBD - we should probably want to use the integer
-                    # unformatted timecreated value for sorting ordered
-                    # events so that faster lsort -integer can be used.
-                    # Unfortunately lsort -integer as of 8.6b3 fails
-                    # for 64-bit ints so for now stick to formatted
-                    # string value.
-                    # TBD - can this be done lazily? Saves about 17MB on 146K events
-                    lappend _ordered_events [list [dict get $ev -timecreated] $key]
                 }
+                set eventid [dict get $eventrec -eventid]
+                dict set ev -eventid [::twapi::atomize $eventid]
+                # For compatibility with Windows event viewer only
+                # display low 16 bits
+                dict set ev -eventcode [::twapi::atomize [expr {0xffff & $eventid}]]
+                
+                # clock format is slow so do it now rather than display
+                # time. TBD
+                dict set ev -timecreated [util::format_large_system_time [dict get $eventrec -timecreated] $tzoff]
+                
+                # TBD - is this the correct key to use ?
+                # Or should we generate an artificial key ?
+                if {0} {
+                    set key [list $src [dict get $ev -eventrecordid]]
+                } else {
+                    set key [incr ::eventcounter]
+                    # dict set ev -key $key; # APN
+                }
+                dict set _events $key $ev
+
+                # TBD - we should probably want to use the integer
+                # unformatted timecreated value for sorting ordered
+                # events so that faster lsort -integer can be used.
+                # Unfortunately lsort -integer as of 8.6b3 fails
+                # for 64-bit ints so for now stick to formatted
+                # string value.
+                # TBD - can this be done lazily? Saves about 17MB on 146K events
+                lappend _ordered_events [list [dict get $ev -timecreated] $key]
+            }
+
+            # The idea is to reschedule ourselves but this does not
+            # work too well so for now set threshold for rescheduling
+            # very high
+            if {$events_read > 1000} {
+                [my scheduler] after1 100 [list [self] refresh!]
+                return unchanged
             }
         }
 
@@ -306,6 +332,19 @@ oo::class create wits::app::wineventlog::Objects {
         }        
         return $count
     }
+
+    method discard {} {
+        set _events {}
+        set _ordered_events {}
+        foreach {src h} [array get _hevents] {
+            twapi::winlog_close $h
+        }
+        unset _hevents
+        array set _hevents {}
+        twapi::purge_atoms
+        next
+    }
+
 }
 
 
