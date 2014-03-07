@@ -2533,7 +2533,7 @@ snit::widgetadaptor wits::widget::busybar {
 
         installhull using [namespace parent]::unmanagedtoplevel \
             -framewidth $fwidth -frameheight $fheight \
-            -title "Tip of the day" \
+            -title "Please wait..." \
             -titleforeground black
 
         set f [$hull getframe]
@@ -4188,7 +4188,7 @@ snit::widget wits::widget::unmanagedtoplevel  {
 
         $_canvas create text \
             [expr {$xmax-13}] 8 \
-            -text X \
+            -text x \
             -font WitsCaptionFont \
             -tags [list $_title_element_tag closetag] \
             -fill [color::complement $_clientf_bg] \
