@@ -737,12 +737,17 @@ oo::class create util::PropertyRecordCollection {
     }
 
     method refresh_callback {} {
-        # Only bother refreshing if anyone is actually interested
-        if {[my have_subscribers]} {
-            my _refresh_cache 1
-        }
-        if {$_refresh_interval} {
-            $_scheduler after1 $_refresh_interval [list [self] refresh_callback]
+
+        # Make sure even on trasient errors we reschedule the next update
+        twapi::trap {
+            # Only bother refreshing if anyone is actually interested
+            if {[my have_subscribers]} {
+                my _refresh_cache 1
+            }
+        } finally {
+            if {$_refresh_interval} {
+                $_scheduler after1 $_refresh_interval [list [self] refresh_callback]
+            }
         }
     }
 
