@@ -39,7 +39,7 @@ namespace eval ::wits::app {
     variable wwwHomePage "http://wits.magicsplat.com"
 
     # Our version-specific home page
-    variable wwwHomeVersionPage "http://wits.magicsplat.com/v[join [lrange [split $version .] 0 1] .]"
+    variable wwwHomeVersionPage $wwwHomePage
 
     # Preference section names
     variable prefUnsupportedSection "Unsupported"
