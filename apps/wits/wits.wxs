@@ -169,8 +169,7 @@
 		     Guid='$(var.WitsGuidSettings)'
 		     Win64='$(var.WitsWin64)'>
 	    <RegistryKey Root="HKCU"
-			 Key="Software\Microsoft\Windows\CurrentVersion\Run"
-			 Action='none'>
+			 Key="Software\Microsoft\Windows\CurrentVersion\Run">
 	      <RegistryValue
 		  Name="WiTS"
 		  Type="string"
@@ -178,12 +177,12 @@
 	    </RegistryKey>
             <RegistryKey Root="HKCU"
 			 Key="Software\$(var.WitsName)"
-			 Action="createAndRemoveOnUninstall">
-	      <RegistryKey Key="General" Action="create">
+			 ForceDeleteOnUninstall="yes">
+	      <RegistryKey Key="General">
 		<RegistryValue Name='InstallDir' Type='string' Value='[APPLICATIONFOLDER]' />
 		<RegistryValue Name="RunAtLogon" Type="integer" Value='1' />
 	      </RegistryKey>
-	      <RegistryKey Key="Software Updates" Action='create'>
+	      <RegistryKey Key="Software Updates">
 		<RegistryValue Name="CheckUpdates" Type="integer" Value='1' />
 	      </RegistryKey>
 	    </RegistryKey>
