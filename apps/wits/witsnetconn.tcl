@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2011, Ashok P. Nadkarni
+# Copyright (c) 2006-2014, Ashok P. Nadkarni
 # All rights reserved.
 #
 # See the file LICENSE for license
@@ -55,6 +55,10 @@ proc wits::app::netconn::get_property_defs {} {
 
     set _property_defs [dict create]
 
+    # -bindtime        "Time of last bind operation" "Bind time" "" largetime
+    # -modulename      "Module name" "Module name" "" text
+    # -modulepath      "Module path" "Module path" ::wits::app::wfile path
+
     foreach {propname desc shortdesc objtype format} {
         -pid             "Process Id" "PID" ::wits::app::process int
         -pidname         "Process" "Process" "" text
@@ -68,9 +72,6 @@ proc wits::app::netconn::get_property_defs {} {
         -remotehostname  "Remote host name" "Remote host" "" text
         -remoteport      "Remote port" "Remote port" "" int
         -remoteportname  "Remote service name" "Remote service" "" text
-        -bindtime        "Time of last bind operation" "Bind time" "" largetime
-        -modulename      "Module name" "Module name" "" text
-        -modulepath      "Module path" "Module path" ::wits::app::wfile path
     } {
         dict set _property_defs $propname \
             [dict create \
@@ -123,9 +124,8 @@ oo::class create wits::app::netconn::Objects {
 
     method _retrieve {propnames force} {
         set conns {}
-        
-        set pidnames [[get_objects ::wits::app::process] get [list ProcessName] 5000]
 
+        set pidnames [[get_objects ::wits::app::process] get [list ProcessName] 5000]
         foreach ipver {4 6} suffix {{} 6} {
             foreach conn [twapi::get_tcp_connections -localaddr -localport -remoteaddr -remoteport -pid -state -ipversion $ipver] {
                 dict set conn -localhostname [map_addr_to_name [dict get $conn -localaddr]]
@@ -168,7 +168,7 @@ oo::class create wits::app::netconn::Objects {
             }
         }
 
-        return [list updated {-localaddr -localhostname -localport -localportname -remoteaddr -remotehostname -remoteport -remoteportname -pid -state -protocol} $conns]
+        return [list updated {-localaddr -localhostname -localport -localportname -remoteaddr -remotehostname -remoteport -remoteportname -pid -pidname -state -protocol} $conns]
     }
 }
 
