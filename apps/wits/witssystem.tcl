@@ -510,6 +510,7 @@ proc wits::app::system::viewlist {args} {
                 -itemname "processor" \
                 -hideitemcount 1 \
                 -displaymode standard \
+                -showsummarypane 0 \
                 -actiontitle "Processor Tasks" \
                 -actions [list \
                               [list view "View properties of selected processors" $viewdetailimg] \
