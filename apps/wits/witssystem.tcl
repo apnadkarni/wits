@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2011, Ashok P. Nadkarni
+# Copyright (c) 2006-2014, Ashok P. Nadkarni
 # All rights reserved.
 #
 # See the file LICENSE for license
@@ -317,7 +317,7 @@ oo::class create wits::app::system::Objects {
 
         # TBD - assumes all processors same
         # TBD - is the processor id 0 ok for systems with > 64 cpus ?
-        set _fixed_system_properties [twapi::get_processor_info 0 -arch -processorlevel -processormodel -processorname -processorrev -processorspeed]
+        set _fixed_system_properties [dict merge $_fixed_system_properties [twapi::get_processor_info 0 -arch -processorlevel -processormodel -processorname -processorrev -processorspeed]]
         # Some prettying up for display
         # For some reason processor name has leading whitespace
         dict set _fixed_system_properties -processorname [string trim [dict get $_fixed_system_properties -processorname]]
@@ -435,7 +435,7 @@ oo::class create wits::app::system::Objects {
         } {
             if {$propname in $propnames} {
                 if {![info exists _pdh_counter_handles($propname)]} {
-                    set _pdh_counter_handles($propname) [twapi::pdh_add_counter $_pdh_query [pdh_counter_path Objects $ctrname] -name $propname]
+                    set _pdh_counter_handles($propname) [twapi::pdh_add_counter $_pdh_query [twapi::pdh_counter_path Objects $ctrname] -name $propname]
                 }
             } else {
                 # Getting counters is non-significant in cost so remove
@@ -466,7 +466,7 @@ oo::class create wits::app::system::Objects {
         }
         
         array set cpuperf {}
-        set pdh_data [pdh_query_get $_pdh_query]
+        set pdh_data [twapi::pdh_query_get $_pdh_query]
         set _pdh_query_timestamp [twapi::get_system_time]
         dict for {cpu utilization} [dict get $pdh_data processor_utilization_per_cpu] {
             set user_utilization [dict get $pdh_data user_utilization_per_cpu $cpu]
