@@ -342,6 +342,8 @@ oo::class create wits::app::wineventlog::Objects {
         unset _hevents
         array set _hevents {}
         twapi::purge_atoms
+        # Reduce our memory footprint
+        twapi::SetProcessWorkingSet [twapi::GetCurrentProcess] -1 -1
         next
     }
 
