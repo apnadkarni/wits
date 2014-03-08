@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011 Ashok P. Nadkarni
+# Copyright (c) 2014 Ashok P. Nadkarni
 # All rights reserved.
 #
 # See the file LICENSE for license
@@ -9,7 +9,7 @@
 
 namespace eval ::wits::app {
 
-    variable copyright "\u00a9 2011 Ashok P. Nadkarni. All rights reserved."
+    variable copyright "\u00a9 2014 Ashok P. Nadkarni. All rights reserved."
 
     # Where the script is stored
     variable script_dir [file dirname [info script]]
