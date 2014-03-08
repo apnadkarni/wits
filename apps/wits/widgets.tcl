@@ -93,7 +93,7 @@ proc wits::widget::_init_styles {{force false}} {
             # In case of errors, just use default colors
             # TBD - output debug message
             puts ERROR:$msg
-            foreach {index color} $indices {
+            foreach {index prop color} $indices {
                 set osthemecolors($class,$part,$state,$index) $color
             }
         }
