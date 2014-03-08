@@ -1,3 +1,10 @@
+#
+# Copyright (c) 2006-2014, Ashok P. Nadkarni
+# All rights reserved.
+#
+# See the file LICENSE for license
+#
+
 namespace eval util {
     variable _handle_property_format
     if {$::tcl_platform(pointerSize) == 4} {
