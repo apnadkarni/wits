@@ -322,7 +322,7 @@ oo::class create wits::app::system::Objects {
         # For some reason processor name has leading whitespace
         dict set _fixed_system_properties -processorname [string trim [dict get $_fixed_system_properties -processorname]]
 
-        dict set _fixed_system_properties -processorspeed " Mhz"
+        dict append _fixed_system_properties -processorspeed " Mhz"
             
         # Get WMI properties (these are all static)
         twapi::trap {
