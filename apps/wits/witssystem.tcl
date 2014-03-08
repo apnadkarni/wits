@@ -516,6 +516,7 @@ proc wits::app::system::viewlist {args} {
                               [list wintool "Windows Device Manager" $winlogoimg] \
                              ] \
                 -displaycolumns {cpuid CPUPercent KernelPercent UserPercent} \
+                -availablecolumns {cpuid CPUPercent KernelPercent UserPercent} \
                 -detailfields {-processorname -processorspeed -processormodel -processorrev} \
                 -nameproperty "cpuid" \
                 -descproperty "-processorname" \
