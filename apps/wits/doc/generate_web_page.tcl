@@ -96,9 +96,9 @@ proc transform_file {infile {adfile ""} {adfile2 ""} {outfile ""}} {
     # Insert the footer
     puts $outfd {
       <div id="ft">
-        Windows Inspection Tool Set V3.0
+        Windows Inspection Tool Set V3.1
         <div class="copyright">
-          &copy; 2007-2011 Ashok P. Nadkarni
+          &copy; 2007-2014 Ashok P. Nadkarni
         </div>
       </div>
     }
