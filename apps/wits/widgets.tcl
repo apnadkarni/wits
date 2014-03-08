@@ -6130,6 +6130,9 @@ snit::widgetadaptor wits::widget::listframe {
     # no need to compare values as they never change for a record
     option -comparerecordvalues -default 1
     
+    # Show summary pane. Also attached to split window tool button
+    option -showsummarypane -default 1 -configuremethod _setsummarypaneopt
+
     delegate option * to _listframe
 
     ### Variables
@@ -6143,8 +6146,8 @@ snit::widgetadaptor wits::widget::listframe {
     # Display mode
     variable _displaymode
     variable _displaymodelabels {
-        standard    "No highlighting"
-        highlighted "Highlight changes"
+        standard    "Highlights off"
+        highlighted "Highlights on"
         changes     "Changes only"
     }
 
@@ -6217,8 +6220,6 @@ snit::widgetadaptor wits::widget::listframe {
 
     variable _filterbuttonvar;  # Attached to the filtering checkbutton
 
-    variable _splitwindowbuttonvar; # Attached to split window checkbutton
-
     variable _nullfilter;       # Const def of a null filter
 
     variable _sashpos;          # Position of sash before shrinking
@@ -6280,8 +6281,7 @@ snit::widgetadaptor wits::widget::listframe {
         tooltip::tooltip [$_toolbar itemid fontenlarge] "Increase font size (Ctrl++)"
         $_toolbar add button fontreduce -image [images::get_icon16 fontreduce] -command [mymethod _change_font_size -1]
         tooltip::tooltip [$_toolbar itemid fontreduce] "Decrease font size (Ctrl+-)"
-        set _splitwindowbuttonvar 1; # Since we start with window open
-        $_toolbar add checkbutton splitwindow -image [images::get_icon16 splitwindow] -command [mymethod _setleftpanevisibility] -variable [myvar _splitwindowbuttonvar]
+        $_toolbar add checkbutton splitwindow -image [images::get_icon16 splitwindow] -command [mymethod _setleftpanevisibility] -variable [myvar options(-showsummarypane)]
         tooltip::tooltip [$_toolbar itemid splitwindow] "Show summary pane"
 
         $_toolbar add button tableconfigure -image [images::get_icon16 tableconfigure] -command [mymethod edittablecolumns]
@@ -6522,6 +6522,7 @@ snit::widgetadaptor wits::widget::listframe {
 
 
         set _constructed true
+        after idle [mymethod _setleftpanevisibility]
     }
 
     destructor {
@@ -6615,10 +6616,22 @@ snit::widgetadaptor wits::widget::listframe {
         return $_records_provider
     }
 
+    method _setsummarypaneopt {opt val} {
+        if {![string is boolean $val]} {
+            error "Non boolean value '$val' supplied for option $opt"
+        }
+        set options(-showsummarypane) $val
+        after idle [mymethod _setleftpanevisibility]
+    }
+
     method _setleftpanevisibility {} {
-        if {! $_splitwindowbuttonvar} {
-            set _sashpos [$win.pw sashpos 0]
-            $win.pw forget 0
+        if {! $options(-showsummarypane)} {
+            # If there are at least two windows in the paned window,
+            # get the position of the sash so it can be restored later
+            if {[llength [$win.pw panes]] > 1} {
+                set _sashpos [$win.pw sashpos 0]
+                $win.pw forget 0
+            }
         } else {
             $win.pw insert 0 $_scroller -weight 0
         }
@@ -6641,15 +6654,13 @@ snit::widgetadaptor wits::widget::listframe {
             if {1} {
                 $win.pw sashpos 0 120
             } else {
-                set _splitwindowbuttonvar 0
+                set options(-showsummarypane) 0
                 after idle [mymethod _setleftpanevisibility]
             }
         } else {
             $_detailsframe configure -headerwidth $width
         }
     }
-
-
 
     # Resorts the table after it has been updated
     method _resort {} {
