@@ -47,17 +47,17 @@ namespace eval wits::app::process {
         set nbpages [list {
             "General" {
                 frame {
-                    {label ProcessId}
-                    {label ProcessName}
+                    {label -pid}
+                    {label -name}
                     {textbox -description}
                     {label -user}
                     {label -path}
                     {label -commandline}
-                    {label InheritedFromProcessId}
+                    {label -parent}
                     {label -logonsession}
-                    {label SessionId}
-                    {label BasePriority}
-                    {label CreateTime}
+                    {label -tssession}
+                    {label -basepriority}
+                    {label -createtime}
                     {label -elapsedtime}
                 }
             }
@@ -77,31 +77,31 @@ namespace eval wits::app::process {
                     {label UserPercent}
                 }
                 {labelframe {title "I/O" cols 2}} {
-                    {label IoCounters.ReadOperationCount}
-                    {label IoCounters.ReadTransferCount}
-                    {label IoCounters.WriteOperationCount}
-                    {label IoCounters.WriteTransferCount}
-                    {label IoCounters.OtherOperationCount}
-                    {label IoCounters.OtherTransferCount}
+                    {label -ioreadops}
+                    {label -ioreadbytes}
+                    {label -iowriteops}
+                    {label -iowritebytes}
+                    {label -iootherops}
+                    {label -iootherbytes}
                 }
                 {labelframe {title Memory cols 2}} {
-                    {label VmCounters.PagefileUsage}
-                    {label VmCounters.PeakPagefileUsage}
-                    {label VmCounters.QuotaNonPagedPoolUsage}
-                    {label VmCounters.QuotaPeakNonPagedPoolUsage}
-                    {label VmCounters.QuotaPagedPoolUsage}
-                    {label VmCounters.QuotaPeakPagedPoolUsage}
-                    {label VmCounters.VirtualSize}
-                    {label VmCounters.PeakVirtualSize}
-                    {label VmCounters.WorkingSetSize}
-                    {label VmCounters.PeakWorkingSetSize}
-                    {label VmCounters.PageFaultCount}
+                    {label -pagefilebytes}
+                    {label -pagefilebytespeak}
+                    {label -poolnonpagedbytes}
+                    {label -poolnonpagedbytespeak}
+                    {label -poolpagedbytes}
+                    {label -poolpagedbytespeak}
+                    {label -virtualbytes}
+                    {label -virtualbytespeak}
+                    {label -workingset}
+                    {label -workingsetpeak}
+                    {label -pagefaults}
                 }
                 {frame {cols 2}} {
-                    {label KernelTime}
-                    {label UserTime}
-                    {label ThreadCount}
-                    {label HandleCount}
+                    {label -privilegedtime}
+                    {label -usertime}
+                    {label -threadcount}
+                    {label -handlecount}
                 }
             }
         }]
@@ -131,32 +131,32 @@ proc wits::app::process::get_property_defs {} {
     set _property_defs [dict create]
 
     foreach {propname desc shortdesc objtype format useintable} {
-        BasePriority "Base priority" "Base priority" "" int 1
-        CreateTime "Start time" "Start time" "" largetime 1
-        HandleCount "Handle count" "Handles" "" int 1
-        IoCounters.OtherOperationCount "Control operations" "Control ops" "" int 1
-        IoCounters.OtherTransferCount "Control bytes" "Control bytes" "" int 1
-        IoCounters.ReadOperationCount "Read operations" "Reads" "" int 1
-        IoCounters.ReadTransferCount  "Read bytes" "Read bytes" "" int 1
-        IoCounters.WriteOperationCount "Write operations" "Writes" "" int 1
-        IoCounters.WriteTransferCount "Write bytes" "Write bytes" "" int 1
-        KernelTime "Kernel time" "Kernel time" "" ns100 1
-        ProcessId         "Process ID" "PID" ::wits::app::process int 1
-        SessionId "Terminal server session" "TS session" "" int 1
-        ThreadCount "Thread count" "Threads" "" int 1
+        -basepriority "Base priority" "Base priority" "" int 1
+        -createtime "Start time" "Start time" "" largetime 1
+        -handlecount "Handle count" "Handles" "" int 1
+        -iootherops "Control operations" "Control ops" "" int 1
+        -iootherbytes "Control bytes" "Control bytes" "" int 1
+        -ioreadops "Read operations" "Reads" "" int 1
+        -ioreadbytes  "Read bytes" "Read bytes" "" int 1
+        -iowriteops "Write operations" "Writes" "" int 1
+        -iowritebytes "Write bytes" "Write bytes" "" int 1
+        -privilegedtime "Kernel time" "Kernel time" "" ns100 1
+        -pid         "Process ID" "PID" ::wits::app::process int 1
+        -tssession "Terminal server session" "TS session" "" int 1
+        -threadcount "Thread count" "Threads" "" int 1
         -user "User account" "User" ::wits::app::account text 1
-        UserTime "User time" "User time" "" ns100 1
-        VmCounters.PageFaultCount "Page faults" "Page faults" "" int 1
-        VmCounters.PagefileUsage "Swap used" "Swap used" "" mb 1
-        VmCounters.PeakPagefileUsage "Peak swap used" "Peak swap used" "" mb 1
-        VmCounters.QuotaNonPagedPoolUsage "Non-paged pool" "Non-paged pool" "" xb 1
-        VmCounters.QuotaPeakNonPagedPoolUsage "Peak non-paged pool" "Peak non-paged pool" "" xb 1
-        VmCounters.QuotaPagedPoolUsage "Paged pool" "Paged pool" "" xb 1
-        VmCounters.QuotaPeakPagedPoolUsage "Peak paged pool" "Peak paged pool" "" xb 1
-        VmCounters.VirtualSize "Virtual memory" "VM used" "" mb 1
-        VmCounters.PeakVirtualSize "Peak virtual memory" "Peak VM" "" mb 1
-        VmCounters.WorkingSetSize "Working set" "Working set" "" mb 1
-        VmCounters.PeakWorkingSetSize "Peak working set" "Peak working set" "" mb 1
+        -usertime "User time" "User time" "" ns100 1
+        -pagefaults "Page faults" "Page faults" "" int 1
+        -pagefilebytes "Swap used" "Swap used" "" mb 1
+        -pagefilebytespeak "Peak swap used" "Peak swap used" "" mb 1
+        -poolnonpagedbytes "Non-paged pool" "Non-paged pool" "" xb 1
+        -poolnonpagedbytespeak "Peak non-paged pool" "Peak non-paged pool" "" xb 1
+        -poolpagedbytes "Paged pool" "Paged pool" "" xb 1
+        -poolpagedbytespeak "Peak paged pool" "Peak paged pool" "" xb 1
+        -virtualbytes "Virtual memory" "VM used" "" mb 1
+        -virtualbytespeak "Peak virtual memory" "Peak VM" "" mb 1
+        -workingset "Working set" "Working set" "" mb 1
+        -workingsetpeak "Peak working set" "Peak working set" "" mb 1
         -elapsedtime "Elapsed time" "Elapsed time" "" interval 0
         -groups "Groups" "Groups" ::wits::app::group listtext 0
         -restrictedgroups "Restricted groups" "Restricted groups" ::wits::app::group listtext 0
@@ -164,11 +164,11 @@ proc wits::app::process::get_property_defs {} {
         -enabledprivileges "Enabled Privileges" "Enabled privs" "" listtext 0
         -disabledprivileges "Disabled Privileges" "Disabled privs" "" listtext 0
         -path "Executable path" "Path" ::wits::app::wfile path 0
-        ProcessName "Process name" "Name" "" text 1
+        -name "Process name" "Name" "" text 1
         -tids "Process threads" "Thread IDs" ::wits::app::thread listint 0
         -toplevels "Toplevel windows" "Toplevels" ::wits::app::window listtext 0
         -commandline "Command line" "Command line" "" text 0
-        InheritedFromProcessId  "Parent process" "Parent" ::wits::app::process int 1
+        -parent  "Parent process" "Parent" ::wits::app::process int 1
         -logonsession "Logon session" "Logon Session" ::wits::app::logonsession text 1
         CPUPercent        "CPU %" "CPU%" "" int 1
         UserPercent       "User %" "User%" "" int 1
@@ -325,10 +325,9 @@ oo::class create wits::app::process::Objects {
     method _retrieve {propnames force} {
 
         # Always get base properties
-        set retrieved_properties {
-ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount ThreadCount CreateTime UserTime KernelTime VmCounters.PeakVirtualSize VmCounters.VirtualSize VmCounters.PageFaultCount VmCounters.PeakWorkingSetSize VmCounters.WorkingSetSize VmCounters.QuotaPeakPagedPoolUsage VmCounters.QuotaPagedPoolUsage VmCounters.QuotaPeakNonPagedPoolUsage VmCounters.QuotaNonPagedPoolUsage VmCounters.PagefileUsage VmCounters.PeakPagefileUsage IoCounters.ReadOperationCount IoCounters.WriteOperationCount IoCounters.OtherOperationCount IoCounters.ReadTransferCount IoCounters.WriteTransferCount IoCounters.OtherTransferCount
-        }
-        set new [twapi::recordarray -format dict -key ProcessId [twapi::Twapi_GetProcessList -1 31]]
+        set new [twapi::Twapi_GetProcessList -1 31]
+        set retrieved_properties [twapi::recordarray fields $new]
+        set new [twapi::recordarray getdict [twapi::Twapi_GetProcessList -1 31] -format dict -key -pid]
 
         # Check if we need CPU%
         if {[lsearch -glob $propnames *Percent]} {
@@ -357,18 +356,18 @@ ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount 
                         set upercent 0
                         set kpercent 0
                         set cpupercent 0
-                        set utime [dict get $rec UserTime]
-                        set ktime [dict get $rec KernelTime]
+                        set utime [dict get $rec -usertime]
+                        set ktime [dict get $rec -privilegedtime]
                         # To make a valid calculation, the process must not
                         # be new - it must exist in _records AND its idle/kernel
                         # times in _records must not be greater (which would
                         # indicate a recycled PID
                         if {[dict exists $_records $pid] &&
-                            [dict get $_records $pid UserTime] <= $utime &&
-                            [dict get $_records $pid KernelTime] <= $ktime} {
+                            [dict get $_records $pid -usertime] <= $utime &&
+                            [dict get $_records $pid -privilegedtime] <= $ktime} {
                             # Calculate times scaled by 100 since doing percents
-                            set utime [expr {100 * ($utime - [dict get $_records $pid UserTime])}]
-                            set ktime [expr {100 * ($ktime - [dict get $_records $pid KernelTime])}]
+                            set utime [expr {100 * ($utime - [dict get $_records $pid -usertime])}]
+                            set ktime [expr {100 * ($ktime - [dict get $_records $pid -privilegedtime])}]
                             if {$ktime && $ktime < $elapsed} {
                                 # Less than 1%. Shows as 0+. This syntax
                                 # carefully chosen for treectrl dictionary
@@ -398,10 +397,8 @@ ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount 
             }
         }
 
-        # Check if we need any non-base data. These all start with
-        # "-" so easy to check
-
-        set opts [lsearch -glob -inline -all $propnames -*]
+        # Check if we need any non-base data.
+        set opts [ldifference $propnames $retrieved_properties]
         if {[llength $opts]} {
             if {"-description" in $opts} {
                 set want_desc 1
@@ -443,7 +440,7 @@ ProcessId InheritedFromProcessId SessionId BasePriority ProcessName HandleCount 
             }
 
 
-            set optvals [twapi::get_multiple_process_info -noaccess $_unknown_token {*}$opts]
+            set optvals [twapi::recordarray getdict [twapi::get_multiple_process_info -noaccess $_unknown_token {*}$opts] -key -pid -format dict]
 
             # Do not just merge, we want a consistent view so only
             # pick up entries that existed in above call
@@ -555,11 +552,11 @@ proc wits::app::process::viewlist {args} {
                              ] \
                 -popupmenu [concat [list {terminate Terminate} -] [widget::propertyrecordslistview standardpopupitems]] \
                 -availablecolumns $_table_properties \
-                -displaycolumns {ProcessId ProcessName CPUPercent -description -user} \
-                -colattrs {-path {-squeeze 1} ProcessName {-squeeze 1} -description {-squeeze 1}} \
-                -nameproperty ProcessName \
+                -displaycolumns {-pid -name CPUPercent -description -user} \
+                -colattrs {-path {-squeeze 1} -name {-squeeze 1} -description {-squeeze 1}} \
+                -nameproperty -name \
                 -descproperty -description \
-                -detailfields {ProcessName -description ProcessId -user -commandline CPUPercent ThreadCount HandleCount VmCounters.VirtualSize VmCounters.WorkingSetSize -elapsedtime} \
+                -detailfields {-name -description -pid -user -commandline CPUPercent -threadcount -handlecount -virtualbytes -workingset -elapsedtime} \
                 {*}$args
                ]
 }
@@ -698,7 +695,7 @@ proc wits::app::process::getviewer {pid} {
     variable _page_view_layout
 
     set objects [get_objects [namespace current]]
-    set name [$objects get_field $pid ProcessName]
+    set name [$objects get_field $pid -name]
 
     if {$name ne ""} {
         set title "$name (PID $pid)"
