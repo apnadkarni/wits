@@ -335,6 +335,7 @@ oo::class create wits::app::wineventlog::Objects {
     }
 
     method discard {} {
+        next
         set _events {}
         set _ordered_events {}
         foreach {src h} [array get _hevents] {
@@ -345,7 +346,6 @@ oo::class create wits::app::wineventlog::Objects {
         twapi::purge_atoms
         # Reduce our memory footprint
         twapi::SetProcessWorkingSetSize [twapi::GetCurrentProcess] -1 -1
-        next
     }
 
 }
