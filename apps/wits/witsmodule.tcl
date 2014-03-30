@@ -106,23 +106,18 @@ oo::class create wits::app::module::Objects {
         if {"-path" in $propnames} {
             set opts [list -all]
         } else {
-            set opts {-handle -name -imagedata}
+            set opts {-handle -name -base -size -entry}
         }
 
         lassign $id pid handle
-        if {[catch {set mods [twapi::get_process_modules $pid {*}$opts]}]} {
+        if {[catch {set mods [twapi::recordarray getlist [twapi::get_process_modules $pid {*}$opts] -format dict]}]} {
             # Either System, Idle or perhaps some privileged process
             # or not existing
-            
         } else {
             foreach mod $mods {
                 if {[dict get $mod -handle] eq $handle} {
                     # Found the module
-                    set imagedata [twapi::kl_get $mod -imagedata]
                     dict set mod -pid $pid
-                    dict set mod -base [lindex $imagedata 0]
-                    dict set mod -size [lindex $imagedata 1]
-                    dict set mod -entry [lindex $imagedata 2]
                     return $mod
                 }
             }
@@ -140,21 +135,17 @@ oo::class create wits::app::module::Objects {
         if {"-path" in $propnames} {
             set opts [list -all]
         } else {
-            set opts {-handle -name -imagedata}
+            set opts {-handle -name -base -size -entry}
         }
         
         set recs {}
         foreach pid [twapi::get_process_ids] {
-            if {[catch {set mods [twapi::get_process_modules $pid {*}$opts]}]} {
+            if {[catch {set mods [twapi::recordarray getlist [twapi::get_process_modules $pid {*}$opts] -format dict]}]} {
                 # Either System, Idle or perhaps some privileged process
                 # TBD - how do we display modules
             } else {
                 foreach mod $mods {
-                    set imagedata [twapi::kl_get $mod -imagedata]
                     dict set mod -pid $pid
-                    dict set mod -base [lindex $imagedata 0]
-                    dict set mod -size [lindex $imagedata 1]
-                    dict set mod -entry [lindex $imagedata 2]
                     dict set recs [list $pid [dict get $mod -handle]] $mod
                 }
             }
