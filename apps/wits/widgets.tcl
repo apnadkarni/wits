@@ -4573,7 +4573,7 @@ snit::widget wits::widget::unmanagedtoplevel  {
                     }
                     combobox -
                     dropdown {
-                        set items [twapi::kl_get_default $attrs values ""]
+                        set items [twapi::kl_get $attrs values ""]
                         $win configure -values $items
                         $win set $value
                     }
@@ -4627,7 +4627,7 @@ snit::widget wits::widget::unmanagedtoplevel  {
             foreach {frametype widgetlist} $framelist {
                 lassign $frametype framewidget frameattr
                 if {$framewidget == "labelframe"} {
-                    set innerframe [::ttk::labelframe $nbf.f[incr _wctr] -text [twapi::kl_get_default $frameattr title ""] -style $labelframestyle]
+                    set innerframe [::ttk::labelframe $nbf.f[incr _wctr] -text [twapi::kl_get $frameattr title ""] -style $labelframestyle]
                 } else {
                     set innerframe [::ttk::$framewidget $nbf.f[incr _wctr] -style $framestyle]
                 }
@@ -4641,7 +4641,7 @@ snit::widget wits::widget::unmanagedtoplevel  {
                 }
                 # Arrange the widgets depending on the number of
                 # columns
-                set numcols [twapi::kl_get_default $frameattr cols 1]
+                set numcols [twapi::kl_get $frameattr cols 1]
                 incr numcols $numcols;  # grid columns (label and value)
                 set wn [llength $wlist]
                 set row 0
@@ -4790,7 +4790,7 @@ snit::widget wits::widget::unmanagedtoplevel  {
                 set retw [list $lwin $vwin new]
             }
             entry   {
-                set vwin [::ttk::entry $frame.v-[incr _wctr] -justify [twapi::kl_get_default $attrs justify left]]
+                set vwin [::ttk::entry $frame.v-[incr _wctr] -justify [twapi::kl_get $attrs justify left]]
                 $vwin insert end $propval
                 if {[twapi::kl_vget $attrs validate validatecmd]} {
                     lappend validatecmd %P
@@ -4805,7 +4805,7 @@ snit::widget wits::widget::unmanagedtoplevel  {
             }
             combobox -
             dropdown {
-                set values [twapi::kl_get_default $attrs values ""]
+                set values [twapi::kl_get $attrs values ""]
                 set vwin [::ttk::combobox $frame.v-[incr _wctr] -values $values -state [expr {$wtype eq "combobox" ? "normal" : "readonly"}]]
                 $vwin set $propval
                 set retw [list $lwin $vwin new]
@@ -4827,8 +4827,8 @@ snit::widget wits::widget::unmanagedtoplevel  {
             }
             helptext {
                 # Help text
-                set height [twapi::kl_get_default $attrs height 3]
-                set text [twapi::kl_get_default $attrs text ""]
+                set height [twapi::kl_get $attrs height 3]
+                set text [twapi::kl_get $attrs text ""]
                 set bgcolor [wits::widget::get_theme_setting tab frame normal bg]
                 # Set the width because else dialog defaults to 80 chars wide
                 set vwin [textlabel $frame.v[incr _wctr] -text $text \
