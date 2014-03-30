@@ -51,27 +51,27 @@ snit::widgetadaptor wits::widget::preferenceseditor {
     constructor {prefobj layout args} {
         set _prefobj $prefobj
         
-        set pl_section [twapi::kl_get_default $layout section ""]
+        set pl_section [twapi::kl_get $layout section ""]
 
         # Construct the layout descriptor to be passed to the page view
         set pg_layout [list ]
         set prop_names [list ]
-        foreach page [twapi::kl_get_default $layout pagelist ""] {
-            set pg_section [twapi::kl_get_default $page section $pl_section]
-            set pg_title   [twapi::kl_get_default $page title ""]
+        foreach page [twapi::kl_get $layout pagelist ""] {
+            set pg_section [twapi::kl_get $page section $pl_section]
+            set pg_title   [twapi::kl_get $page title ""]
 
             set fr_layout [list ]
-            foreach frame [twapi::kl_get_default $page framelist ""] {
-                set fr_section [twapi::kl_get_default $frame section $pg_section]
-                set fr_title   [twapi::kl_get_default $frame title ""]
-                set fr_attr    [twapi::kl_get_default $frame fattr ""]
+            foreach frame [twapi::kl_get $page framelist ""] {
+                set fr_section [twapi::kl_get $frame section $pg_section]
+                set fr_title   [twapi::kl_get $frame title ""]
+                set fr_attr    [twapi::kl_get $frame fattr ""]
 
                 set pref_layout [list ]
-                foreach prefdef [twapi::kl_get_default $frame prefdeflist ""] {
-                    set section [twapi::kl_get_default $prefdef section $fr_section]
-                    set wtype   [twapi::kl_get_default $prefdef wtype "entry"]
-                    set name    [twapi::kl_get_default $prefdef name ""]
-                    set wattr   [twapi::kl_get_default $prefdef wattr ""]
+                foreach prefdef [twapi::kl_get $frame prefdeflist ""] {
+                    set section [twapi::kl_get $prefdef section $fr_section]
+                    set wtype   [twapi::kl_get $prefdef wtype "entry"]
+                    set name    [twapi::kl_get $prefdef name ""]
+                    set wattr   [twapi::kl_get $prefdef wattr ""]
 
                     if {$name ne ""} {
                         lappend prop_names [list $name $section]
