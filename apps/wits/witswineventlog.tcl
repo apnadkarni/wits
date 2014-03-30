@@ -25,6 +25,8 @@ namespace eval wits::app::wineventlog {
                          [list last "Last" $lastimg "Show last event"] \
                          ]
 
+        # TBD - -data is not available through winlog currently
+        # {textbox  -data {-font {{Courier New} 8} -width 35}}
         set fields {
             {label -channel}
             {label -providername}
@@ -33,7 +35,6 @@ namespace eval wits::app::wineventlog {
             {label -taskname}
             {label -eventcode}
             {label -account}
-            {textbox  -data {-font {{Courier New} 8} -width 35}}
             {label -eventrecordid}
             {label -levelname}
         }
@@ -343,7 +344,7 @@ oo::class create wits::app::wineventlog::Objects {
         array set _hevents {}
         twapi::purge_atoms
         # Reduce our memory footprint
-        twapi::SetProcessWorkingSet [twapi::GetCurrentProcess] -1 -1
+        twapi::SetProcessWorkingSetSize [twapi::GetCurrentProcess] -1 -1
         next
     }
 
