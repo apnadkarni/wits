@@ -761,16 +761,6 @@ oo::class create util::PropertyRecordCollection {
         $_scheduler after1 60000 [list [self] housekeeping]
     }
 
-    method unsubscribe args {
-        # Overrides publisher unsubscribe so that resource can be freed
-        # if no subscribers left
-        next {*}$args
-
-        if { ! [my have_subscribers]} {
-            my discard
-        }
-    }
-
     method scheduler {} {
         return $_scheduler
     }
