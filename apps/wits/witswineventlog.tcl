@@ -348,6 +348,14 @@ oo::class create wits::app::wineventlog::Objects {
         twapi::SetProcessWorkingSetSize [twapi::GetCurrentProcess] -1 -1
     }
 
+    method unsubscribe args {
+        next {*}$args
+        if { ! [my have_subscribers]} {
+            # Do not discard until we are told to discard but at least
+            # reduce our working set as soon as there are not subscribers
+            twapi::SetProcessWorkingSetSize [twapi::GetCurrentProcess] -1 -1
+        }
+    }
 }
 
 
