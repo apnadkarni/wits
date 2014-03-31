@@ -180,8 +180,7 @@ oo::class create wits::app::remote_share::Objects {
     method _retrieve {propnames force} {
         set recs {}
         
-        foreach share [twapi::get_client_shares] {
-            lassign $share localdevice remoteshare
+        foreach {localdevice remoteshare} [twapi::recordarray getlist [twapi::get_client_shares -level 0] -format flat] {
             if {$localdevice ne ""} {
                 set key $localdevice
             } else {
