@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2011, Ashok P. Nadkarni
+# Copyright (c) 2006-2014, Ashok P. Nadkarni
 # All rights reserved.
 #
 # See the file LICENSE for license
@@ -24,13 +24,13 @@ namespace eval wits::app::local_share {
             {
                 "General" {
                     frame {
-                        {label netname}
-                        {textbox remark}
-                        {label type}
-                        {label path}
-                        {label max_uses}
-                        {label current_uses}
-                        {::wits::widget::secdbutton security_descriptor}
+                        {label -name}
+                        {textbox -comment}
+                        {label -type}
+                        {label -path}
+                        {label -max_conn}
+                        {label -current_conn}
+                        {::wits::widget::secdbutton -secd}
                     }
                 }
             }
@@ -62,13 +62,13 @@ proc wits::app::local_share::get_property_defs {} {
         set _property_defs [dict create]
 
         foreach {propname desc shortdesc objtype format} {
-            netname      "Share name" "Share name" ::wits::app::localshare text
-            remark       "Description" "Description" "" text
-            type         "Share type" "Type" "" text
-            path         "Share path" "Path" ::wits::app::shareable path
-            max_uses     "Connection limit" "Max conns" "" int
-            current_uses  "Connection count" "\# Connections" "" int
-            security_descriptor "Security descriptor" "Security" "" text
+            -name      "Share name" "Share name" ::wits::app::localshare text
+            -comment       "Description" "Description" "" text
+            -type         "Share type" "Type" "" text
+            -path         "Share path" "Path" ::wits::app::shareable path
+            -max_conn     "Connection limit" "Max conns" "" int
+            -current_conn  "Connection count" "\# Connections" "" int
+            -secd "Security descriptor" "Security" "" text
         } {
             dict set _property_defs $propname \
                 [dict create \
@@ -76,14 +76,14 @@ proc wits::app::local_share::get_property_defs {} {
                      shortdesc $shortdesc \
                      displayformat $format \
                      objtype $objtype]
-            if {$propname ne "security_descriptor"} {
+            if {$propname ne "-secd"} {
                 lappend _table_properties $propname
             }
         }
 
         # Add in the ones that need custom formatting
 
-        dict set _property_defs max_uses displayformat {
+        dict set _property_defs -max_conn displayformat {
             map {
                 -1 "No limit"
             }
@@ -121,11 +121,10 @@ oo::class create wits::app::local_share::Objects {
         
         if {$_use_level502} {
             if {! [catch {set shares [twapi::get_shares -level 502]}]} {
-                foreach share $shares {
-                    dict set share type [::twapi::_share_type_code_to_symbols [dict get $share type]]
-                    dict set recs [dict get $share netname] $share
+                foreach share [twapi::recordarray getlist $shares -format dict] {
+                    dict set recs [dict get $share -name] $share
                 }
-                return [list updated {netname type remark permissions max_uses current_uses path passwd security_descriptor} $recs]
+                return [list updated {-name -type -comment -permissions -max_conn -current_conn -path -passwd -secd} $recs]
             }
         }
             
@@ -133,12 +132,11 @@ oo::class create wits::app::local_share::Objects {
         set _use_level502 0;    # So we do not try again in the future
 
         set noaccess "<No access>"
-        set missing [dict create path $noaccess max_uses $noaccess current_uses $noaccess  security_descriptor $noaccess]
-        foreach share [twapi::get_shares -level 1] {
-            dict set share type [::twapi::_share_type_code_to_symbols [dict get $share type]]
-            dict set recs [dict get $share netname] [dict merge $missing $share]
+        set missing [dict create -path $noaccess -max_conn $noaccess -current_conn $noaccess  -secd $noaccess]
+        foreach share [twapi::recordarray getlist [twapi::get_shares -level 1] -format dict] {
+            dict set recs [dict get $share -name] [dict merge $missing $share]
         }
-        return [list updated {netname type remark permissions max_uses current_uses path passwd security_descriptor} $recs]
+        return [list updated {-name -type -comment -permissions -max_conn -current_conn -path -passwd -secd} $recs]
     }
 }
 
@@ -157,11 +155,11 @@ proc wits::app::local_share::viewlist {args} {
                               [list view "View properties of selected shares" $viewdetailimg] \
                              ] \
                 -availablecolumns $_table_properties \
-                -displaycolumns {netname type remark} \
-                -colattrs {remark {-squeeze 1}} \
-                -detailfields {netname remark type path current_uses max_uses} \
-                -nameproperty "netname" \
-                -descproperty "remark" \
+                -displaycolumns {-name -type -comment} \
+                -colattrs {-comment {-squeeze 1}} \
+                -detailfields {-name -comment -type -path -current_conn -max_conn} \
+                -nameproperty "-name" \
+                -descproperty "-comment" \
                 {*}$args \
                ]
 }
