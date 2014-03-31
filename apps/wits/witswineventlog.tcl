@@ -80,7 +80,7 @@ proc wits::app::wineventlog::get_property_defs {} {
         -timecreated "Timestamp" "Timestamp" "" text
         -levelname "Level" "Level" "" text
         -message "Message" "Message" "" text
-        -userid "SID" "SID" ::wits::app::account text
+        -sid "SID" "SID" ::wits::app::account text
         -account "Account" "Account" ::wits::app::account text
     } {
         dict set _property_defs $propname \
@@ -209,7 +209,7 @@ oo::class create wits::app::wineventlog::Objects {
         while {1} {
             set events {}
             foreach {src hevl} [array get _hevents] {
-                lappend events {*}[twapi::winlog_read $hevl]
+                lappend events {*}[twapi::recordarray getlist [twapi::winlog_read $hevl] -format dict]
             }
             if {[llength $events] == 0} {
                 break
@@ -229,12 +229,12 @@ oo::class create wits::app::wineventlog::Objects {
                 dict set ev -eventrecordid [dict get $eventrec -eventrecordid]
                 dict set ev -levelname [::twapi::atomize [dict get $eventrec -levelname]]
                 dict set ev -message [::twapi::atomize [dict get $eventrec -message]]
-                set userid [::twapi::atomize [dict get $eventrec -userid]]
-                dict set ev -userid $userid
-                dict set ev -account $userid
-                if {$userid ne ""} {
+                set sid [::twapi::atomize [dict get $eventrec -sid]]
+                dict set ev -sid $sid
+                dict set ev -account $sid
+                if {$sid ne ""} {
                     catch {
-                        dict set ev -account [wits::app::sid_to_name $userid]
+                        dict set ev -account [wits::app::sid_to_name $sid]
                     }
                 }
                 set eventid [dict get $eventrec -eventid]
