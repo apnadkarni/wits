@@ -6364,6 +6364,7 @@ snit::widgetadaptor wits::widget::listframe {
         if {! $options(-hideitemcount)} {
             set lstatus [::ttk::label $_statusframe.lstatus \
                              -textvariable [myvar _itemcounttext] \
+                             -width 20 \
                              -justify left -anchor w]
         }
 
