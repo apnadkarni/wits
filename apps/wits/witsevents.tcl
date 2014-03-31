@@ -575,18 +575,18 @@ snit::type ::wits::app::eventmanager {
 
         set totalhandles 0
         set totalthreads 0
-        foreach {pid prec} [[wits::app::get_objects ::wits::app::process] get {ThreadCount HandleCount ProcessName} $options(-monitorinterval)] {
-            set threads [dict get $prec ThreadCount]
+        foreach {pid prec} [[wits::app::get_objects ::wits::app::process] get {-threadcount -handlecount -name} $options(-monitorinterval)] {
+            set threads [dict get $prec -threadcount]
             incr totalthreads $threads
 
-            set handles [dict get $prec HandleCount]
+            set handles [dict get $prec -handlecount]
             incr totalhandles $handles
 
             if {$threads > $options(-processthreadsthreshold)} {
-                set toomanythreads_pids($pid) [dict get $prec ProcessName]
+                set toomanythreads_pids($pid) [dict get $prec -name]
             }
             if {$handles > $options(-processhandlesthreshold)} {
-                set toomanyhandles_pids($pid) [dict get $prec ProcessName]
+                set toomanyhandles_pids($pid) [dict get $prec -name]
             }
             # TBD - memory
         }
