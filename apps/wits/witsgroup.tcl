@@ -25,8 +25,8 @@ namespace eval wits::app::group {
             {
                 "General" {
                     frame {
-                        {label name}
-                        {textbox comment}
+                        {label -name}
+                        {textbox -comment}
                         {label -type}
                         {label -sid}
                         {label -domain}
@@ -68,8 +68,8 @@ proc wits::app::group::get_property_defs {} {
         set _property_defs [dict create]
 
         foreach {propname desc shortdesc objtype format} {
-            name             "Group" "Group" ::wits::app::group text
-            comment          "Description" "Description" "" text
+            -name             "Group" "Group" ::wits::app::group text
+            -comment          "Description" "Description" "" text
             -domain           "Account domain" "Domain" "" text
             -sid              "Security identifier" "SID" "" text
             -type             "Group type" "Type" "" text
@@ -131,7 +131,7 @@ oo::class create wits::app::group::Objects {
                 -rights {
                     dict set result -rights [twapi::get_account_rights $sid]
                 }
-                name -
+                -name -
                 -domain -
                 -type {
                     # Already retrieved by get_sid_info
@@ -139,21 +139,21 @@ oo::class create wits::app::group::Objects {
                 -sid {
                     dict set result -sid $sid
                 }
-                comment {
+                -comment {
                     switch -exact -- [dict get $result -type] {
                         alias {
-                            dict set result comment [lindex [twapi::get_local_group_info [dict get $result name] -comment] 1]
+                            dict set result -comment [lindex [twapi::get_local_group_info [dict get $result -name] -comment] 1]
                         }
                         group {
                             # We could use get_global_group_info after finding
                             # the defining system as in the old Wits code
                             # but do not bother since we do not support
                             # global groups fully anyways.
-                            dict set result comment ""
+                            dict set result -comment ""
                         }
                         wellknowngroup -
                         default {
-                            dict set result comment ""
+                            dict set result -comment ""
                         }
                     }
                 }
@@ -180,8 +180,8 @@ oo::class create wits::app::group::Objects {
 
         set recs {}
 
-        foreach elem [twapi::get_local_groups -level 1] {
-            set name [dict get $elem name]
+        foreach elem [twapi::recordarray getlist [twapi::get_local_groups -level 1] -format dict] {
+            set name [dict get $elem -name]
             set sid  [name_to_sid $name]
             dict set recs $sid $elem
             dict set recs $sid -sid $sid
@@ -216,11 +216,11 @@ proc wits::app::group::viewlist {args} {
                 -actions [list \
                               [list view "View properties of selected groups" $viewdetailimg] \
                              ] \
-                -displaycolumns {name comment} \
-                -colattrs {comment {-squeeze 1}} \
+                -displaycolumns {-name -comment} \
+                -colattrs {-comment {-squeeze 1}} \
                 -detailfields {-sid -domain -type} \
-                -nameproperty "name" \
-                -descproperty "comment" \
+                -nameproperty "-name" \
+                -descproperty "-comment" \
                 {*}$args \
                ]
 }
