@@ -590,26 +590,31 @@ oo::class create util::PropertyRecordCollection {
         #  propnames - the property names of interest
         #  force - if true, data is returned even if unchanged
         #
-        # The return values must be a list with three elements:
+        # The return values must be a list with one or three elements:
         # status, property names, and data records.
         #
-        # The status field may either 'nochange' or 'updated' indicating 
+        # The status field may either 'nochange', 'updated' or
+        # 'inprogress', indicating 
         # whether the returned data is different from that returned by
-        # the last call or not. Derived classes are always free to
+        # the last call or not, or data retrieval is not complete
+        # Derived classes are always free to
         # return 'updated' even if data has not changed if they do not
         # themselves track changes.
         #
-        # The property names field contains the names of the properties
+        # If the status field is 'inprogress', the property names and
+        # data records fields are not present. Otherwise,
+        # the data records field is a dictionary of data records.
+        # If caller specified $force as true, it always contains
+        # valid data when the status field is not 'inprogress'.
+        # If $force was specified as false, then the records field
+        # contains valid data only if the status field is 'updated'
+        # and must be ignored otherwise.
+        #
+        # If the status field is not 'inprogress',
+        # the property names field contains the names of the properties
         # actually retrieved. This may be subset or superset of the
         # requested property names. If it is a subset, callers should
         # use default values and not try and get the data again.
-        #
-        # The data records field is a dictionary of data records.
-        # If caller specified $force as true, it always contains
-        # valid data irrespective of the value of the status field.
-        # If $force was specified as false, then the records field
-        # contains valid data only if the status field is 'updated'
-        # and must be ignored if the status is 'nochange'.
         #
         # Note that base class has to keep track of setting $force
         # to true if $propnames contains more fields than
@@ -737,6 +742,10 @@ oo::class create util::PropertyRecordCollection {
     }
 
     method refresh_callback {} {
+
+        # TBD - this will call _refresh_cache which will call _retrieve
+        # even if only one object is being displayed. Figure out
+        # how to cll _retrieve1 in such a case
 
         # Make sure even on trasient errors we reschedule the next update
         twapi::trap {
