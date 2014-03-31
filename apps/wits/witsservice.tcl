@@ -207,10 +207,9 @@ oo::class create wits::app::service::Objects {
 
     method _retrieve {propnames force} {
         # Always get service status
-        set retrieved_properties {
-            name displayname servicetype state interactive controls_accepted exitcode service_code checkpoint wait_hint pid serviceflags
-        }
         set new [twapi::get_multiple_service_status -win32_share_process -win32_own_process]
+        set retrieved_properties [twapi::recordarray fields $new]
+        set new [twapi::recordarray getdict $new -key name -format dict]
 
         # Service configuration is obtained one at a time so see
         # we really need that data. Configuration opts all start with
@@ -228,8 +227,12 @@ oo::class create wits::app::service::Objects {
         }
         if {[llength $config_opts]} {
             foreach name [dict keys $new] {
-                # TBD - what if that service does not exist?
-                dict set new $name [dict merge [dict get $new $name] [twapi::get_service_configuration $name {*}$config_opts]]
+                trap {
+                    dict set new $name [dict merge [dict get $new $name] [twapi::get_service_configuration $name {*}$config_opts]]
+                } onerror {TWAPI_WIN32 1060} {
+                    # Service does not exist? Just removed after we got status?
+                    dict unset new $name
+                }
             }
         }
 
@@ -573,5 +576,10 @@ proc wits::app::service::getlisttitle {} {
 
 # Return list of services that are dependent on the given service
 proc wits::app::service::get_dependents {svcname} {
-    return [twapi::kl_fields [twapi::get_dependent_service_status $svcname]]
+    twapi::trap {
+        return [twapi::recordarray column [twapi::get_dependent_service_status $svcname] name]
+    } onerror {TWAPI_WIN32 1060} {
+        # Service does not exist. Just uninstalled after we got status ?
+        return {}
+    }
 }
