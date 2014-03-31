@@ -105,7 +105,7 @@ oo::class create wits::app::driver::Objects {
             "-description" in $propnames ||
             "-command" in $propnames} {
             lappend retrieved_properties -displayname -description -command
-            dict for {name elem} [::twapi::get_multiple_service_status -kernel_driver -file_system_driver -adapter -recognizer_driver -active] {
+            foreach name [twapi::recordarray column [::twapi::get_multiple_service_status -kernel_driver -file_system_driver -adapter -recognizer_driver -active] name] {
                 set svc [twapi::get_service_configuration $name -displayname -description -command]
                 set service_drivers([string tolower [file tail [dict get $svc -command]]]) $svc
             }
@@ -120,6 +120,7 @@ oo::class create wits::app::driver::Objects {
             lappend retrieved_properties -base -name
             set drivers [twapi::get_device_drivers -base -name]
         }
+        set drivers [twapi::recordarray getlist $drivers -format dict]
         foreach driver $drivers {
             if {[dict exists $driver -path]} {
                 dict set driver -path [file nativename [dict get $driver -path]]
