@@ -125,9 +125,9 @@ oo::class create wits::app::netconn::Objects {
     method _retrieve {propnames force} {
         set conns {}
 
-        set pidnames [[get_objects ::wits::app::process] get [list ProcessName] 5000]
+        set pidnames [[get_objects ::wits::app::process] get [list -name] 5000]
         foreach ipver {4 6} suffix {{} 6} {
-            foreach conn [twapi::get_tcp_connections -localaddr -localport -remoteaddr -remoteport -pid -state -ipversion $ipver] {
+            foreach conn [twapi::recordarray getlist [twapi::get_tcp_connections -localaddr -localport -remoteaddr -remoteport -pid -state -ipversion $ipver] -format dict] {
                 dict set conn -localhostname [map_addr_to_name [dict get $conn -localaddr]]
                 dict set conn -localportname [map_port_to_name [dict get $conn -localport]]
                 dict set conn -remotehostname [map_addr_to_name [dict get $conn -remoteaddr]]
@@ -135,8 +135,8 @@ oo::class create wits::app::netconn::Objects {
                 dict set conn -protocol TCP$suffix
 
                 set pid [dict get $conn -pid]
-                if {[dict exists $pidnames $pid ProcessName]} {
-                    dict set conn -pidname [dict get $pidnames $pid ProcessName]
+                if {[dict exists $pidnames $pid -name]} {
+                    dict set conn -pidname [dict get $pidnames $pid -name]
                 } else {
                     dict set conn -pidname "PID $pid"
                 }
@@ -144,7 +144,7 @@ oo::class create wits::app::netconn::Objects {
                 dict set conns [list [dict get $conn -localaddr] [dict get $conn -localport] [dict get $conn -remoteaddr] [dict get $conn -remoteport]] $conn
             }
             
-            foreach conn [twapi::get_udp_connections -ipversion $ipver -localaddr -localport -pid] {
+            foreach conn [twapi::recordarray getlist [twapi::get_udp_connections -ipversion $ipver -localaddr -localport -pid] -format dict] {
                 dict set conn -localhostname [map_addr_to_name [dict get $conn -localaddr]]
                 dict set conn -localportname [map_port_to_name [dict get $conn -localport]]
                 dict set conn -remoteaddr ""
@@ -155,8 +155,8 @@ oo::class create wits::app::netconn::Objects {
                 dict set conn -protocol UDP$suffix
 
                 set pid [dict get $conn -pid]
-                if {[dict exists $pidnames $pid ProcessName]} {
-                    dict set conn -pidname [dict get $pidnames $pid ProcessName]
+                if {[dict exists $pidnames $pid -name]} {
+                    dict set conn -pidname [dict get $pidnames $pid -name]
                 } else {
                     dict set conn -pidname "PID $pid"
                 }
