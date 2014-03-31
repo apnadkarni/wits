@@ -255,33 +255,35 @@ oo::class create wits::app::user::Objects {
         foreach elem [twapi::recordarray getlist [twapi::get_users -level $netenum_level] -format dict] {
             set name [dict get $elem -name]
             set sid  [name_to_sid $name]
-            dict set recs $sid $elem
-            dict set recs $sid -sid $sid
-            if {$map_status} {
-                set flags [dict get $recs $sid -flags]
-                # UF_LOCKOUT -> 0x10, UF_ACCOUNTDISABLE -> 0x2
-                if {$flags & 0x2} {
-                    dict set recs $sid -status "Disabled"
-                } elseif {$flags & 0x10} {
-                    dict set recs $sid -status "Locked"
-                } else {
-                    dict set recs $sid -status "Enabled"
+            dict update recs $sid rec {
+                set rec $elem
+                dict set rec -sid $sid
+                if {$map_status} {
+                    set flags [dict get $rec -flags]
+                    # UF_LOCKOUT -> 0x10, UF_ACCOUNTDISABLE -> 0x2
+                    if {$flags & 0x2} {
+                        dict set rec -status "Disabled"
+                    } elseif {$flags & 0x10} {
+                        dict set rec -status "Locked"
+                    } else {
+                        dict set rec -status "Enabled"
+                    }
                 }
-            }
-            if {$need_lookup_account_sid} {
-                dict set recs $sid [dict merge [dict get $recs $sid] [get_sid_info $sid]]
-            }
-            if {$need_local_groups} {
-                dict set recs $sid -local_groups [twapi::get_user_local_groups $name]
-            }
-            if {$need_global_groups} {
-                dict set recs $sid -global_groups [twapi::get_user_global_groups $name -all]
-            }
-            if {$need_rights} {
-                # TBD - optimize by copying contents of get_account_rights
-                # but keeping the lsa handle open instead of opening
-                # for every iteration.
-                dict set recs $sid -rights [twapi::get_account_rights $sid]
+                if {$need_lookup_account_sid} {
+                    set rec [dict merge $rec [get_sid_info $sid]]
+                }
+                if {$need_local_groups} {
+                    dict set rec -local_groups [twapi::get_user_local_groups $name]
+                }
+                if {$need_global_groups} {
+                    dict set rec -global_groups [twapi::get_user_global_groups $name -all]
+                }
+                if {$need_rights} {
+                    # TBD - optimize by copying contents of get_account_rights
+                    # but keeping the lsa handle open instead of opening
+                    # for every iteration.
+                    dict set rec -rights [twapi::get_account_rights $sid]
+                }
             }
         }
 
