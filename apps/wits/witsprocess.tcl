@@ -244,93 +244,21 @@ oo::class create wits::app::process::Objects {
         # cache. No point in our retrieving the same data again.
         # The "collective" properties do not start with "-" so
         # easy enough to tell 
-        
-        set propnames [lsearch -glob -inline -all $propnames[set propnames {}] -*]
-
-        if {"-logonsession" in $propnames} {
-            lappend propnames -tssession; # Might need it
+        lassign [my _retrieve $propnames 0 $id] status propnames recs
+        if {$status eq "updated" && [dict exists $recs $id]} {
+            return [dict get $recs $id]
         }
-
-        if {"-description" in $propnames} {
-            set want_desc 1
-            if {"-path" ni $propnames} {
-                lappend propnames -path
-            }
-            # -description not supported by get_process_info
-            set propnames [lsearch -inline -exact -all -not $propnames -description]
-        } else {
-            set want_desc 0
-        }
-
-        # -groups can cause error if domain unreachable so
-        # use -groupattrs.
-        if {"-groups" in $propnames} {
-            # -groups can cause error if domain unreachable so
-            # use -groupattrs.
-            set propnames [lsearch -inline -exact -all -not $propnames -groups]
-            lappend propnames -groupattrs
-            set want_groups 1
-        } else {
-            set want_groups 0
-        }
-
-        # Ditto for -restrictedgroups
-        if {"-restrictedgroups" in $propnames} {
-            set propnames [lsearch -inline -exact -all -not $propnames -restrictedgroups]
-            lappend propnames -restrictedgroupattrs
-            set want_restrictedgroups 1
-        } else {
-            set want_restrictedgroups 0
-        }
-
-        # We always make this call to check pid even if $propnames is empty
-        set rec [twapi::get_process_info $id -noaccess $_unknown_token -noexist "" -pid {*}$propnames]
-
-        if {[dict get $rec -pid] eq ""} {
-            error "The specified process does not exist or is inaccessible."
-        }
-
-        if {[dict exists $rec -logonsession] &&
-            [dict get $rec -logonsession] eq $_unknown_token &&
-            [dict exists $rec -tssession]} {
-            dict set rec -logonsession [my map_tssession_to_logonsession [dict get $rec -tssession]]
-        }
-
-        if {$want_groups} {
-            dict set rec -groups {}
-            foreach {sid attrs} [dict get $rec -groupattrs] {
-                set gname $sid
-                catch {set gname [wits::app::sid_to_name $sid]}
-                dict lappend rec -groups $gname
-            }
-            dict unset rec -groupattrs
-        }
-        if {$want_restrictedgroups} {
-            dict set rec -restrictedgroups {}
-            foreach {sid attrs} [dict get $rec -restrictedgroupattrs] {
-                set gname $sid
-                catch {set gname [wits::app::sid_to_name $sid]}
-                dict lappend rec -restrictedgroups $gname
-            }
-            dict unset rec -restrictedgroupattrs
-        }
-
-        if {$want_desc} {
-            dict set rec -description [wits::app::process_path_to_version_description [dict get $rec -path]]
-        }
-
-        return $rec
+        return {}
     }
 
-    method _retrieve {propnames force} {
-
+    method _retrieve {propnames force {matchpid -1}} {
         # Always get base properties
-        set new [twapi::Twapi_GetProcessList -1 31]
+        set new [twapi::Twapi_GetProcessList $matchpid 31]
         set retrieved_properties [twapi::recordarray fields $new]
-        set new [twapi::recordarray getdict [twapi::Twapi_GetProcessList -1 31] -format dict -key -pid]
+        set new [twapi::recordarray getdict $new -format dict -key -pid]
 
         # Check if we need CPU%
-        if {[lsearch -glob $propnames *Percent]} {
+        if {[lsearch -glob $propnames *Percent] >= 0} {
             # If we get one, we get all 3
             lappend retrieved_properties CPUPercent UserPercent KernelPercent
 
@@ -340,12 +268,10 @@ oo::class create wits::app::process::Objects {
             if {$elapsed == 0} {
                 # Can happen if called quickly before clock has clicked.
                 # In this case use the old values if present
-                dict for {pid rec} $_records {
-                    if {[dict exists $new $pid]} {
-                        foreach field {KernelPercent UserPercent CPUPercent} {
-                            if {[dict exists $rec $field]} {
-                                dict set new $pid $field [dict get $rec $field]
-                            }
+                dict for {pid rec} $new {
+                    foreach field {KernelPercent UserPercent CPUPercent} {
+                        if {[dict exists $_records $pid $field]} {
+                            dict set new $pid $field [dict get $_records $pid $field]
                         }
                     }
                 }
@@ -440,7 +366,11 @@ oo::class create wits::app::process::Objects {
             }
 
 
-            set optvals [twapi::recordarray getdict [twapi::get_multiple_process_info -noaccess $_unknown_token {*}$opts] -key -pid -format dict]
+            if {$matchpid == -1} {
+                set optvals [twapi::recordarray getdict [twapi::get_multiple_process_info -noaccess $_unknown_token {*}$opts] -key -pid -format dict]
+            } else {
+                set optvals [twapi::recordarray getdict [twapi::get_multiple_process_info -noaccess $_unknown_token {*}$opts -matchpids [list $matchpid]] -key -pid -format dict]
+            }
 
             # Do not just merge, we want a consistent view so only
             # pick up entries that existed in above call
