@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2011, Ashok P. Nadkarni
+# Copyright (c) 2006-2014, Ashok P. Nadkarni
 # All rights reserved.
 #
 # See the file LICENSE for license
@@ -28,10 +28,9 @@ namespace eval wits::app::user {
             {
                 "General" {
                     frame {
-                        {label name}
-                        {label full_name}
-                        {textbox comment}
-                        {label user_id}
+                        {label -name}
+                        {label -full_name}
+                        {textbox -comment}
                         {label -sid}
                         {label -domain}
                         {label -type}
@@ -41,7 +40,7 @@ namespace eval wits::app::user {
             {
                 "Groups and Privileges" {
                     {labelframe {title "Groups"}} {
-                        {label primary_group_id}
+                        {label -primary_group_id}
                         {listbox -local_groups}
                         {listbox -global_groups}
                     }
@@ -53,26 +52,26 @@ namespace eval wits::app::user {
             {
                 "Profile" {
                     frame {
-                        {label profile}
-                        {label script_path}
-                        {label code_page}
-                        {label country_code}
-                        {label home_dir_drive}
-                        {label home_dir}
-                        {label max_storage}
+                        {label -profile}
+                        {label -script_path}
+                        {label -code_page}
+                        {label -country_code}
+                        {label -home_dir_drive}
+                        {label -home_dir}
+                        {label -max_storage}
                     }
                 }
             }
             {
                 "Logon" {
                     frame {
-                        {label status}
-                        {label logon_server}
-                        {label password_age}
-                        {label acct_expires}
-                        {label last_logon}
-                        {label last_logoff}
-                        {label bad_pw_count}
+                        {label -status}
+                        {label -logon_server}
+                        {label -password_age}
+                        {label -acct_expires}
+                        {label -last_logon}
+                        {label -last_logoff}
+                        {label -bad_pw_count}
                     }
                 }
             }
@@ -106,31 +105,30 @@ proc wits::app::user::get_property_defs {} {
         set _property_defs [dict create]
 
         foreach {propname desc shortdesc objtype format useintable netenumlevel} {
-            name             "Account" "Account" ::wits::app::user text true 0
-            full_name        "Full name" "Full Name" "" text true 2
-            comment          "Description" "Description" "" text true 1
-            user_id          "User Id" "User Id" "" text true 3
+            -name             "Account" "Account" ::wits::app::user text true 0
+            -full_name        "Full name" "Full Name" "" text true 2
+            -comment          "Description" "Description" "" text true 1
             -sid              "Security identifier" "SID" "" text true -1
             -domain           "Account domain" "Domain" "" text true -1
             -type             "Account type" "Type" "" text true -1
-            primary_group_id "Primary group" "Primary group" "" int true 3
+            -primary_group_id "Primary group" "Primary group" "" int true 3
             -local_groups     "Local groups" "Local groups" ::wits::app::group listtext false -1
             -global_groups    "Global groups" "Global groups" ::wits::app::group listtext false -1
             -rights           "Account rights" "Rights" "" listtext false -1
-            profile          "Profile" "Profile" IOFile path true 3
-            script_path      "Logon script" "Logon script" IOFile path true 1
-            code_page        "Code page" "Code page" "" text true 2
-            country_code     "Country code" "Country" "" text true 2
-            home_dir_drive   "Home drive" "Home drive" "" text true 3
-            home_dir         "Home directory" "Home directory" IOFile path true 1
-            max_storage      "Disk quota" "Disk quota" "" mb true 2
-            logon_server     "Logon server" "Logon server" "" text true 2
-            password_age     "Password age" "Password age" "" interval true 1
-            acct_expires     "Account expiration" "Expiration" "" secs1970 true 2
-            last_logon       "Last logon time" "Last logon" "" secs1970 true 2
-            last_logoff      "Last logoff time" "Last logoff" "" secs1970 true 2
-            bad_pw_count     "Logon failures" "Logon failures" "" int true 2
-            status           "Account status" "Status" "" text true 1
+            -profile          "Profile" "Profile" IOFile path true 3
+            -script_path      "Logon script" "Logon script" IOFile path true 1
+            -code_page        "Code page" "Code page" "" text true 2
+            -country_code     "Country code" "Country" "" text true 2
+            -home_dir_drive   "Home drive" "Home drive" "" text true 3
+            -home_dir         "Home directory" "Home directory" IOFile path true 1
+            -max_storage      "Disk quota" "Disk quota" "" mb true 2
+            -logon_server     "Logon server" "Logon server" "" text true 2
+            -password_age     "Password age" "Password age" "" interval true 1
+            -acct_expires     "Account expiration" "Expiration" "" secs1970 true 2
+            -last_logon       "Last logon time" "Last logon" "" secs1970 true 2
+            -last_logoff      "Last logoff time" "Last logoff" "" secs1970 true 2
+            -bad_pw_count     "Logon failures" "Logon failures" "" int true 2
+            -status           "Account status" "Status" "" text true 1
         } {
             dict set _property_defs $propname \
                 [dict create \
@@ -148,13 +146,13 @@ proc wits::app::user::get_property_defs {} {
         # Add in the ones that need custom formatting
 
         # Need status mapping because get_user_account_info returns uncapitalized
-        dict set _property_defs status displayformat {
+        dict set _property_defs -status displayformat {
             map {enabled Enabled disabled Disabled locked Locked}
         }
-        dict set _property_defs code_page displayformat {map {0 {System default}}}
-        dict set _property_defs country_code displayformat {map {0 {System default}}}
-        dict set _property_defs max_storage displayformat {map {0 {No limit}}}
-        dict set _property_defs logon_server displayformat [list map [list "\\\\*" "Local system"]]
+        dict set _property_defs -code_page displayformat {map {0 {System default}}}
+        dict set _property_defs -country_code displayformat {map {0 {System default}}}
+        dict set _property_defs -max_storage displayformat {map {0 {No limit}}}
+        dict set _property_defs -logon_server displayformat [list map [list "\\\\*" "Local system"]]
 
         # TBD - property to indicate if currently logged in
     }
@@ -190,7 +188,7 @@ oo::class create wits::app::user::Objects {
                 -rights {
                     dict set result -rights [twapi::get_account_rights $sid -system $system]
                 }
-                name -
+                -name -
                 -domain -
                 -type {
                     # Already set via get_sid_info above
@@ -230,7 +228,7 @@ oo::class create wits::app::user::Objects {
                 if {$netenum_level < $::wits::app::user::_property_netenum_level($propname)} {
                     set netenum_level $::wits::app::user::_property_netenum_level($propname)
                 }
-                if {$propname eq "status"} {
+                if {$propname eq "-status"} {
                     set map_status 1
                 }
             } else {
@@ -254,30 +252,30 @@ oo::class create wits::app::user::Objects {
 
         set recs {}
 
-        foreach elem [twapi::get_users -level $netenum_level] {
-            set name [dict get $elem name]
+        foreach elem [twapi::recordarray getlist [twapi::get_users -level $netenum_level] -format dict] {
+            set name [dict get $elem -name]
             set sid  [name_to_sid $name]
             dict set recs $sid $elem
             dict set recs $sid -sid $sid
             if {$map_status} {
-                set flags [dict get $recs $sid flags]
+                set flags [dict get $recs $sid -flags]
                 # UF_LOCKOUT -> 0x10, UF_ACCOUNTDISABLE -> 0x2
                 if {$flags & 0x2} {
-                    dict set recs $sid status "disabled"
+                    dict set recs $sid -status "Disabled"
                 } elseif {$flags & 0x10} {
-                    dict set recs $sid status "locked"
+                    dict set recs $sid -status "Locked"
                 } else {
-                    dict set recs $sid status "enabled"
+                    dict set recs $sid -status "Enabled"
                 }
             }
             if {$need_lookup_account_sid} {
                 dict set recs $sid [dict merge [dict get $recs $sid] [get_sid_info $sid]]
             }
             if {$need_local_groups} {
-                dict set recs $sid -local_groups [twapi::kl_flatten [lindex [twapi::NetUserGetLocalGroups "" $name 0 0] 3] name]
+                dict set recs $sid -local_groups [twapi::get_user_local_groups $name]
             }
             if {$need_global_groups} {
-                dict set recs $sid -global_groups [twapi::kl_flatten [lindex [twapi::NetUserGetGroups "" $name 0] 3] name]
+                dict set recs $sid -global_groups [twapi::get_user_global_groups $name -all]
             }
             if {$need_rights} {
                 # TBD - optimize by copying contents of get_account_rights
@@ -312,11 +310,11 @@ proc wits::app::user::viewlist {args} {
                               [list wintool "Windows user administration tool" $winlogoimg] \
                              ] \
                 -popupmenu [concat [list {enable Enable} {disable Disable} -] [widget::propertyrecordslistview standardpopupitems]] \
-                -displaycolumns {name full_name comment status} \
-                -colattrs {full_name {-squeeze 1} comment {-squeeze 1}} \
-                -detailfields {full_name user_id -sid status home_dir -domain last_logon password_age} \
-                -nameproperty "name" \
-                -descproperty "comment" \
+                -displaycolumns {-name -full_name -comment -status} \
+                -colattrs {-full_name {-squeeze 1} -comment {-squeeze 1}} \
+                -detailfields {-full_name -sid -status -home_dir -domain -last_logon -password_age} \
+                -nameproperty "-name" \
+                -descproperty "-comment" \
                 {*}$args \
                ]
 }
@@ -352,7 +350,7 @@ proc wits::app::user::listviewhandler {viewer act objkeys} {
                 -title "Users (Enabled)" \
                 -disablefilter 0 \
                 -filter [util::filter create \
-                             -properties {status {condition "!= Disabled"}}]
+                             -properties {-status {condition "!= Disabled"}}]
         }
         default {
             standardactionhandler $viewer $act $objkeys
