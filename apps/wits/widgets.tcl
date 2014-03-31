@@ -2648,6 +2648,7 @@ snit::widgetadaptor wits::widget::busybar {
     }
 
     method _settext {opt val} {
+        catch {set val [twapi::get_security_descriptor_text $val]}
         set options($opt) $val
         if {$_textdlg ne ""} {
             $_textdlg configure -text $val
