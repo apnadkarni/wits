@@ -3819,7 +3819,7 @@ snit::widgetadaptor wits::widget::balloon {
         set myreqheight [winfo reqheight $win]
 
 
-        if {$side ni {top bottom left right}} {
+        if {$side ni {center centre top bottom left right}} {
             # Place above if possible, else below
             if {$myheight < $wy} {
                 # Enough room above the widget
@@ -3834,6 +3834,8 @@ snit::widgetadaptor wits::widget::balloon {
         }
 
         switch -exact -- $side {
+            centre -
+            center { util::center_window $win $w }
             top {
                 set x $wx
                 set y [expr {$wy - $myheight}]
@@ -3856,25 +3858,28 @@ snit::widgetadaptor wits::widget::balloon {
             }
         }
 
-        # Keep us within the screen, but only adjust in one axis
-        # The routine only gurantees full visibility if a specific
-        # $side is not specified.
-        if {$adjust eq "x"} {
-            if {$x < 0} {
-                set x 0
-            } elseif {($x + $mywidth) > $screenx} {
-                set x [expr {$screenx - $mywidth}]
+        if {$side ni {center centre}} {
+            # Keep us within the screen, but only adjust in one axis
+            # The routine only guarantees full visibility if a specific
+            # $side is not specified.
+            if {$adjust eq "x"} {
+                if {$x < 0} {
+                    set x 0
+                } elseif {($x + $mywidth) > $screenx} {
+                    set x [expr {$screenx - $mywidth}]
+                }
+            } else {
+                if {$y < 0} {
+                    set y 0
+                } elseif {($y + $myheight) > $screeny} {
+                    set y [expr {$screeny - $myheight}]
+                }
             }
-        } else {
-            if {$y < 0} {
-                set y 0
-            } elseif {($y + $myheight) > $screeny} {
-                set y [expr {$screeny - $myheight}]
-            }
+            wm geometry $win +$x+$y
         }
 
-        wm geometry $win +$x+$y
         wm deiconify $win
+        raise $win
         return
     }
 
