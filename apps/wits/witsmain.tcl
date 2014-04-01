@@ -1718,6 +1718,13 @@ proc wits::app::viewlist {objtype args} {
                  -popupcommand $opts(popupcommand) \
                  -popupmenu $opts(popupmenu) \
                  {*}$args ]
+
+        if {![prefs getbool TipShown Views/listview]} {
+            set text "Use the table editor to add/remove columns.\n\nFilter data based on column values.\n\nDrag column headers to change order.\n\nExport data to the clipboard or file.[tip_morehelp_url listview.html {and more...}]"
+
+            show_window_tip $text "List View Tips" $view
+            prefs setitem TipShown Views/listview 1 true
+        }
     } finally {
         if {[info exists bb] && [winfo exists $bb]} {
             if {[info exists view]} {

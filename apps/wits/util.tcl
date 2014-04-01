@@ -1545,6 +1545,32 @@ proc util::to_clipboard {text} {
 }
 
 
+# From Sean Woods on the Tcl chat
+proc util::center_window {w {parent {}}} {
+  ::update
+  set ww [winfo reqwidth $w]
+  set wh [winfo reqheight $w]
+  if {$parent==""} {
+    set px 0
+    set py 0
+    set pw [winfo screenwidth .]
+    set ph [winfo screenheight .]
+    if {$pw>$ph*1.25} {set pw [expr {int($ph*1.25)}]}
+    if {$ph>$pw*1.25} {set ph [expr {int($pw*1.25)}]}
+  } else {
+    set px [winfo rootx $parent]
+    set py [winfo rooty $parent]
+    set pw [winfo width $parent]
+    set ph [winfo height $parent]
+  }
+  set x [expr {$px+($pw-$ww)/2}]
+  set y [expr {$py+($ph-$wh)/2}]
+  if {$x<0} {set x 0}
+  if {$y<0} {set y 0}
+  wm geometry $w +$x+$y
+  raise $w
+}
+
 
 # TBD - remove these two procs
 proc util::tile_set_style_default {style attr val} {
