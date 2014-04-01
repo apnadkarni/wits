@@ -3597,7 +3597,7 @@ snit::widgetadaptor wits::widget::tipoftheday {
         install _htextw using [namespace parent]::htext $f.ht \
             -font $tipfont \
             -background $background \
-            -width 40 -height 10
+            -width 40 -height 12
 
         ::ttk::style configure "WitsTip.TCheckbutton" -background $background -font WitsDefaultFont
         ::ttk::style configure "WitsTip.TButton" -background $background
@@ -3658,8 +3658,10 @@ snit::widgetadaptor wits::widget::tipoftheday {
         pack forget $_titlesepw $_iconw $_htextw $_cbw $_btnf $_sepw
 
         pack $_titlesepw -side top -fill x -expand false -padx 5 -pady 5
-        pack $_btnf -side bottom -fill x -expand false -padx 5 -pady 5
-        pack $_sepw -side bottom -fill x -expand false -padx 5 -pady 5
+        if {$options(-command) ne ""} {
+            pack $_btnf -side bottom -fill x -expand false -padx 5 -pady 5
+            pack $_sepw -side bottom -fill x -expand false -padx 5 -pady 5
+        }
         if {$options(-checkboxvar) ne ""} {
             pack $_cbw -expand false -fill x -padx 10 -pady 10 -side bottom
         }
@@ -3910,8 +3912,6 @@ snit::widgetadaptor wits::widget::balloon {
     delegate method * to hull
 }
 
-
-            
 
 # Shows a swapbox dialog. Extends the tklib swaplist::swaplist package
 # to include two additional checkboxes
@@ -7284,9 +7284,12 @@ snit::widget wits::widget::htext {
         $_textw tag config italic -font "$font -slant italic"
         $_textw tag config bold   -font "$font -weight bold"
         $_textw tag config plain  -font WitsDefaultFont
-        $_textw tag config dtx    -lmargin1 20 -lmargin2 20
-        # TBD - show real bullets
-        $_textw tag config bullet -font {Courier 8 bold} -offset 3 -lmargin1 10
+        # Calc bullet offsets
+        set off 10
+        incr off [font measure WitsDefaultFont "\u2022 "]
+        $_textw tag config dtx  -lmargin1 $off -lmargin2 $off
+        # $_textw tag config bullet -font {Courier 10 bold} -offset 3 -lmargin1 10
+        $_textw tag config bullet -offset 3 -lmargin1 10
 
         pack $_scroller -fill both -expand yes -padx 0 -pady 0
 
@@ -7320,10 +7323,12 @@ snit::widget wits::widget::htext {
         }
 
         set var 0
-        set dtx {}
+        set dtx {};             # dtx == "dtx" when processing a list element
         foreach i [split $options(-text) \n] {
-            if { ![string compare $dtx {}] } {
+            if {[string equal $dtx {}] } {
+                # Not in a list and...
                 if [regexp {^[ \t]+} $i] {
+                    # ...indented line -> literal line
                     $_textw ins end $i\n fix
                     set var 0
                     continue
@@ -7331,18 +7336,21 @@ snit::widget wits::widget::htext {
             }
             set i [string trim $i]
 
-            if { ![string length $i] } {
+            if {[string length $i] == 0} {
+                # Blank line - terminate previous block
                 $_textw ins end "\n" plain
                 if { $var } { $_textw ins end "\n" plain }
-                set dtx {}
+                set dtx {};     # Mark no longer in list element
                 continue
             }
 
             if { [regexp {^[*] (.*)} $i -> i] } {
+                # Start of list element
                 if { !$var || [string compare $dtx {}] } {
-                    $_textw ins end \n plain }
-                $_textw ins end "o " bullet
-                set dtx dtx
+                    $_textw ins end \n plain 
+                }
+                $_textw ins end "\u2022 " bullet
+                set dtx dtx;    # Mark now in list element
             }
 
             set var 1

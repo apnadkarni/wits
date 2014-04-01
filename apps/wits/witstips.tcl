@@ -25,12 +25,12 @@ namespace eval ::wits::app {
             return "\[{${url}} {$text}\]"
         }
     }
-    proc tip_morehelp_url {page {link_text "More information"}} {
+    proc tip_morehelp_url {page {link_text "More information"} {sep \n\n}} {
         if {$page eq "TBD"} {
             return ""
         } else {
             # TBD - change to version specific page
-            return \n\n[tip_url $link_text $::wits::app::wwwHomeVersionPage/$page]
+            return "$sep[tip_url $link_text $::wits::app::wwwHomeVersionPage/$page]"
         }
     }
 
@@ -46,22 +46,23 @@ namespace eval ::wits::app {
              [list "System tray menu" "Right clicking the WiTS icon in the system tray will bring up a menu that provides access to almost all the WiTS functions.\n\nYou can also assign a [tip_url {hotkey} wits://wits/app/configure_preferences Hotkeys] to bring up the menu."] \
              [list "Quick access using hot keys" "WiTS views can be quickly accessed even from other applications through the use of hotkeys. You can [tip_url {configure hotkeys} wits://wits/app/configure_preferences Hotkeys] through the preferences editor.[tip_morehelp_url hotkey.html]"] \
              [list "Customizing list views" "List views show properties of multiple objects in table form. You can customize the layout of any list view including the properties displayed in the table columns and their order.[tip_morehelp_url listcolumns.html]"] \
+             [list "Filtering data" "The first row in a list view allows you to set a filter expression for every column. The view will only display data that matches all the specified filters. [tip_morehelp_url listfilters.html]"] \
              [list "Navigating between objects" "WiTS displays references to objects as hyperlinks in list views, property page views as well as the event monitor making it easy to navigate between related objects.[tip_morehelp_url navigation.html]"] \
              [list "Monitor the system" "The WiTS [tip_url {event monitor} wits://wits/app/showeventviewer] can display messages for various system events such as process startup, new user logons, shortage of system resources etc.. You can [tip_url {configure the categories} wits://wits/app/configure_preferences {Event Monitor}] monitored through the preferences editor.[tip_morehelp_url eventmonitor.html]"] \
+             [list "Keeping the event monitor visible" "You can configure the WiTS [tip_url {event monitor} wits://wits/app/showeventviewer] window to be always on top of other windows so that it is always visible.[tip_morehelp_url eventmonitor.html]"] \
+             [list "Resource monitoring false alarms" "If you are getting false alarms in the event monitor relating to low system resources, you can [tip_url {configure the thresholds} wits://wits/app/configure_preferences {Event Monitor}] at which these events are triggered.[tip_morehelp_url eventmonitorpreferences.html]"] \
+             [list "Automatically starting the event monitor" "The WiTS [tip_url {event monitor} wits://wits/app/showeventviewer] can be automatically displayed every time WiTS starts up. You can configure this through the [tip_url {preferences editor} wits://wits/app/configure_preferences].[tip_morehelp_url TBD]"] \
              [list "Hiding and restoring views" "Open WiTS views can be collectively hidden and restored quickly either through the WiTS system tray menu or by [tip_url {assigning a hotkey} wits://wits/app/configure_preferences Hotkeys]."] \
              [list "WiTS command line" "The command entry field in the main WiTS window allows entry of WiTS internal commands as well as external programs. You can [tip_url {assign a hotkey} wits://wits/app/configure_preferences Hotkeys] to the main WiTS window for quick access to the command entry.[tip_morehelp_url usercmd.html]"] \
              [list "WiTS internal commands" "WiTS internal commands allow convenient ways to deal with multiple objects. For example,\n   list svchost\nshows all svchost processes in a list view and\n   end notepad\nterminates all notepad processes. [tip_morehelp_url usercmd.html]"] \
-             [list "Resource monitoring false alarms" "If you are getting false alarms in the event monitor relating to low system resources, you can [tip_url {configure the thresholds} wits://wits/app/configure_preferences {Event Monitor}] at which these events are triggered.[tip_morehelp_url eventmonitorpreferences.html]"] \
-             [list "Automatically starting the event monitor" "The WiTS [tip_url {event monitor} wits://wits/app/showeventviewer] can be automatically displayed every time WiTS starts up. You can configure this through the [tip_url {preferences editor} wits://wits/app/configure_preferences].[tip_morehelp_url TBD]"] \
              [list "Logging events to a file" "You can [tip_url configure wits://wits/app/configure_preferences {Event Monitor}] the WiTS [tip_url {event monitor} wits://wits/app/showeventviewer] to log all events to a file. You can also save the currently displayed events to a file.[tip_morehelp_url eventmonitorlogging.html]"] \
-             [list "Keeping the event monitor visible" "You can configure the WiTS [tip_url {event monitor} wits://wits/app/showeventviewer] window to be always on top of other windows so that it is always visible.[tip_morehelp_url eventmonitor.html]"] \
              [list "Automatically closing the main window" "You can [tip_url configure wits://wits/app/configure_preferences] WiTS to automatically iconify the main window when a command is selected or entered through the command entry field.[tip_morehelp_url TBD]"] \
              [list "Refreshing list views" "The data in list views is automatically refreshed. You can change the refresh rate or turn it off altogether.[tip_morehelp_url listview.html]"] \
              [list "Exporting list views" "You can export the currently displayed data in any list view using the right-click menu in the view.[tip_morehelp_url listview.html]"] \
             ]
 }
 
-proc ::wits::app::show_tipoftheday {{startingup false}} {
+proc ::wits::app::show_tipoftheday {{startingup false} {tipkey {}}} {
     variable tipW
     variable currentTipIndex
     variable tips
@@ -91,13 +92,10 @@ proc ::wits::app::show_tipoftheday {{startingup false}} {
         wm deiconify $tipW
     }
 
-
     if {$currentTipIndex < 0} {
         # Show last tip
-        set currentTipIndex [llength $tips]
-        incr currentTipIndex -1
+        set currentTipIndex [expr {[llength $tips]-1}]
     } elseif {$currentTipIndex >= [llength $tips]} {
-        # Show first tip
         set currentTipIndex 0
     }
 
@@ -113,6 +111,18 @@ proc ::wits::app::show_tipoftheday {{startingup false}} {
 
     # Remember tip for next startup
     prefs setitem "NextTip" "General" $currentTipIndex true
+}
+
+proc ::wits::app::show_window_tip {text title {w ""}} {
+
+    catch {destroy .tiptemp}
+    ::wits::widget::tipoftheday .tiptemp \
+        -icon [images::get_icon48 witslogo] \
+        -linkcommand ::wits::app::tipoftheday_link_handler \
+        -title $title
+    .tiptemp configure -tip $text
+    util::center_window .tiptemp $w
+    after 100 raise .tiptemp; # else it shows behind the window
 }
 
 # Callback to handle tip window buttons
