@@ -1438,6 +1438,7 @@ proc ::wits::app::make_command_link {command args} {
 
 proc ::wits::app::get_objects {objtype args} {
     if {[llength [info commands ${objtype}::objects]] == 0} {
+puts "CREATING NEW"
         ${objtype}::Objects create ${objtype}::objects {*}$args
     }
     return ${objtype}::objects
@@ -1909,6 +1910,7 @@ proc ::wits::app::main {} {
     array set opts [twapi::parseargs cmdargs {
         iconify
         killall
+        noelevate
     }]
 
     if {$opts(killall)} {
@@ -1931,7 +1933,7 @@ proc ::wits::app::main {} {
     # then elevate
     if {[twapi::process_in_administrators]} {
         # If on Vista or later, check if we are running with full privileges
-        if {[twapi::min_os_version 6]} {
+        if {[twapi::min_os_version 6] && ! $opts(noelevate) } {
             if {[twapi::get_process_elevation] eq "limited"} {
                 # Ask user whether to elevate
                 set answer [wits::widget::showconfirmdialog \
