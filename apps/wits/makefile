@@ -102,7 +102,7 @@ witslibraries: "$(VFSDIR)\lib\snit-$(SNITVER)" \
 	copy "$(THIRDPARTYDIR)\struct-2.2.3\sets_tcl.tcl" $@
 
 
-TREECTRLDIR=$(THIRDPARTYDIR)\treectrl-2.4.1\$(PLATFORM)
+TREECTRLDIR=$(THIRDPARTYDIR)\treectrl-2.4.2\$(PLATFORM)
 
 "$(VFSDIR)\lib\treectrl": 
 	-mkdir $@
