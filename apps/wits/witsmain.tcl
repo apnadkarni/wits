@@ -1438,7 +1438,6 @@ proc ::wits::app::make_command_link {command args} {
 
 proc ::wits::app::get_objects {objtype args} {
     if {[llength [info commands ${objtype}::objects]] == 0} {
-puts "CREATING NEW"
         ${objtype}::Objects create ${objtype}::objects {*}$args
     }
     return ${objtype}::objects
