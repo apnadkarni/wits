@@ -129,6 +129,7 @@ oo::class create wits::app::wineventlog::Objects {
         set ns [namespace qualifier [self class]]
         namespace path [concat [namespace path] [list $ns [namespace parent $ns]]]
 
+        array set _hevents {}
         set _events [dict create]
 
         # Flat list of timestamp, event key used for traversing forward
@@ -146,6 +147,7 @@ oo::class create wits::app::wineventlog::Objects {
             twapi::winlog_close $h
         }
         # Free up data so that purging the atom cache is effective
+        # Freeing it up as part of object namespace would be too late
         unset -nocomplain _events
         unset -nocomplain _ordered_events
         twapi::purge_atoms
