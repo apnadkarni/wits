@@ -5928,7 +5928,10 @@ snit::widgetadaptor wits::widget::listframe {
                 # to move it to the top. Also, need to do this after
                 # a delay so that the treectrl has updated, else
                 # top does not show for whatever reason.
-                after 100 [mymethod  showtop]
+
+                # Now commented out because this problem seems
+                # fixed in treectrl 2.4.2
+                #after 100 [mymethod  showtop]
             }
         }
 
@@ -6401,11 +6404,6 @@ snit::widgetadaptor wits::widget::listframe {
                               -text "Freeze" \
                               -variable [myvar _freezedisplay]]
 
-        if {[info exist lstatus]} {
-            pack $lstatus -side left -expand no -fill none -padx 1
-            pack [::ttk::separator $_statusframe.sep2 -orient vertical] -expand no -fill y -padx 1 -side left
-        }
-
         pack [::ttk::sizegrip $_statusframe.grip] -side right -anchor se
         pack $cbfreezemode -side right -expand no -fill none -padx 1
         pack $refreshb -expand no -fill x -padx 10 -side right
@@ -6413,6 +6411,11 @@ snit::widgetadaptor wits::widget::listframe {
         pack $refreshl -expand no -fill x -padx 1 -side right
         pack [::ttk::separator $_statusframe.sep1 -orient vertical] -expand no -fill y -padx 1 -side right
         pack $mbdisplaymode -side right -expand no -fill none -padx 1
+        if {[info exist lstatus]} {
+            pack $lstatus -side left -expand no -fill none -padx 1
+            pack [::ttk::separator $_statusframe.sep2 -orient vertical] -expand no -fill y -padx 1 -side left
+        }
+
 
         set padx 10
         set pady 10
