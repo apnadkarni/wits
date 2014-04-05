@@ -373,8 +373,13 @@ oo::class create wits::app::process::Objects {
             }
 
             # Do not just merge, we want a consistent view so only
-            # pick up entries that existed in above call
+            # pick up entries that existed in above call. For same reason
+            # drop any entries that no longer exist
             dict for {pid rec} $new {
+                if {![dict exists $optvals $pid]} {
+                    dict unset new $pid
+                    continue
+                }
                 if {$want_desc} {
                     dict set rec -description [wits::app::process_path_to_version_description [dict get $optvals $pid -path]]
                 }
