@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2011, Ashok P. Nadkarni
+# Copyright (c) 2006-2014, Ashok P. Nadkarni
 # All rights reserved.
 #
 # See the file LICENSE for license
@@ -25,98 +25,6 @@ namespace eval wits::app::netif {
                          [list wintool "Windows" $winlogoimg "Windows network interfaces tool"] \
                         ]
 
-        # IPv4 LAYOUT
-
-        # -laststatus removed from below because time is in some funky offset
-        # in centaseconds from Jan 1, 1601 and I don't have the date time
-        # routines to calculate from 1601
-        # -adminstatus removed because right now we can only show enabled
-        # adapters (do not know how to list unknown adapters)
-        set nbpages {
-            {
-                "General" {
-                    frame {
-                        {label -ifname}
-                        {textbox -description}
-                        {label -ipversion}
-                        {label -ifindex}
-                        {label -operstatus}
-                    }
-                    {labelframe {title "Adapter"}} {
-                        {label -adaptername}
-                        {label -type}
-                        {label -physicaladdress}
-                        {label -speed}
-                        {label -mtu}
-                        {label -reassemblysize}
-                    }
-                }
-            }
-            {
-                "Addresses" {
-                    frame {
-                        {listbox -ipaddresses}
-                        {label -defaultgateway}
-                    }
-                    {labelframe {title DHCP}} {
-                        {label -dhcpenabled}
-                        {label -autoconfigenabled}
-                        {label -autoconfigactive}
-                        {label -dhcpserver}
-                        {label -dhcpleasestart}
-                        {label -dhcpleaseend}
-                    }
-                }
-            }
-            {
-                "Name servers" {
-                    {labelframe {title "DNS"}} {
-                        {listbox -dnsservers}
-                    }
-                    {labelframe {title "WINS"}} {
-                        {label   -havewins}
-                        {label   -primarywins}
-                        {label   -secondarywins}
-                    }
-                }
-            }
-            {
-                "Statistics" {
-                    {labelframe {title "Incoming" cols 2}} {
-                        {label -inbytes}
-                        {label -indiscards}
-                        {label -inerrors}
-                        {label -innonunicastpkts}
-                        {label -inunicastpkts}
-                        {label -inunknownprotocols}
-                    }
-                    {labelframe {title "Outgoing" cols 2}} {
-                        {label -outbytes}
-                        {label -outdiscards}
-                        {label -outerrors}
-                        {label -outnonunicastpkts}
-                        {label -outunicastpkts}
-                        {label -outqlen}
-                    }
-                }
-            }
-        }
-
-        set buttons {
-            "Close" "destroy"
-        }
-
-        # IPv4 page layout
-        set _page_view_layout(4) \
-            [list \
-                 "Main Title - replaced at runtime" \
-                 $nbpages \
-                 $actions \
-                 $buttons]
-
-
-        # IPv6 LAYOUT
-
         # TBD - -zoneindices
         # TBD - various flags in addresses list
         # TBD - -prefixes
@@ -126,23 +34,21 @@ namespace eval wits::app::netif {
                     frame {
                         {label -friendlyname}
                         {textbox -description}
-                        {label -ipversion}
+                        {label -adaptername}
+                        {label -ipv4ifindex}
                         {label -ipv6ifindex}
                         {label -operstatus}
-                    }
-                    {labelframe {title Adapter}} {
-                        {label -adaptername}
                         {label -type}
-                        {label -physicaladdress}
                     }
                 }
             }
             {
                 "Addresses" {
                     frame {
-                        {listbox -unicastaddrs}
-                        {listbox -multicastaddrs}
-                        {listbox -anycastaddrs}
+                        {label -physicaladdress}
+                        {listbox -unicastaddresses}
+                        {listbox -multicastaddresses}
+                        {listbox -anycastaddresses}
                     }
                     {labelframe {title DHCP}} {
                         {label -dhcpenabled}
@@ -157,6 +63,23 @@ namespace eval wits::app::netif {
                     }
                 }
             }
+            {
+                "Statistics" {
+                    {labelframe {title "Incoming" cols 2}} {
+                        {label -inpktspersec}
+                        {label -inbytespersec}
+                        {label -indiscards}
+                        {label -inerrors}
+                        {label -inunknownprotocols}
+                    }
+                    {labelframe {title "Outgoing" cols 2}} {
+                        {label -outpktspersec}
+                        {label -outbytespersec}
+                        {label -outdiscards}
+                        {label -outerrors}
+                    }
+                }
+            }
         }
 
         set buttons {
@@ -165,7 +88,7 @@ namespace eval wits::app::netif {
 
 
         # IPv4 page layout
-        set _page_view_layout(6) \
+        set _page_view_layout \
             [list \
                  "Main Title - replaced at runtime" \
                  $nbpages \
@@ -188,53 +111,34 @@ proc wits::app::netif::get_property_defs {} {
         set _property_defs [dict create]
 
         foreach {propname desc shortdesc objtype format} {
-            -ipversion "IP Version" "IP Ver" "" text
-            -ifindex "Interface index" "Index" "" int
-            -ifname "Interface name" "Name" "" text
             -description "Description" "Description" "" text
             -type "Interface type" "Type" "" text
             -operstatus "Status" "Status" "" text
-            -laststatuschange "Last status change time" "Last change" "" text
-            -speed "Link speed" "Speed" "" bps
-            -adapterindex "Adapter index" "Adapter index" "" int
             -adaptername "Adapter name" "Adapter name" "" text
-            -adapterdescription "Adapter description" "Description" "" text
             -physicaladdress "Physical address" "H/W address" "" text
-            -adminstatus "Administrative Status" "Admin status" "" text
-            -autoconfigenabled "Auto-configuration enabled" "Auto-config enabled" "" bool
-            -autoconfigactive "Auto-configuration active" "Auto-config active" "" bool
             -mtu "MTU" "MTU" "" int
-            -reassemblysize "Reassembly size" "Reassembly size" "" int
-            -ipaddresses "IP addresses" "IP addresses" "" listtext
-            -addrs "IP addresses" "IP addresses" "" listtext
-            -defaultgateway "Default gateway address" "Default gateway" "" text
             -dhcpenabled "DHCP Enabled" "DHCP enabled" "" bool
-            -dhcpserver "DHCP Server" "DHCP Server" "" text
-            -dhcpleasestart "DHCP Lease Start" "Lease Start" "" text
-            -dhcpleaseend "DHCP Lease End" "Lease End" "" text
             -dnsservers "DNS servers" "DNS servers" "" listtext
-            -havewins "WINS enabled" "WINS enabled" "" bool
-            -primarywins "Primary WINS server" "Primary WINS" "" text
-            -secondarywins "Secondary WINS server" "Secondary WINS" "" text
-            -inbytes "Bytes received" "Bytes in" "" int
+
+            -inbytespersec "Bytes In/sec" "Bytes in/s" "" int
+            -outbytespersec "Bytes Out/sec" "Bytes out/s" "" int
+            -bytespersec "Bytes/sec" "Bytes/s" "" int
+            -inpktspersec "Packets In/sec" "Packets in/s" "" int
+            -outpktspersec "Packets Out/sec" "Packets out/s" "" int
+            -pktspersec "Packets/sec" "Pkts/s" "" int
             -indiscards "Discards (in)" "Discards in" "" int
             -inerrors "Input errors" "Input errors" "" int
-            -innonunicastpkts "Broad/multi-cast (in)" "Input multicast" "" int
-            -inunicastpkts "Unicast (in)" "Unicast (in)" "" int
             -inunknownprotocols "Unknown protocol" "Unknown protocol" "" int
-            -outbytes "Bytes sent" "Bytes out" "" int
             -outdiscards "Discards (out)" "Discards out" "" int
             -outerrors "Output errors" "Output errors" "" int
-            -outnonunicastpkts "Broad/multi-cast (out)" "Output multicast" "" int
-            -outunicastpkts "Unicasts (out)" "Unicasts (out)" "" int
-            -outqlen "Output queue length" "Output queue" "" int
 
-            -ipv6ifindex "Interface index" "Index" "" int
+            -ipv4ifindex "IPv4 Interface index" "IPv4 Index" "" int
+            -ipv6ifindex "IPv6 Interface index" "IPv6 Index" "" int
             -friendlyname "Display name" "Display name" "" text
             -dnssuffix    "DNS suffix" "DNS suffix" "" text
-            -unicastaddrs "Unicast addresses" "Unicast addresses" "" listtext
-            -anycastaddrs "Anycast addresses" "Anycast addresses" "" listtext
-            -multicastaddrs "Multicast addresses" "Multicast addresses" "" listtext
+            -unicastaddresses "Unicast addresses" "Unicast addresses" "" listtext
+            -anycastaddresses "Anycast addresses" "Anycast addresses" "" listtext
+            -multicastaddresses "Multicast addresses" "Multicast addresses" "" listtext
         } {
             dict set _property_defs $propname \
                 [dict create \
@@ -260,12 +164,6 @@ proc wits::app::netif::get_property_defs {} {
         # IPv4 returns tokens, IPv6 returns numbers
         dict set _property_defs -operstatus displayformat {
             map {
-                "operational"    "Connected"
-                "nonoperational" "Disconnected"
-                "wanunreachable" "Disconnected"
-                "disconnected"   "Disconnected"
-                "wanconnected"   "Connected"
-                "wanconnecting"  "Connecting"
                 1 "Connected"
                 2 "Disconnected"
                 3 "Test mode"
@@ -275,9 +173,6 @@ proc wits::app::netif::get_property_defs {} {
                 7 "Disconnected"
             }
         }
-
-        # Set table properties to only fields common to IPv4 and IPv6
-        set _table_properties {-description -ipversion -type -operstatus -physicaladdress -addrs}
     }
 
     proc [namespace current]::get_property_defs {} {
@@ -292,92 +187,136 @@ proc wits::app::netif::get_property_defs {} {
 oo::class create wits::app::netif::Objects {
     superclass util::PropertyRecordCollection
 
+    variable _hquery;           # PDH query handle
+    variable _adapters;         # Dictionary of adapters keyed by adapter name
+
     constructor {} {
         namespace path [concat [namespace path] [list [namespace qualifiers [self class]]]]
-        next [get_property_defs] -ignorecase 1 -refreshinterval 15000
+        my _setup
+        next [get_property_defs] -ignorecase 1 -refreshinterval 2000
     }
 
     destructor {
         next
+        my discard
     }
 
-    method _get_one {ver ifindex} {
+    method _setup {} {
+        if {[info exists _hquery]} {
+            twapi::pdh_query_close $_hquery
+        }
+        set _hquery [twapi::pdh_query_open]
+
+        set _adapters {}
+        foreach rec [twapi::recordarray getlist [twapi::get_network_interfaces_detail] -format dict] {
+            dict set rec -dhcpenabled [expr {0 != ([dict get $rec -flags] & 0x4)}]
+            foreach addrtype {-dnsservers -unicastaddresses -anycastaddresses -multicastaddresses} {
+                set addrlist {}
+                foreach elem [dict get $rec $addrtype] {
+                    lappend addrlist [dict get $elem -address]
+                }
+                dict set rec $addrtype $addrlist
+            }
+
+            lappend _adapters [string tolower [dict get $rec -adaptername]] $rec
+        }
         
-        if {$ver == 4} {
-            set data [twapi::get_netif_info $ifindex -all]
-            dict set data -ipversion IPv4
+        # Map our property names to PDH counter names
+        # Note all PDH names are lower case as PDH does not care
+        # and this allows us to use them for dict lookups
+        set pdh_counter_map {
+            -inbytespersec "bytes received/sec"
+            -outbytespersec "bytes sent/sec"
+            -bytespersec "bytes total/sec"
+            -inpktspersec "packets received/sec"
+            -outpktspersec "packets sent/sec"
+            -pktspersec "packets/sec"
+            -indiscards "packets received discarded"
+            -inerrors "packets received errors"
+            -inunknownprotocols "packets received unknown"
+            -outdiscards "packets outbound discarded"
+            -outerrors "packets outbound errors"
+        }
 
-            # Convert address and mask
-            set addrs [list ]
-            set ipaddresses [list ]
-            foreach elem [dict get $data -ipaddresses] {
-                lassign $elem ip mask bcast
-                lappend ipaddresses [list $ip mask $mask]
-                lappend addrs $ip
-            }
-            dict set data -ipaddresses $ipaddresses
-            dict set data -addrs       $addrs
-        } else {
-            set data [twapi::get_netif6_info $ifindex -all]
-            dict set data -ipversion IPv6
+        # Not sure whether performance counters will show up under
+        # "Network Interface" or "Network Adapter". Seems to depend
+        # on the specific network adapter and the OS version. Moreover,
+        # the counter name can be either the description field or
+        # the friendly name. Also note these perf objects are not
+        # necessarily present (XP does not seem to have Network Adapter)
 
-            set dnsservers [list ]
-            foreach elem [dict get $data -dnsservers] {
-                lappend dnsservers [dict get $elem -address]
-            }
-            dict set data -dnsservers $dnsservers
-            
-            dict set data -addrs {}
-            foreach addrtype {-unicastaddresses -anycastaddresses -multicastaddresses} opt {-unicastaddrs -anycastaddrs -multicastaddrs} {
-                dict set data $opt [list ]
-                foreach elem [dict get $data $addrtype] {
-                    dict lappend data $opt [dict get $elem -address]
-                    dict lappend data -addrs [dict get $elem -address]
+        # NOTE: much of the code relies on the fact that PDH will
+        # treat passed strings in case-insensitive fashion
+
+        # Build the list of performance counter objects. Map the
+        # counter name and instance to the perf object that provides it
+        set pdh_objects {}
+        foreach pdh_object [lsearch -nocase -inline -regexp -all [pdh_enumerate_objects] {^Network (Interface|Adapter)$}] {
+            set items [twapi::pdh_enumerate_object_items $pdh_object]
+            foreach pdh_ctr_name [lindex $items 0] {
+                set pdh_ctr_name [string tolower $pdh_ctr_name]
+                foreach instance_name [lindex $items 1] {
+                    dict set pdh_objects $pdh_ctr_name [string tolower $instance_name] $pdh_object
                 }
             }
-            dict set data -ipaddresses [dict get $data -addrs]
         }
-        return $data
+
+        # Now go through each adapter. Find out which perf object provides
+        # the counters for that adapter and it to the PDH query
+        # If not found anywhere, the counter is init'ed to 0 and stays that way
+        dict for {adapter_key adapter_item} $_adapters {
+            set adapter_friendly_name [string tolower [dict get $adapter_item -friendlyname]]
+            set adapter_description   [string tolower [dict get $adapter_item -description]]
+            dict for {propname pdh_ctr_name} $pdh_counter_map {
+                dict set _adapters $adapter_key $propname 0; # Initialize
+                if {[dict exists $pdh_objects $pdh_ctr_name $adapter_friendly_name]} {
+                    set instance_name $adapter_friendly_name
+                } elseif {[dict exists $pdh_objects $pdh_ctr_name $adapter_description]} {
+                    set instance_name $adapter_description
+                } else {
+                    # Not found in any object. Will not get updated
+                    continue
+                }
+                # Add the found counter to the query
+                set pdh_object 
+                set cpath [twapi::pdh_counter_path [dict get $pdh_objects $pdh_ctr_name $instance_name] $pdh_ctr_name -instance $instance_name]
+                twapi::pdh_add_counter $_hquery $cpath -name [list $adapter_key $propname]
+            }
+        }
+
+        twapi::pdh_query_refresh $_hquery
     }
 
-    method _retrieve1 {netif propnames} {
-        return [my _get_one {*}$netif]
+    method _update_counters {} {
+        dict for {key val} [twapi::pdh_query_get $_hquery] {
+            dict set _adapters {*}$key $val
+        }
     }
 
     method _retrieve {propnames force} {
-        set recs {}
-        
-        # We use catch because twapi may throw error if no interfaces
-        # of that ip version exist.
-
-        if {![catch {set indices [twapi::get_netif_indices]}]} {
-            foreach i $indices {
-                dict set recs [list 4 $i] [my _get_one 4 $i]
-            }
-        }
-
-        if {![catch {set indices [twapi::get_netif6_indices]}]} {
-            foreach i $indices {
-                dict set recs [list 6 $i] [my _get_one 6 $i]
-            }
-        }
+        my _update_counters
 
         # Actually we are not returning all propnames as they differ
         # between ipv6 and ipv4. However, by returning $propnames as
         # the names of the properties we are indicating that we have
         # returned everything we have and there is no point calling
         # for missing properties.
-        return [list updated $propnames $recs]
+        return [list updated $propnames $_adapters]
     }
+
+    method discard {} {
+        if {[info exists _hquery]} {
+            twapi::pdh_query_close $_hquery
+            unset _hquery
+        }
+        set _adapters {}
+    }
+
 }
 
 # Create a new window showing logon sessions
 proc wits::app::netif::viewlist {args} {
     # args: -filter
-
-    variable _table_properties
-
-    get_property_defs;          # Just to init _table_properties
 
     foreach name {netifenable netifdisable viewdetail netiffilter networkon winlogo tableconfigure} {
         set ${name}img [images::get_icon16 $name]
@@ -393,10 +332,9 @@ proc wits::app::netif::viewlist {args} {
                 -tools [list \
                             [list tableconfigure "Customize view" $tableconfigureimg] \
                            ] \
-                -displaycolumns {-description -ipversion -operstatus -addrs} \
-                -availablecolumns $_table_properties \
-                -colattrs {-description {-squeeze 1} -addrs {-squeeze 1}} \
-                -detailfields {-adaptername -ipversion -type -operstatus -addrs -dnsservers -dhcpenabled -dhcpserver} \
+                -displaycolumns {-friendlyname -description -operstatus -unicastaddresses} \
+                -colattrs {-friendlyname {-squeeze 1} -description {-squeeze 1} -unicastaddresses {-squeeze 1}} \
+                -detailfields {-friendlyname -adaptername -type -operstatus -unicastaddresses -dnsservers -dhcpenabled} \
                 -descproperty "-description" \
                 {*}$args \
                ]
@@ -446,7 +384,7 @@ proc wits::app::netif::getviewer {netif} {
     return [widget::propertyrecordpage .pv%AUTO% \
                 [get_objects [namespace current]] \
                 $netif \
-                [lreplace $_page_view_layout([lindex $netif 0]) 0 0 $netif] \
+                [lreplace $_page_view_layout 0 0 $netif] \
                 -title "Network Interface" \
                 -objlinkcommand [namespace parent]::view_property_page \
                 -actioncommand [list [namespace current]::pageviewhandler $netif]]
