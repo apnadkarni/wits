@@ -1142,6 +1142,22 @@ proc util::listequal {a b} {
     return 1
 }
 
+proc util::equal_sets {s1 s2} {
+    set s1 [lsort -unique $s1]
+    set s2 [lsort -unique $s2]
+    if {[llength $s1] != [llength $s2]} {
+        return 0
+    }
+
+    foreach e1 $s1 e2 $s2 {
+        if {[string compare $e1 $e2]} {
+            return 0
+        }
+    }
+
+    return 1
+}
+
 #
 # Check if arg is an integer within a range
 proc util::is_int_in_range {low high val} {

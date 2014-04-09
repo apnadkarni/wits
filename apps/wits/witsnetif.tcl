@@ -187,11 +187,13 @@ proc wits::app::netif::get_property_defs {} {
 oo::class create wits::app::netif::Objects {
     superclass util::PropertyRecordCollection
 
+    variable _last_setup_time
     variable _hquery;           # PDH query handle
     variable _adapters;         # Dictionary of adapters keyed by adapter name
 
     constructor {} {
         namespace path [concat [namespace path] [list [namespace qualifiers [self class]]]]
+        set _last_setup_time 0
         my _setup
         next [get_property_defs] -ignorecase 1 -refreshinterval 2000
     }
@@ -202,11 +204,15 @@ oo::class create wits::app::netif::Objects {
     }
 
     method _setup {} {
-        if {[info exists _hquery]} {
-            twapi::pdh_query_close $_hquery
-        }
-        set _hquery [twapi::pdh_query_open]
 
+        if {[info exists _adapters]} {
+            set old_adapters [dict keys $_adapters]
+        } else {
+            set old_adapters {}
+        }
+
+        # Update adapter list in case description etc. might have changed
+        # or new adapters materialized etc.
         set _adapters {}
         foreach rec [twapi::recordarray getlist [twapi::get_network_interfaces_detail] -format dict] {
             dict set rec -dhcpenabled [expr {0 != ([dict get $rec -flags] & 0x4)}]
@@ -221,6 +227,22 @@ oo::class create wits::app::netif::Objects {
             lappend _adapters [string tolower [dict get $rec -adaptername]] $rec
         }
         
+        # If there were no adapter changes, and we already have a
+        # query, no need to create a PDH query
+        if {[util::equal_sets $old_adapters [dict keys $_adapters]] &&
+            [info exists _hquery]} {
+            puts "Already exists"
+            return
+        }
+        puts "Doingsetup"
+
+        # Need to regenerate PDH query because adapters changed
+
+        if {[info exists _hquery]} {
+            twapi::pdh_query_close $_hquery
+        }
+        set _hquery [twapi::pdh_query_open]
+
         # Map our property names to PDH counter names
         # Note all PDH names are lower case as PDH does not care
         # and this allows us to use them for dict lookups
@@ -274,13 +296,28 @@ oo::class create wits::app::netif::Objects {
                 } elseif {[dict exists $pdh_objects $pdh_ctr_name $adapter_description]} {
                     set instance_name $adapter_description
                 } else {
-                    # Not found in any object. Will not get updated
-                    continue
+                    # No direct match. This could also be because the
+                    # instance name differs because of PDH restrictions
+                    # on characters. For example, Intel's wireless adapter
+                    # name Intel (R) has a counter Intel [R]. Search using
+                    # approximate matching
+                    set approx_friendly [regsub -all {[^[:alnum:]]} $adapter_friendly_name .]
+                    set approx_description [regsub -all {[^[:alnum:]]} $adapter_description .]
+                    set instance_name ""
+                    dict for {possible_instance dontcare} [dict get $pdh_objects $pdh_ctr_name] {
+                        set possible_match [regsub -all {[^[:alnum:]]} $possible_instance .]
+                        if {[string equal $possible_match $approx_friendly] ||
+                            [string equal $possible_match $approx_description]} {
+                            set instance_name $possible_instance
+                            break
+                        }
+                    }
                 }
-                # Add the found counter to the query
-                set pdh_object 
-                set cpath [twapi::pdh_counter_path [dict get $pdh_objects $pdh_ctr_name $instance_name] $pdh_ctr_name -instance $instance_name]
-                twapi::pdh_add_counter $_hquery $cpath -name [list $adapter_key $propname]
+                if {$instance_name ne ""} {
+                    # Add the found counter to the query
+                    set cpath [twapi::pdh_counter_path [dict get $pdh_objects $pdh_ctr_name $instance_name] $pdh_ctr_name -instance $instance_name]
+                    twapi::pdh_add_counter $_hquery $cpath -name [list $adapter_key $propname]
+                }
             }
         }
 
@@ -288,12 +325,25 @@ oo::class create wits::app::netif::Objects {
     }
 
     method _update_counters {} {
-        dict for {key val} [twapi::pdh_query_get $_hquery] {
+        if {[catch {
+            set counters [twapi::pdh_query_get $_hquery]
+        }]} {
+            # Error can happen if adapters go away. Try resetting up
+            my _setup
+            set counters [twapi::pdh_query_get $_hquery]
+        }
+        dict for {key val} $counters {
             dict set _adapters {*}$key $val
         }
     }
 
     method _retrieve {propnames force} {
+        set now [twapi::get_system_time]
+        if {($now - $_last_setup_time) > 100000000} {
+            set _last_setup_time $now
+            my _setup
+        }
+        
         my _update_counters
 
         # Actually we are not returning all propnames as they differ
