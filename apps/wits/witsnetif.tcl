@@ -231,10 +231,8 @@ oo::class create wits::app::netif::Objects {
         # query, no need to create a PDH query
         if {[util::equal_sets $old_adapters [dict keys $_adapters]] &&
             [info exists _hquery]} {
-            puts "Already exists"
             return
         }
-        puts "Doingsetup"
 
         # Need to regenerate PDH query because adapters changed
 
