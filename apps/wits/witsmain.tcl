@@ -1837,7 +1837,7 @@ proc wits::app::map_port_to_name {port} {
 }
 
 proc wits::app::pid_to_name {pid} {
-    if {[catch {[get_objects ::wits::app::process] get_field $pid ProcessName 10000 "Process $pid"} name]} {
+    if {[catch {[get_objects ::wits::app::process] get_field $pid -name 10000 "Process $pid"} name]} {
         set name "Process $pid"
     }
     return $name
