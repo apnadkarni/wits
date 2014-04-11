@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011-2012, Ashok P. Nadkarni
+# Copyright (c) 2011-2014, Ashok P. Nadkarni
 # All rights reserved.
 #
 # See the file LICENSE for license
@@ -224,12 +224,12 @@ oo::class create wits::app::wineventlog::Objects {
                 # Note category cannot be cached as it is dependent
                 # on application, source and category file
                     
-                dict set ev -channel [::twapi::atomize [dict get $eventrec -channel]]
-                dict set ev -providername [::twapi::atomize [dict get $eventrec -providername]]
-                dict set ev -taskname [::twapi::atomize [dict get $eventrec -taskname]]
+                dict set ev -channel [dict get $eventrec -channel]
+                dict set ev -providername [dict get $eventrec -providername]
+                dict set ev -taskname [dict get $eventrec -taskname]
                 #dict set ev -data [::twapi::atomize [dict get $eventrec -data]]
                 dict set ev -eventrecordid [dict get $eventrec -eventrecordid]
-                dict set ev -levelname [::twapi::atomize [dict get $eventrec -levelname]]
+                dict set ev -levelname [dict get $eventrec -levelname]
                 dict set ev -message [::twapi::atomize [dict get $eventrec -message]]
                 set sid [::twapi::atomize [dict get $eventrec -sid]]
                 dict set ev -sid $sid
@@ -272,8 +272,8 @@ oo::class create wits::app::wineventlog::Objects {
             # The idea is to reschedule ourselves but this does not
             # work too well so for now set threshold for rescheduling
             # very high
-            if {$events_read > 10000} {
-                [my scheduler] after1 500 [list [self] refresh!]
+            if {$events_read > 100} {
+                [my scheduler] after1 idle [list [my scheduler] after1 0 [self] refresh!]
                 return inprogress
             }
         }
