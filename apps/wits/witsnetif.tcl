@@ -214,7 +214,7 @@ oo::class create wits::app::netif::Objects {
         # Update adapter list in case description etc. might have changed
         # or new adapters materialized etc.
         set _adapters {}
-        foreach rec [twapi::recordarray getlist [twapi::get_network_interfaces_detail] -format dict] {
+        foreach rec [twapi::recordarray getlist [twapi::get_network_adapters_detail] -format dict] {
             dict set rec -dhcpenabled [expr {0 != ([dict get $rec -flags] & 0x4)}]
             foreach addrtype {-dnsservers -unicastaddresses -anycastaddresses -multicastaddresses} {
                 set addrlist {}
