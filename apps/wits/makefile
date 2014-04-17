@@ -124,7 +124,9 @@ TREECTRLDIR=$(THIRDPARTYDIR)\treectrl-2.4.2\$(PLATFORM)
 
 imagedata.tcl: makefile
         for %f in ($(IMAGEDIRS)) do xcopy /Q /S /I /Y /EXCLUDE:excludepatterns %f "$(BUILDDIR)"\%f
-	cd "$(BUILDDIR)" && $(CTCL) "$(TOOLDIR)\createimagedatafile.tcl" "$(MAKEDIR)/imagedata.tcl" images::image_data $(IMAGEDIRS)
+	-mkdir "$(BUILDDIR)\images\icons\48x48"
+	copy /Y "images\icons\48x48\witslogo.png" "$(BUILDDIR)\images\icons\48x48\witslogo.png"
+	cd "$(BUILDDIR)" && $(CTCL) "$(TOOLDIR)\createimagedatafile.tcl" "$(MAKEDIR)/imagedata.tcl" images::image_data $(IMAGEDIRS) images\icons
 
 
 

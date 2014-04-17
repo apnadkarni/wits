@@ -319,7 +319,7 @@ proc images::use_external_images {} {
 
     ### 48 bit icons
     foreach {name file family fmt} {
-        witslogo  mycomputer+viewmag.png nuvola png
+        witslogo witslogo.png icons png
         hibernate exit-yellow.png nuvola png
         poweroff exit.png nuvola png
         poweron exit-green.png nuvola png
