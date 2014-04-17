@@ -5949,8 +5949,9 @@ snit::widgetadaptor wits::widget::listframe {
     # Controls the style for the pane
     typevariable _panedstyle
 
-    # Which preferences section we should use
-    typevariable _prefssection "Views/ListView"
+    # Which preferences section we should use for list view settings
+    typevariable _prefssubkey "listview"
+    typevariable _prefssection "Views/listview"
 
     # Controls whether filter help balloons are shown
     typevariable _show_filter_help
@@ -6235,16 +6236,26 @@ snit::widgetadaptor wits::widget::listframe {
 
     variable _original_display_columns
 
+    variable _prefstypesubkey; # type-specific settings
+
     constructor {witstype records_provider args} {
+
         set _witstype $witstype
+        set _prefstypesubkey "$_prefssubkey/$witstype"
 
         set _scheduler [util::Scheduler new]
 
         set _nullfilter [util::filter null]
 
-        # Size the toplevel to a reasonable size
-        # Commented out - let it resize based on columns
-        #        wm geometry $win 640x480
+        # Size the toplevel to last saved size
+        if {[catch {
+            set geom [wits::app::getwindowgeometrypref $_prefstypesubkey]
+            if {[regexp {\d+x\d+[\+\-]\d+[\+\-]\d+} $geom]} {
+                wm geometry $win $geom
+            }
+        } msg]} {
+            puts $msg
+        }
 
         set _records_provider $records_provider
         set _refreshinterval [$records_provider get_refresh_interval]
@@ -6426,6 +6437,9 @@ snit::widgetadaptor wits::widget::listframe {
 
         # Now configure options
         $self configurelist $args
+        # TBD - do we want to really override passed option ? Or only
+        # override built-in default ?
+        set options(-showsummarypane) [$self _getprefbool ShowSummaryPane $options(-showsummarypane)]
 
         # Store defaults for options that were not specified
 
@@ -6444,10 +6458,7 @@ snit::widgetadaptor wits::widget::listframe {
         # Get list of display columns from preferences. This overrides
         # any specified options. On errors, we will just stick with
         # what we have
-        set prefcols {}
-        if {$options(-prefscontainer) ne ""} {
-            set prefcols [$options(-prefscontainer) getitem $witstype $_prefssection]
-        }
+        set prefcols [$self _getpref DefaultColumns]
         catch {
             if {[llength $prefcols]} {
                 # Columns specified. Make sure they are valid
@@ -6530,8 +6541,10 @@ snit::widgetadaptor wits::widget::listframe {
         bind $bindtarget <Control-minus> [mymethod _change_font_size -1]
         bind $bindtarget <Control-0> [mymethod _reset_font]
 
+        ::wits::app::trackgeometrychange $win $_prefstypesubkey
 
         set _constructed true
+
         after idle [mymethod _setleftpanevisibility]
     }
 
@@ -6635,6 +6648,7 @@ snit::widgetadaptor wits::widget::listframe {
     }
 
     method _setleftpanevisibility {} {
+        $self _setpref ShowSummaryPane $options(-showsummarypane)
         if {! $options(-showsummarypane)} {
             # If there are at least two windows in the paned window,
             # get the position of the sash so it can be restored later
@@ -7030,8 +7044,8 @@ snit::widgetadaptor wits::widget::listframe {
         }
 
         # If we were asked to save the layout, do so
-        if {$save_columns && $options(-prefscontainer) ne ""} {
-            $options(-prefscontainer) setitem [$self getobjtype] $_prefssection $selnames true
+        if {$save_columns} {
+            $self _setpref DefaultColumns $selnames
         }
 
         $self configure -displaycolumns $selnames
@@ -7227,6 +7241,25 @@ snit::widgetadaptor wits::widget::listframe {
                 $self configure -disablefilter [expr {! $_filterbuttonvar}]
             }
         }
+    }
+
+    # Get/save type-specific prefs (NOT general prefs)
+    method _setpref {item val} {
+        if {$options(-prefscontainer) ne ""} {
+            $options(-prefscontainer) setitem $item "Views/$_prefstypesubkey" $val true
+        }
+    }
+    method _getpref {item} {
+        if {$options(-prefscontainer) ne ""} {
+            return [$options(-prefscontainer) getitem $item "Views/$_prefstypesubkey"]
+        }
+        return {}
+    }
+    method _getprefbool {item {default 0}} {
+        if {$options(-prefscontainer) ne ""} {
+            return [$options(-prefscontainer) getbool $item "Views/$_prefstypesubkey" -default $default]
+        }
+        return $default
     }
 }
 
