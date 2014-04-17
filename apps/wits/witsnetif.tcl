@@ -271,7 +271,7 @@ oo::class create wits::app::netif::Objects {
         # Build the list of performance counter objects. Map the
         # counter name and instance to the perf object that provides it
         set pdh_objects {}
-        foreach pdh_object [lsearch -nocase -inline -regexp -all [pdh_enumerate_objects] {^Network (Interface|Adapter)$}] {
+        foreach pdh_object [lsearch -nocase -inline -regexp -all [twapi::pdh_enumerate_objects] {^Network (Interface|Adapter)$}] {
             set items [twapi::pdh_enumerate_object_items $pdh_object]
             foreach pdh_ctr_name [lindex $items 0] {
                 set pdh_ctr_name [string tolower $pdh_ctr_name]
