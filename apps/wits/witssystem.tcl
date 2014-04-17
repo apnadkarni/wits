@@ -6,7 +6,6 @@
 #
 
 # System information object
-# TBD - handle multiple processors
 
 namespace eval ::wits::app::system {
     namespace path [list [namespace parent] [namespace parent [namespace parent]]]
@@ -93,17 +92,8 @@ namespace eval ::wits::app::system {
                 }
             }
             {
-                "Processor and Kernel" {
-                    {labelframe {title "Processor"}} {
-                        {label -processorname}
-                        {label -processorcount}
-                        {label -processorspeed}
-                        {label -arch}
-                        {label -processormodel}
-                        {label -processorlevel}
-                        {label -processorrev}
-                    }
-                    {labelframe {title "Kernel Resources" cols 2}} {
+                "Kernel" {
+                    {frame {cols 2}} {
                         {label -processcount}
                         {label -threadcount}
                         {label -handlecount}
@@ -198,15 +188,8 @@ twapi::proc* wits::app::system::get_property_defs {} {
         -domaincontroller "Domain controller" "Domain controller" "" text
         -netbiosname      "Computer name" "Computer name" "" text
         -os               "Operating System" "OS" "" text
-        -arch             "Processor architecture" "Processor architecture" "" text
         -peakcommit       "Peak VM commit" "Peak commit" "" mb
         -usedcommit       "Used VM commit" "Used commit" "" mb
-        -processorcount   "Number of processors" "Num processors" "" int
-        -processorlevel   "Processor level" "Processor level" "" text
-        -processormodel   "Processor model" "Model" "" text
-        -processorname    "Processor" "Processor" "" text
-        -processorrev     "Processor revision" "Revision" "" text
-        -processorspeed   "Processor speed" "Speed" "" int
         -systemlocale     "System locale" "Locale" "" text
         -windir           "System directory" "System directory" ::wits::app::wfile path
         -dnsname          "DNS name" "DNS name" "" text
@@ -221,10 +204,6 @@ twapi::proc* wits::app::system::get_property_defs {} {
         -sid              "System SID" "SID" "" text
         -kernelpaged      "Kernel paged pool" "Paged pool" "" mb
         -kernelnonpaged   "Kernel nonpaged pool" "Nonpaged pool" "" mb
-        cpuid             "CPU Id" "CPU Id" "" text
-        CPUPercent        "CPU %" "CPU%" "" int
-        UserPercent       "User %" "User%" "" int
-        KernelPercent     "Kernel %" "Kernel%" "" int
      } {
         dict set _property_defs $propname \
             [dict create \
@@ -284,7 +263,7 @@ oo::class create wits::app::system::Objects {
         namespace path [concat [namespace path] [list [namespace qualifiers [self class]]]]
 
         array set _pdh_counter_handles {}
-        set _pdh_query [twapi::pdh_system_performance_query processor_utilization_per_cpu user_utilization_per_cpu]
+        set _pdh_query [twapi::pdh_query_open]
         set _pdh_query_timestamp [twapi::get_system_time]
 
         # IMPORTANT - make sure properties initialized - needed by 
@@ -312,18 +291,6 @@ oo::class create wits::app::system::Objects {
         dict set _fixed_system_properties -windir [twapi::GetSystemWindowsDirectory]
         dict set _fixed_system_properties -sid [twapi::get_system_sid]
 
-        set ncpu [twapi::get_processor_count]
-        dict set _fixed_system_properties -processorcount $ncpu
-
-        # TBD - assumes all processors same
-        # TBD - is the processor id 0 ok for systems with > 64 cpus ?
-        set _fixed_system_properties [dict merge $_fixed_system_properties [twapi::get_processor_info 0 -arch -processorlevel -processormodel -processorname -processorrev -processorspeed]]
-        # Some prettying up for display
-        # For some reason processor name has leading whitespace
-        dict set _fixed_system_properties -processorname [string trim [dict get $_fixed_system_properties -processorname]]
-
-        dict append _fixed_system_properties -processorspeed " Mhz"
-            
         # Get WMI properties (these are all static)
         twapi::trap {
             set wmi [::wits::app::get_wmi]
@@ -465,107 +432,27 @@ oo::class create wits::app::system::Objects {
             after $wait_time
         }
         
-        array set cpuperf {}
         set pdh_data [twapi::pdh_query_get $_pdh_query]
         set _pdh_query_timestamp [twapi::get_system_time]
-        dict for {cpu utilization} [dict get $pdh_data processor_utilization_per_cpu] {
-            set user_utilization [dict get $pdh_data user_utilization_per_cpu $cpu]
-            if {$user_utilization > $utilization} {
-                set user_utilization $utilization
-            }
-            set kernel_utilization [expr {$utilization - $user_utilization}]
-
-            set cpuperf($cpu) [list cpuid "CPU $cpu" \
-                                   CPUPercent [format %.1f $utilization] \
-                                   UserPercent  [format %.1f $user_utilization] \
-                                   KernelPercent  [format %.1f $kernel_utilization]]
-
-        }
                            
-        set cpuperf($::wits::app::system::_all_cpus_label) $cpuperf(_Total)
-        dict set cpuperf($::wits::app::system::_all_cpus_label) cpuid $::wits::app::system::_all_cpus_label
-
-        # Get rid of the _Total,N entries which correspond to processor groups
-        array unset cpuperf *_Total
-
-        foreach {cpu cpudata} [array get cpuperf] {
-            # Need pdhdata entries for -sectioncount etc.
-            # Does not matter if returned values contain extraneous keys
-            dict set newdata $cpu [dict merge $system_properties $pdh_data $cpudata]
-        }
-
-        return [list updated [dict keys [dict get $newdata $::wits::app::system::_all_cpus_label]] $newdata]
+        # Need pdhdata entries for -sectioncount etc.
+        # Does not matter if returned values contain extraneous keys.
+        # "-netbiosname" is the unique key we use for the return dict
+        # which contains only one entry (for this system)
+        set newdata [dict merge $system_properties $pdh_data]
+        return [list updated [dict keys $newdata] [list [dict get $newdata -netbiosname] $newdata]]
     }
 }
 
-proc wits::app::system::viewlist {args} {
-
-    foreach name {viewdetail winlogo} {
-        set ${name}img [images::get_icon16 $name]
-    }
-
-    # -hideitemcount is set to 1 because otherwise the item count
-    # is not right as it includes the "All" record
-    return [::wits::app::viewlist [namespace current] \
-                -itemname "processor" \
-                -hideitemcount 1 \
-                -displaymode standard \
-                -showsummarypane 0 \
-                -actiontitle "Processor Tasks" \
-                -actions [list \
-                              [list view "View properties of selected processors" $viewdetailimg] \
-                              [list wintool "Windows Device Manager" $winlogoimg] \
-                             ] \
-                -displaycolumns {cpuid CPUPercent KernelPercent UserPercent} \
-                -availablecolumns {cpuid CPUPercent KernelPercent UserPercent} \
-                -detailfields {-processorname -processorspeed -processormodel -processorrev} \
-                -nameproperty "cpuid" \
-                -descproperty "-processorname" \
-                {*}$args \
-                ]
-}
-
-
-# Takes the specified action on the passed processes
-proc wits::app::system::listviewhandler {viewer act objkeys} {
-    variable _property_defs
-
-    switch -exact -- $act {
-        view {
-            foreach objkey $objkeys {
-                viewdetails [namespace current] $objkey
-            }
-        }
-        wintool {
-            [get_shell] ShellExecute taskmgr.exe
-        }
-        default {
-            tk_messageBox -icon error -message "Internal error: Unknown command '$act'"
-        }
-    }
-}
-
-# Handler for popup menu
-proc wits::app::system::popuphandler {viewer tok objkeys} {
-    $viewer standardpopupaction $tok $objkeys
-}
-
-proc wits::app::system::getviewer {cpu} {
+proc wits::app::system::getviewer {system_name} {
     variable _page_view_layout
-
-    if {$cpu eq "$::wits::app::system::_all_cpus_label"} {
-        set title "All Processors"
-    } else {
-        set title "Processor $cpu"
-    }
-
     return [widget::propertyrecordpage .pv%AUTO% \
                 [get_objects [namespace current]] \
-                $cpu \
-                [lreplace $_page_view_layout 0 0 $cpu] \
-                -title $title \
+                $system_name \
+                [lreplace $_page_view_layout 0 0 $system_name] \
+                -title $system_name \
                 -objlinkcommand [namespace parent]::view_property_page \
-                -actioncommand [list [namespace current]::pageviewhandler $cpu]]
+                -actioncommand [list [namespace current]::pageviewhandler $system_name]]
 }
 
 # Handle button clicks from a page viewer
@@ -590,7 +477,7 @@ proc wits::app::system::pageviewhandler {name button viewer} {
 }
 
 proc wits::app::system::getlisttitle {} {
-    return "Processors"
+    return "System"
 }
 
 
