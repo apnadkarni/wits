@@ -119,6 +119,7 @@ if {[string compare -nocase [file extension [info script]] ".tm"]} {
         witslocalshare.tcl
         witsremoteshare.tcl
         witssystem.tcl
+        witscpu.tcl
         witstips.tcl
         witsupdate.tcl
         witsuser.tcl
@@ -223,7 +224,8 @@ snit::widgetadaptor ::wits::app::mainview {
             -spacing1 0 \
             -separator ", " \
             -items [list \
-                        [list system "CPU and OS" ""] \
+                        [list system "OS" ""] \
+                        [list cpu "CPU" ""] \
                         [list process "Processes" ""] \
                         [list service "Services" ""] \
                         [list module "Modules" ""] \
@@ -401,6 +403,7 @@ snit::widgetadaptor ::wits::app::mainview {
     # to be an object type
     method _commandhandler {objtype} {
         switch -exact -- $objtype {
+            system { ::wits::app::system::getviewer [twapi::get_computer_netbios_name] }
             eventlog { ::wits::app::showeventviewer }
             default {
                 wits::app::${objtype}::viewlist
@@ -845,7 +848,12 @@ proc ::wits::app::create_taskbar_menu {} {
         # List views menu
         set menu [menu $taskbarMenu.sysmenu -tearoff 0]
         $menu add command -command "$mainWin _commandhandler system" \
-            -compound left -label "OS and Hardware" \
+            -compound left -label "OS" \
+            -underline 0 \
+            -image [images::get_icon16 system]
+        # TBD get a different icon for cpu
+        $menu add command -command "$mainWin _commandhandler cpu" \
+            -compound left -label "CPU" \
             -underline 0 \
             -image [images::get_icon16 system]
         $menu add command -command "$mainWin _commandhandler process" \
