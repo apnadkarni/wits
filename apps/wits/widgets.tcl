@@ -5136,9 +5136,9 @@ snit::widgetadaptor wits::widget::listframe {
     method _rightclickhandler {winx winy screenx screeny} {
         if {$options(-rightclickcommand) ne ""} {
             lassign [$_treectrl identify $winx $winy] type row_id col_id
-            if {$type eq "item"} {
+            if {$type eq "" || $type eq "item"} {
                 {*}$options(-rightclickcommand) $row_id $col_id $winx $winy $screenx $screeny
-            }
+            } 
         }
     }
 
@@ -6143,6 +6143,8 @@ snit::widgetadaptor wits::widget::listframe {
     # Show summary pane. Also attached to split window tool button
     option -showsummarypane -default 1 -configuremethod _setsummarypaneopt
 
+    delegate option -menu to hull
+
     delegate option * to _listframe
 
     ### Variables
@@ -6871,13 +6873,17 @@ snit::widgetadaptor wits::widget::listframe {
 
     # Called from ListFrame for a right mouse click
     method _rightclickcommand {row_id col_id winx winy screenx screeny} {
+        # row_id, col_id will be "" if clicked on whitespace
+
         if {$options(-popupcommand) != ""} {
             # If the mouse is on a row, but it is not in the selection
             # then change the selection to be that row.
             # (this imitates Windows Explorer behaviour)
-            if {! [$_listframe selection includes $row_id]} {
-                $_listframe selection clear
-                $_listframe selection add $row_id
+            if {$row_id ne ""} {
+                if {! [$_listframe selection includes $row_id]} {
+                    $_listframe selection clear
+                    $_listframe selection add $row_id
+                }
             }
             # Post the popup menu
             $self _postpopup $screenx $screeny
