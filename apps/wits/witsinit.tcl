@@ -49,7 +49,7 @@ namespace eval ::wits::app {
     variable mainWin
 
     # Event log win - we only keep one because of possible performance issues
-    variable eventWin ".witslog"
+    variable eventWin ".witsmonitor"
 
     # Whether there are multiple instances runnign
     variable multiple_instances false

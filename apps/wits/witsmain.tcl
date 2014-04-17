@@ -73,7 +73,7 @@ proc ::wits::app::initialize_preferences {} {
         {{DuplicateHoldbackInterval "Event Monitor"} "Hide duplicates (secs)" "Seconds to hide duplicates" "" int 600}
         {{EnableLogFile "Event Monitor"} "Log events to file" "Log events" "" bool}
         {{LogFile "Event Monitor"} "Log file" "Log file" "" path ""}
-        {{ShowFilterHelpBalloon "Views/ListView"} "Show list view filter help popup" "Filter help" "" bool 1}
+        {{ShowFilterHelpBalloon "Views/listview"} "Show list view filter help popup" "Filter help" "" bool 1}
     } {
         set def [lassign $def key description shortdesc objtype displayformat]
         if {[llength $def]} {
@@ -1091,20 +1091,31 @@ proc ::wits::app::gohome {} {
 }
 
 proc ::wits::app::getwindowgeometrypref {wname} {
-    return [prefs getitem $wname Views/Geometries]
+    return [prefs getitem Geometry Views/$wname]
 }
 
 proc ::wits::app::storewindowgeometrypref {w wname} {
-    if {[winfo exists $w] && [wm state $w] eq "normal"} {
-        prefs setitem $wname Views/Geometries [wm geometry $w] true
+    # Can be called from destructor. wm state may fail so catch
+    catch {
+        if {[wm state $w] eq "normal"} {
+            prefs setitem Geometry Views/$wname [wm geometry $w] true
+        }
     }
 }
 
-proc ::wits::app::windowgeometrychangehandler {w wname} {
+proc ::wits::app::windowgeometrychangehandler {w wname triggerwin} {
     variable gscheduler
     # We can get a lot of events while window is being resized.
     # Schedule a single store after things settle down
-    $gscheduler after1 1000 [list ::wits::app::storewindowgeometrypref $w $wname]
+    # Also triggerwin can be a child of the window of interest so
+    # only schedule if it is actually $w
+    if {$w eq $triggerwin} {
+        $gscheduler after1 1000 [list ::wits::app::storewindowgeometrypref $w $wname]
+    }
+}
+
+proc ::wits::app::trackgeometrychange {w wname} {
+    bind $w <Configure> "::wits::app::windowgeometrychangehandler $w $wname %W"
 }
 
 proc ::wits::app::showeventviewer {} {
@@ -1119,7 +1130,7 @@ proc ::wits::app::showeventviewer {} {
                 # The catch protects against bad registry values
                 catch {wm geometry $eventWin $geom}
             }
-            bind $eventWin <Configure> "::wits::app::windowgeometrychangehandler $eventWin $eventWin"
+            ::wits::app::trackgeometrychange $eventWin $eventWin
         } finally {
             if {[winfo exists $bb]} {
                 $bb waitforwindow $eventWin
@@ -1165,6 +1176,7 @@ proc ::wits::app::die {} {
     destroy_all_views true
 
     update;                     # So windows get destroyed
+    update idletasks
 
     # Remove ourselves from taskbar
     remove_from_taskbar
