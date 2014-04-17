@@ -239,8 +239,8 @@ proc images::use_external_images {} {
         eventlog messagebox_warning.png nuvola png
         exit fileclose.png nuvola png
         filesave filesave.png nuvola png
-        fontenlarge fontenlarge.png wits png
-        fontreduce fontreduce.png wits png
+        fontenlarge font-add.png famfamsilk png
+        fontreduce font-delete.png famfamsilk png
         group kuser.png nuvola png
         groupadd kuser+add.png nuvola png
         groupdelete kuser+delete.png nuvola png
