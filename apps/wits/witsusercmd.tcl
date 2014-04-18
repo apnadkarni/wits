@@ -124,6 +124,7 @@ proc ::wits::app::user_cmd_list {cmdline parent} {
     set objtype [string tolower [lindex $cmdline 1]]
 
     switch -exact -- $objtype {
+        cpu { set objtype ::wits::app::cpu }
         process -
         processes { set objtype ::wits::app::process }
         remoteshares -
@@ -155,6 +156,7 @@ proc ::wits::app::user_cmd_list {cmdline parent} {
 #
 # Implementation of the "end" user command
 set ::wits::app::userCmd(end) ::wits::app::user_cmd_end
+
 set ::wits::app::userCmdSummary(end) "Stops or disconnects a running object"
 set ::wits::app::userCmdHelpfile(end) "endcmd.html"
 proc ::wits::app::user_cmd_end {cmdline parent} {
@@ -376,53 +378,6 @@ proc ::wits::app::match_local_shares {name} {
         if {[string match -nocase $name $share]} {
             lappend matches $share
         }
-    }
-
-    return $matches
-}
-
-#
-# Return a list of printers that match the specified name.
-proc ::wits::app::match_printers {name} {
-
-    set printers [list ]
-    foreach printer [twapi::enumerate_printers] {
-        lappend printers [twapi::kl_get $printer name]
-    }
-
-    if {[llength $printers] == 0} {
-        return [list ];                 # No remote printers
-    }
-
-    regsub -all / $name \\ name
-    set matches [list ]
-
-    # First try matching on the exact name
-    foreach printer $printers {
-        if {[string equal -nocase $name $printer]} {
-            return [list $printer];       # exact match - can be only one
-        }
-    }
-
-    # If no exact match, try matching against last part of printername
-    # Note there may be more than one such match (different remote systems)
-    foreach printer $printers {
-        if {[string equal -nocase $name [lindex [split $printer \\] end]]} {
-            lappend matches $printer
-        }
-    }
-    if {[llength $matches]} {
-        return $matches
-    }
-
-    # Try matching using wildcard matching
-    foreach printer $printers {
-        if {[string match -nocase $name [lindex [split $printer \\] end]]} {
-            lappend matches $printer
-        }
-    }
-    if {[llength $matches]} {
-        return $matches
     }
 
     return $matches

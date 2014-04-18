@@ -67,7 +67,7 @@ namespace eval ::wits::app {
         main {HotkeyMain "Show main window" "Main window" "$::wits::app::mainWin deiconify"}
         process {HotkeyProcesses "Show process list view" "Process list" "::wits::app::process::viewlist"}
         netconn {HotkeyConnections "Show connection list view" "Connection list" "::wits::app::netconn::viewlist"}
-        events {HotkeyEvents "Show event log view" "Event log" "::wits::app::showeventviewer"}
+        events {HotkeyEvents "Show event monitor" "Event monitor" "::wits::app::showeventviewer"}
         taskmenu {HotkeyTaskmenu "Show WiTS taskbar menu" "Taskbar menu" "::wits::app::show_taskbar_menu"}
     }
 
