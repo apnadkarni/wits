@@ -5956,11 +5956,15 @@ snit::widgetadaptor wits::widget::listframe {
     # Controls whether filter help balloons are shown
     typevariable _show_filter_help
 
+    # Whether grooved separators are shown between frames
+    typevariable _show_frame_separators
+
     ### Type methods
 
     typeconstructor {
         setup_nspath
         set _panedstyle WitsListView.TPanedwindow
+        set _show_frame_separators 0
 
         # Pass on tab ins/outs
         bind Propertyrecordslistview <<TraverseIn>> [list event generate %W <<NextWindow>>]
@@ -6143,7 +6147,11 @@ snit::widgetadaptor wits::widget::listframe {
     # Show summary pane. Also attached to split window tool button
     option -showsummarypane -default 1 -configuremethod _setsummarypaneopt
 
-    delegate option -menu to hull
+    # Show status bar
+    option -showstatusbar -default 1 -configuremethod _setbarvisibilityopt
+
+    # Show tool bar
+    option -showtoolbar -default 1 -configuremethod _setbarvisibilityopt
 
     delegate option * to _listframe
 
@@ -6268,6 +6276,9 @@ snit::widgetadaptor wits::widget::listframe {
         set options(-tools)    [from args -tools {}]
         set options(-actions)  [from args -actions {}]
         install _toolbar using ::widget::toolbar $win.tb
+        if {$_show_frame_separators} {
+            ::ttk::separator $win.tbsep -orient horizontal
+        }
         foreach elem $options(-actions) {
             lassign $elem token tip image text
             $_toolbar add button $token -image $image -text $text -command [mymethod _actioncallback $token]
@@ -6305,6 +6316,12 @@ snit::widgetadaptor wits::widget::listframe {
         tooltip::tooltip [$_toolbar itemid fontreduce] "Decrease font size (Ctrl+-)"
         $_toolbar add checkbutton splitwindow -image [images::get_icon16 splitwindow] -command [mymethod _setleftpanevisibility] -variable [myvar options(-showsummarypane)]
         tooltip::tooltip [$_toolbar itemid splitwindow] "Show summary pane"
+
+        $_toolbar add checkbutton statusbar -image [images::get_icon16 statusbar] -command [mymethod _repack] -variable [myvar options(-showstatusbar)]
+        tooltip::tooltip [$_toolbar itemid statusbar] "Show status bar"
+
+        $_toolbar add checkbutton toolbar -image [images::get_icon16 toolbar] -command [mymethod _repack] -variable [myvar options(-showtoolbar)]
+        tooltip::tooltip [$_toolbar itemid toolbar] "Show toolbar"
 
         $_toolbar add button tableconfigure -image [images::get_icon16 tableconfigure] -command [mymethod edittablecolumns]
         tooltip::tooltip [$_toolbar itemid tableconfigure] "Select table columns"
@@ -6378,7 +6395,11 @@ snit::widgetadaptor wits::widget::listframe {
 
         # Status frame and its content
         install _statusframe using frame $win.statusf
-        $_statusframe configure -relief groove -pady 1 -border 2
+        if {$_show_frame_separators} {
+            $_statusframe configure -relief groove -pady 1 -border 2
+        } else {
+            $_statusframe configure -relief flat -pady 1 -border 0
+        }
 
         # Item count label
         set options(-hideitemcount) [from args -hideitemcount 0]
@@ -6442,6 +6463,8 @@ snit::widgetadaptor wits::widget::listframe {
         # TBD - do we want to really override passed option ? Or only
         # override built-in default ?
         set options(-showsummarypane) [$self _getprefbool ShowSummaryPane $options(-showsummarypane)]
+        set options(-showstatusbar) [$self _getprefbool ShowStatusBar $options(-showstatusbar)]
+        set options(-showtoolbar) [$self _getprefbool ShowToolBar $options(-showtoolbar)]
 
         # Store defaults for options that were not specified
 
@@ -6495,19 +6518,10 @@ snit::widgetadaptor wits::widget::listframe {
 
         pack $frame -expand yes -fill both
 
-        set pw_pad 0
-
         $_panemanager add $_scroller -weight 0
         $_panemanager add $_listframe -weight 3
 
-        # Note toolbar is packed first so on shrinking window it
-        # does not disappear
-        if {$_toolbar ne ""} {
-            pack $_toolbar -fill x -expand false -side top
-            pack [::ttk::separator $win.tbsep -orient horizontal] -side top -fill x -expand no -padx 0 -pady 0
-        }
-        pack $_statusframe -fill x -expand false -side bottom
-        pack $_panemanager -fill both -expand true -padx $pw_pad -pady $pw_pad
+        $self _repack
 
         # Get data
         # TBD - Window is not sized to hold all columns properly unless
@@ -6639,6 +6653,56 @@ snit::widgetadaptor wits::widget::listframe {
     # Return the object type we are listing
     method get_data_provider {} {
         return $_records_provider
+    }
+
+    # Packs toplevel based on which frames are to be visible
+    method _repack {} {
+        if {$_toolbar ne ""} {
+            pack forget $_toolbar
+            if {$_show_frame_separators} {
+                pack forget $win.tbsep
+            }
+        }
+        pack forget $_statusframe
+        pack forget $_panemanager
+
+        # Note toolbar is packed first so on shrinking window it
+        # does not disappear
+        if {$_toolbar ne ""} {
+            if {$options(-showtoolbar)} {
+                if {[winfo exists $win.showtb]} {
+                    place forget $win.showtb
+                }
+                pack $_toolbar -fill x -expand false -side top
+                if {$_show_frame_separators} {
+                    pack $win.tbsep -side top -fill x -expand no -padx 0 -pady 0
+                }
+            } else {
+                # Need to show a button to get back the toolbar
+                if {![winfo exists $win.showtb]} {
+                    ::ttk::checkbutton $win.showtb -style Toolbutton -takefocus 0 -command [mymethod _repack] -variable [myvar options(-showtoolbar)] -image [images::get_icon16 toolbar]
+                    tooltip::tooltip $win.showtb "Show toolbar"
+                }
+                place $win.showtb -anchor ne -relx 1.0 -rely 0.0 -in $_panemanager
+            }
+        }
+        if {$options(-showstatusbar)} {
+            pack $_statusframe -fill x -expand false -side bottom
+        }
+        pack $_panemanager -fill both -expand true -padx 0 -pady 0
+
+        # Save the options
+        $self _setpref ShowStatusBar $options(-showstatusbar)
+        $self _setpref ShowToolBar $options(-showtoolbar)
+    }
+
+
+    method _setbarvisibilityopt {opt val} {
+        if {![string is boolean $val]} {
+            error "Non boolean value '$val' supplied for option $opt"
+        }
+        set options($opt) $val
+        after idle [mymethod _repack]
     }
 
     method _setsummarypaneopt {opt val} {
