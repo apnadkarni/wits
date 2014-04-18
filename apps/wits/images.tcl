@@ -281,6 +281,7 @@ proc images::use_external_images {} {
         servicefilter kcmsystem+filter.png nuvola png
         splitwindow application-side-boxes.png famfamsilk png
         statusbar  kcmkwm-statusbar.png nuvola png
+        toolbar    kcmkwm-toolbar.png nuvola png
         support chat.png nuvola png
         system mycomputer.png nuvola png
         tableconfigure view_text+configure.png nuvola png
