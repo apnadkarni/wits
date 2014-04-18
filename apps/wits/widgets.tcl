@@ -6318,7 +6318,7 @@ snit::widgetadaptor wits::widget::listframe {
         tooltip::tooltip [$_toolbar itemid splitwindow] "Show summary pane"
 
         $_toolbar add checkbutton statusbar -image [images::get_icon16 statusbar] -command [mymethod _repack] -variable [myvar options(-showstatusbar)]
-        tooltip::tooltip [$_toolbar itemid statusbar] "Show status bar"
+        tooltip::tooltip [$_toolbar itemid statusbar] "Show refresh bar"
 
         $_toolbar add checkbutton toolbar -image [images::get_icon16 toolbar] -command [mymethod _repack] -variable [myvar options(-showtoolbar)]
         tooltip::tooltip [$_toolbar itemid toolbar] "Show toolbar"

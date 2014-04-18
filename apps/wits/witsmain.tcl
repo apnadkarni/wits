@@ -505,7 +505,7 @@ snit::widgetadaptor ::wits::app::mainview {
             } else {
                 array set data [twapi::pdh_query_get $_pdh_query]
                 set _system_status_summary \
-                    "CPU: [format %5.2f $data(processor_utilization)]%, Free Memory: $data(memory_free_mb)MB, Disk: [format %5.2f [expr {100 - $data(disk_idle_percent)}]]%"
+                    "CPU: [format %5.2f $data(processor_utilization)]%, Free Memory: $data(memory_free_mb)MB, Disk I/O: [format %5.2f [expr {100 - $data(disk_idle_percent)}]]%"
             }
         }
 
