@@ -32,6 +32,7 @@ HTFFILES= \
         listview.htf \
 	listviewbindings.htf \
 	listviewhighlights.htf \
+	listviewlayout.htf \
 	listviewselection.htf \
         listfilters.htf \
         mainwin.htf \
@@ -56,8 +57,10 @@ IMGFILES= \
         favicon.ico \
         hotkeyprefs.png \
 	listview3-detail-labeled.png \
-	listview3-nodetail.png \
-	listview3-filter-labeled.png \
+	listview3-bare.png \
+	listview3-filter.png \
+	listview3-filter-edit.png \
+	listview3-layout-buttons.png \
         magicsplat.png \
         mainwindow.png \
         logo.png \

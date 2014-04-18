@@ -19,9 +19,10 @@
   to hide and restore them as a group.
 </p>
 
-<h2>Running in elevated mode on Vista and Windows 7</h2>
+<h2>Running in elevated mode</h2>
 <p>
-The User Account Control feature in Vista and Windows 7 limits the 
+The User Account Control feature in Vista and later versions of Windows
+limits the 
 privileges that a process runs under even if the user signed in under
 an administrative account. Under these circumstances, WiTS will
 prompt asking whether you want to elevate privileges. If you decline,

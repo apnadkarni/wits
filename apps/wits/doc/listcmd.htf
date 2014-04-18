@@ -10,14 +10,15 @@ The <span class='cmd'>list</span> command takes the following form:
         <a href='listview.html'>list view</a> containing
         objects of the specified type.
         <span class='cmd'>OBJECTTYPE</span> may be one of
-        <span class='cmd'>service</span>,
-        <span class='cmd'>process</span>,
-        <span class='cmd'>remoteshare</span>,
+        <span class='cmd'>cpu</span>,
+        <span class='cmd'>driver</span>,
+        <span class='cmd'>eventlog</span>,
         <span class='cmd'>localshare</span>,
-        <span class='cmd'>network</span> or
-        <span class='cmd'>driver</span> or
-        <span class='cmd'>eventlog</span> or
-        <span class='cmd'>module</span>.
+        <span class='cmd'>module</span>,
+        <span class='cmd'>network</span>,
+        <span class='cmd'>process</span>,
+        <span class='cmd'>remoteshare</span> or
+        <span class='cmd'>service</span>.
 </p>
 <div class="seealso">
   <h2>Related topics</h2>

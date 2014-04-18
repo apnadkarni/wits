@@ -7,9 +7,7 @@
   <li>The main display area of a list view shows the properties of a set
     of objects (such as processes, network connections etc.) in a table.</li>
   <li>An optional summary pane on the left shows additional information about
-    an object selected in the table. Use the toolbar
-    <span class='witsmenu'>Show/Hide Summary</span> 
-    button to hide this pane.</li>
+    an object selected in the table.
   <li>A toolbar at the top provides a set of standard
     functions in all list views.</li>
   <li>Finally, a status pane at the bottom
@@ -21,12 +19,16 @@
 <p>
 <img src="listview3-detail-labeled.png" alt="List view image"/>
 </p>
-
+<p>
+List views are customizable both in terms of the layout as well as
+the data that is displayed. See the list of topics below for more.
+</p>
 <div class="seealso">
   <h2>Related topics</h2>
   <ul>
     <li><a href="listviewbindings.html">Navigating a list view</a></li>
     <li><a href="listviewselection.html">Selecting list view items</a></li>
+    <li><a href="listviewlayout.html">Changing the list view layout</a></li>
     <li><a href="listcolumns.html">Configuring columns in a list view</a></li>
     <li><a href="listfilters.html">Filtering list view data</a></li>
     <li><a href="listviewhighlights.html">Using display modes to track changes</a></li>

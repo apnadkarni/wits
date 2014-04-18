@@ -5,7 +5,8 @@
 </p>
 
 <ul>
-  <li>Operating system and processors</li>
+  <li>System information</li>
+  <li>Processors</li>
   <li>Processes</li>
   <li>Services</li>
   <li>Drives and volumes</li>
