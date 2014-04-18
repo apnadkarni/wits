@@ -167,7 +167,7 @@ proc ::wits::app::user_cmd_end {cmdline parent} {
     set objname [lindex $cmdline 1]
     set objtype [string tolower [lindex $cmdline 2]]
     if {$objtype eq ""} {
-        set objtype {service process network}
+        set objtype {service process}
     }
     foreach {objtype objlist} [_match_objects $objname $objtype] break
 
@@ -382,63 +382,6 @@ proc ::wits::app::match_local_shares {name} {
 }
 
 #
-# Return a list of matching connections
-proc ::wits::app::match_network_connections {name} {
-    # First figure out if name is
-    #  - an IP address
-    #  - a port number
-    #  - a system name
-    #  - a service name
-
-    if {[string is integer $name]} {
-        set match_port $name
-        set match_field port
-    } elseif {[regexp {^[[:digit:]]+(\.[[:digit:]]+){3}$} $name]} {
-        # IP address
-        set match_addrs [list $name]
-        set match_field addr
-    } else {
-        # Try to resolve as hostname
-        set match_addrs [twapi::resolve_hostname $name]
-        if {[llength $match_addrs]} {
-            set match_field addr
-        } else {
-            # Not hostname, check if service
-            set match_port [twapi::service_to_port $name]
-            if {[string length $match_port] == 0} {
-                # Nothing matches
-                return [list ]
-            }
-            set match_field port
-        }
-    }
-
-    if {$match_field eq "port"} {
-        # Check all connections for matching port
-        set matches [concat \
-                         [::wits::app::netconn getinstancekeys \
-                              [wits::filter::create \
-                                   -properties [list -localport $match_port]]] \
-                         [::wits::app::netconn getinstancekeys \
-                              [wits::filter::create \
-                                   -properties [list -remoteport $match_port]]]]
-    } else {
-        # Match on address fields
-        set matches [list ]
-        foreach addr $match_addrs {
-            set matches [concat $matches \
-                             [::wits::app::netconn getinstancekeys \
-                                  [wits::filter::create \
-                                       -properties [list -localaddr $addr]]] \
-                             [::wits::app::netconn getinstancekeys \
-                                  [wits::filter::create \
-                                       -properties [list -remoteaddr $addr]]]]
-        }
-    }
-    return $matches
-}
-
-#
 # Return a list of printers that match the specified name.
 proc ::wits::app::match_printers {name} {
 
@@ -506,7 +449,7 @@ proc ::wits::app::match_files {name} {
 # Returns a pair consising of object type and the list of their id's
 proc ::wits::app::_match_objects {objname {matchorder ""}} {
     if {$matchorder eq ""} {
-        set matchorder {service process remoteshare localshare file network}
+        set matchorder {service process remoteshare localshare file}
     }
 
     foreach objtype $matchorder {
@@ -516,11 +459,9 @@ proc ::wits::app::_match_objects {objname {matchorder ""}} {
             remoteshare  match_remote_shares
             localshare   match_local_shares
             file         match_files
-            network      match_network_connections
         } $objtype]
         switch -exact -- $objtype {
             file    { set objtype ::wits::app::wfile }
-            network { set objtype ::wits::app::netconn }
             default { set objtype ::wits::app::$objtype }
         }
 
