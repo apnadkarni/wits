@@ -32,9 +32,8 @@
     for an object
   </li>
   <li>
-    <a href="listcmd.html">list</a> shows a
-    <a href="listview.html">list view</a> containing
-    matching objects
+    <a href="listcmd.html">list</a> shows the
+    <a href="listview.html">list view</a> for an object type
   </li>
   <li>
     <a href="endcmd.html">end</a> stops or terminates running objects
@@ -42,17 +41,10 @@
 </ul>
 <p>
   Many WiTS internal commands like
-  <a href='listcmd.html'>list</a> and
+  <a href='showcmd.html'>show</a> and
   <a href='endcmd.html'>end</a> operate on multiple types of
   objects and will attempt to guess the object type if it is not
-  specified. For example, the command
-  <br /><span class='cmdblock'>list www.yahoo.com</span><br />
-  will show a list view containing all connections to
-  www.yahoo.com.
-</p>
-<p>
-  Moreover, the commands will attempt to match objects in
-  multiple ways. For example,
+  specified. For example,
   <br /><span class='cmdblock'>end rpcss</span><br />
   will stop a Windows service matching against both internal
   and display names.

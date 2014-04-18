@@ -58,5 +58,6 @@
     <li><a href="listview.html">List views</a></li>
     <li><a href="listfilters.html">Filtering list view data</a></li>
     <li><a href="listviewhighlights.html">Using display modes to track changes</a></li>
+    <li><a href="listviewlayout.html">Changing the list view layout</a></li>
   </ul>
 </div>

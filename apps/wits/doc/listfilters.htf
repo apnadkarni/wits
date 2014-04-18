@@ -10,7 +10,7 @@ The example below shows only those processes that are running under a
 specific user account and are consuming CPU.
 </p>
 <p>
-<img src="listview3-filter-labeled.png" alt="List view image"/>
+<img src="listview3-filter.png" alt="List view image"/>
 </p>
 <p>
 The filter configuration row resides just below the column header row.
