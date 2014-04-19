@@ -1,20 +1,21 @@
 <h1>List view layout</h1>
 
+<p>
 The view layout buttons in the tool bar shown below 
 can be used to control the visibility of the various areas of a
 list view.
-<p>
+</p><p>
 <img src="listview3-layout-buttons.png" alt="List view layout buttons"/>
-</p>
+</p><p>
 The sample view below has all frames except the main display area hidden
 along with the filter row. The button in the column header can be used
 to restore the toolbar.
-<p>
+</p><p>
 <img src="listview3-bare.png" alt="List view bare layout"/>
-</p>
+</p><p>
 WiTS remembers the last layout so that when a new list view for
 the same type of object is created, the same layout is used for the window.
-
+</p>
 <div class="seealso">
   <h2>Related topics</h2>
   <ul>
