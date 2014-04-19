@@ -660,7 +660,10 @@ proc ::wits::app::set_views_visibility {visibility} {
                 wm withdraw $view
                 wm deiconify $view
             }
-            $mainWin deiconify
+            # Only deiconify main window if there are no other views open
+            if {[llength $views] == 0} {
+                $mainWin deiconify
+            }
         }
         hide {
             foreach view $views {

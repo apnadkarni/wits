@@ -3,7 +3,7 @@ UILONGNAME=Windows Inspection Tool Set
 UISHORTNAME=WiTS
 APPVERSIONMAJOR=3
 APPVERSIONMINOR=1
-APPVERSIONPATCH=8
+APPVERSIONPATCH=10
 RELEASETYPE=
 # NOTE - the order of files here is important. It must be the same order
 # as required to be stored in the concatenated .tm file
@@ -18,6 +18,7 @@ APPFILES= \
 	images.tcl \
 	imagedata.tcl \
         witsaccount.tcl \
+	witscpu.tcl \
         witsdrive.tcl \
         witsdriver.tcl \
         witsevents.tcl \
@@ -122,7 +123,7 @@ TREECTRLDIR=$(THIRDPARTYDIR)\treectrl-2.4.2\$(PLATFORM)
 "$(VFSDIR)\lib\uri":
 	xcopy /Q /S /I /Y /EXCLUDE:excludepatterns "$(THIRDPARTYDIR)\uri" $@
 
-imagedata.tcl: makefile
+imagedata.tcl: makefile images.tcl
         for %f in ($(IMAGEDIRS)) do xcopy /Q /S /I /Y /EXCLUDE:excludepatterns %f "$(BUILDDIR)"\%f
 	-mkdir "$(BUILDDIR)\images\icons\48x48"
 	copy /Y "images\icons\48x48\witslogo.png" "$(BUILDDIR)\images\icons\48x48\witslogo.png"
