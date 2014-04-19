@@ -286,6 +286,7 @@ proc images::use_external_images {} {
         system mycomputer.png nuvola png
         tableconfigure view_text+configure.png nuvola png
         tip ktip.png nuvola png
+        topmost window_list.png nuvola png
         update kdisknav.png nuvola png
         user personal.png nuvola png
         useradd personal+add.png nuvola png

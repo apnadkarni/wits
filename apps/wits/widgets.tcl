@@ -6153,6 +6153,9 @@ snit::widgetadaptor wits::widget::listframe {
     # Show tool bar
     option -showtoolbar -default 1 -configuremethod _setbarvisibilityopt
 
+    # Make window topmost
+    option -topmost -default 0 -configuremethod _settopmostopt
+
     delegate option * to _listframe
 
     ### Variables
@@ -6314,6 +6317,9 @@ snit::widgetadaptor wits::widget::listframe {
         tooltip::tooltip [$_toolbar itemid fontenlarge] "Increase font size (Ctrl++)"
         $_toolbar add button fontreduce -image [images::get_icon16 fontreduce] -command [mymethod _change_font_size -1]
         tooltip::tooltip [$_toolbar itemid fontreduce] "Decrease font size (Ctrl+-)"
+
+        $_toolbar add separator
+
         $_toolbar add checkbutton splitwindow -image [images::get_icon16 splitwindow] -command [mymethod _setleftpanevisibility] -variable [myvar options(-showsummarypane)]
         tooltip::tooltip [$_toolbar itemid splitwindow] "Show summary pane"
 
@@ -6323,9 +6329,13 @@ snit::widgetadaptor wits::widget::listframe {
         $_toolbar add checkbutton toolbar -image [images::get_icon16 toolbar] -command [mymethod _repack] -variable [myvar options(-showtoolbar)]
         tooltip::tooltip [$_toolbar itemid toolbar] "Show toolbar"
 
+        $_toolbar add checkbutton topmost -image [images::get_icon16 topmost] -command [mymethod _maketopmost] -variable [myvar options(-topmost)]
+        tooltip::tooltip [$_toolbar itemid topmost] "Show on top"
+
+        $_toolbar add separator
+
         $_toolbar add button tableconfigure -image [images::get_icon16 tableconfigure] -command [mymethod edittablecolumns]
         tooltip::tooltip [$_toolbar itemid tableconfigure] "Select table columns"
-
         install _panemanager using \
             ttk::panedwindow $win.pw -orient horizontal \
             -style $_panedstyle -width 0
@@ -6465,6 +6475,7 @@ snit::widgetadaptor wits::widget::listframe {
         set options(-showsummarypane) [$self _getprefbool ShowSummaryPane $options(-showsummarypane)]
         set options(-showstatusbar) [$self _getprefbool ShowStatusBar $options(-showstatusbar)]
         set options(-showtoolbar) [$self _getprefbool ShowToolBar $options(-showtoolbar)]
+        set options(-topmost) [$self _getprefbool Topmost $options(-topmost)]
 
         # Store defaults for options that were not specified
 
@@ -6522,6 +6533,7 @@ snit::widgetadaptor wits::widget::listframe {
         $_panemanager add $_listframe -weight 3
 
         $self _repack
+        $self _maketopmost
 
         # Get data
         # TBD - Window is not sized to hold all columns properly unless
@@ -6725,6 +6737,19 @@ snit::widgetadaptor wits::widget::listframe {
         } else {
             $win.pw insert 0 $_scroller -weight 0
         }
+    }
+
+    method _settopmostopt {opt val} {
+        if {![string is boolean $val]} {
+            error "Non boolean value '$val' supplied for option $opt"
+        }
+        set options($opt) $val
+        after idle [mymethod _maketopmost]
+    }
+
+    method _maketopmost {} {
+        $self _setpref Topmost $options(-topmost)
+        wm attributes $win -topmost $options(-topmost)
     }
 
     method _relayoutleftpane {w eventtype} {
