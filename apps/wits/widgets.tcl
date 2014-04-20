@@ -4695,8 +4695,10 @@ snit::widget wits::widget::unmanagedtoplevel  {
 
         # Finally arrange the frames
         set pad 2
-        pack $_toolbar -side top -fill x -expand no -padx 0 -pady 0
-        pack [::ttk::separator $win.sep -orient horizontal] -side top -fill x -expand no -padx 0 -pady 0
+        if {[llength $actionlist]} {
+            pack $_toolbar -side top -fill x -expand no -padx 0 -pady 0
+            pack [::ttk::separator $win.sep -orient horizontal] -side top -fill x -expand no -padx 0 -pady 0
+        }
         pack $_buttonf -side bottom -fill both -expand no -padx $pad -pady $pad
         # This frame is set to expand no because otherwise
         # the window layout is visibly slower when set to yes
