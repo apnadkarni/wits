@@ -96,7 +96,7 @@ proc wits::app::remote_share::get_property_defs {} {
         set _property_defs [dict create]
 
         foreach {propname desc shortdesc objtype format useintable} {
-            -remoteshare "Remote share" "Remote share" ::wits::app::remoteshare path true
+            -remoteshare "Remote share" "Remote share" ::wits::app::remote_share path true
             -comment "Comment" "Comment" "" text true
             -localdevice "Local device mapped" "Local" "" text true
             -domain "Share domain" "Domain" "" text true
