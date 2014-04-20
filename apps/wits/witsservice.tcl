@@ -227,7 +227,7 @@ oo::class create wits::app::service::Objects {
         }
         if {[llength $config_opts]} {
             foreach name [dict keys $new] {
-                trap {
+                twapi::trap {
                     dict set new $name [dict merge [dict get $new $name] [twapi::get_service_configuration $name {*}$config_opts]]
                 } onerror {TWAPI_WIN32 1060} {
                     # Service does not exist? Just removed after we got status?
