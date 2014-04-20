@@ -17,10 +17,9 @@ namespace eval wits::app::module {
         foreach name {process} {
             set ${name}img [images::get_icon16 $name]
         }
-        set actions [list \
-                         [list showprocess "Show process" $processimg "Show owning process"] \
-                         ]
 
+        # [list showprocess "Show processes" $processimg "Show all processes that have loaded this module"]
+        set actions [list ]
         set nbpages {
             {
                 "General" {
