@@ -62,7 +62,7 @@ proc wits::app::local_share::get_property_defs {} {
         set _property_defs [dict create]
 
         foreach {propname desc shortdesc objtype format} {
-            -name      "Share name" "Share name" ::wits::app::localshare text
+            -name      "Share name" "Share name" ::wits::app::local_share text
             -comment       "Description" "Description" "" text
             -type         "Share type" "Type" "" text
             -path         "Share path" "Path" ::wits::app::shareable path
