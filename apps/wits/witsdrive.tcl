@@ -207,15 +207,13 @@ oo::class create wits::app::drive::Objects {
         } onerror {TWAPI_WIN32 21} {
             set vals(-status) "Device not ready"
         } onerror {TWAPI_WIN32} {
-            lassign $errorCode fac code
+            lassign $::errorCode fac code
             if {$code == 2 || $code == 3 || $code == 15} {
-                # ERROR_NO_SUCH_FILE
-                # ERROR_NO_SUCH_PATH
-                # ERROR_INVALID_DRIVE
-                error $errorResult $errorInfo $errorCode
+                # ERROR_NO_SUCH_FILE, ERROR_NO_SUCH_PATH, ERROR_INVALID_DRIVE
+                rethrow
             }
             # Other errors, just set the status
-            set vals(-status) "Error: $errorResult"
+            set vals(-status) "Error: [trapresult]"
         }
 
         return [array get vals]
