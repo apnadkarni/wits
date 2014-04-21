@@ -154,13 +154,44 @@ proc wits::app::drive::get_property_defs {} {
 oo::class create wits::app::drive::Objects {
     superclass util::PropertyRecordCollection
 
+    # If a particular drive is unreadable, we remember it so we do
+    # not keep trying to read it suffering a long timeout every time.
+    # Once a device notification arrives, we will reset this
+    variable _unreadable
+
+    variable _device_notification_handle
+
     constructor {} {
         namespace path [concat [namespace path] [list [namespace qualifiers [self class]]]]
+        array set _unreadable {}
+        set _device_notification_handle [twapi::start_device_notifier [list [self] device_notification_handler] -deviceinterface volume]
         next [get_property_defs] -ignorecase 1 -refreshinterval 15000
     }
 
     destructor {
+        catch {twapi::stop_device_notifier $_device_notification_handle}
         next
+    }
+
+    
+    # Note must be exportable command since callback
+    method device_notification_handler {notify_handle notification args} {
+        switch -exact -- $notification {
+            deviceremovecomplete -
+            devicearrival {
+                if {[lindex $args 0] eq "volume"} {
+                    foreach vol [lindex $args 1] {
+                        set vol [string tolower $vol]
+                        if {$notification eq "devicearrival"} {
+                            unset -nocomplain _unreadable($vol)
+                        } else {
+                            set _unreadable($vol) 1
+                        }
+                    }
+                }
+            }
+        }
+        return ""
     }
 
     method _get_one {drv propnames} {
@@ -173,39 +204,42 @@ oo::class create wits::app::drive::Objects {
             # (eg. CD-ROM not inserted)
             array set vals [twapi::get_volume_info $drv -device -type]
 
-            # If we get through the -device and -type options it means the
-            # device is available
-            set vals(-status) "Available"
+            if {[info exists _unreadable([string tolower $drv])]} {
+                set vals(-status) "Device not ready"
+            } else {
+                # If we get through the -device and -type options it means the
+                # device is available
+                set vals(-status) "Available"
+                set vals(-priordevices) [join [lrange $vals(-device) 1 end] ", "]
+                set vals(-device) [lindex $vals(-device) 0]
+                array set vals [twapi::get_volume_info $drv -all]
 
-            set vals(-priordevices) [join [lrange $vals(-device) 1 end] ", "]
-            set vals(-device) [lindex $vals(-device) 0]
-
-            array set vals [twapi::get_volume_info $drv -all]
-
-            # Convert attributes to properties
-            foreach attrname {
-                case_preserved_names
-                unicode_on_disk
-                persistent_acls
-                file_compression
-                volume_quotas
-                supports_sparse_files
-                supports_reparse_points
-                supports_remote_storage
-                volume_is_compressed
-                supports_object_ids
-                supports_encryption
-                named_streams
-                read_only_volume
-            } {
-                set vals(-$attrname) [expr {[lsearch -exact $vals(-attr) $attrname] >= 0}]
-            }
-
-            if {$vals(-type) ne "remote"} {
-                set vals(-volumename) [twapi::get_mounted_volume_name $drv]
+                # Convert attributes to properties
+                foreach attrname {
+                    case_preserved_names
+                    unicode_on_disk
+                    persistent_acls
+                    file_compression
+                    volume_quotas
+                    supports_sparse_files
+                    supports_reparse_points
+                    supports_remote_storage
+                    volume_is_compressed
+                    supports_object_ids
+                    supports_encryption
+                    named_streams
+                    read_only_volume
+                } {
+                    set vals(-$attrname) [expr {[lsearch -exact $vals(-attr) $attrname] >= 0}]
+                }
+                
+                if {$vals(-type) ne "remote"} {
+                    set vals(-volumename) [twapi::get_mounted_volume_name $drv]
+                }
             }
         } onerror {TWAPI_WIN32 21} {
             set vals(-status) "Device not ready"
+            set _unreadable([string tolower $drv]) 1
         } onerror {TWAPI_WIN32} {
             lassign $::errorCode fac code
             if {$code == 2 || $code == 3 || $code == 15} {
