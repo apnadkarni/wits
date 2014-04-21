@@ -14,7 +14,13 @@ to restore the toolbar.
 <img src="listview3-bare.png" alt="List view bare layout"/>
 </p><p>
 WiTS remembers the last layout so that when a new list view for
-the same type of object is created, the same layout is used for the window.
+the same type of object is created, the same layout is used for the window,
+including positioning of the window and layout of its frames.
+You can use arrange a layout as per your liking and then use
+a hot key assigned to
+<span class="witsmenu">Show/hide all windows</span>
+in the <a href="preferences.html">preferences</a> window
+to show / hide them as a group.
 </p>
 <div class="seealso">
   <h2>Related topics</h2>
