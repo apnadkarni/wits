@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2011, Ashok P. Nadkarni
+# Copyright (c) 2006-2014, Ashok P. Nadkarni
 # All rights reserved.
 #
 # See the file LICENSE for license
@@ -213,7 +213,7 @@ oo::class create wits::app::drive::Objects {
                 rethrow
             }
             # Other errors, just set the status
-            set vals(-status) "Error: [trapresult]"
+            set vals(-status) "Error: [twapi::trapresult]"
         }
 
         return [array get vals]
@@ -230,10 +230,13 @@ oo::class create wits::app::drive::Objects {
             dict set recs $drv [my _get_one $drv $propnames]
         }
 
-        # Second element of returned list -
-        # Retrieved property names are keys of any record, in this case
-        # $drv is last record.
-        return [list updated [dict keys [dict get $recs $drv]] $recs]
+        # Second element of returned list is $propnames but not
+        # all records may contain every propname. That is ok as it
+        # indicates which propnames were attempted to be retrieved
+        # as opposed to which were actually retrieved. This is important
+        # as otherwise caller will keep calling back, hanging the
+        # the process
+        return [list updated $propnames $recs]
     }
 }
 
