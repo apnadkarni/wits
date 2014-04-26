@@ -303,7 +303,7 @@ oo::class create wits::app::system::Objects {
             }
         } onerror {} {
             # Ignore errors - any data we can't get will just show up as N/A
-            # TBD  debug log - puts $errorResult
+            # TBD  debug log - puts [twapi::trapresult]
         }
 
         # Append minor SMBIOS version to major for display
