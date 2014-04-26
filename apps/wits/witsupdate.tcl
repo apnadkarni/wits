@@ -206,7 +206,7 @@ proc ::wits::app::get_update_manifest {args} {
         twapi::trap {
             http::geturl $opts(url) -timeout $opts(timeout) -command [list ::wits::app::get_update_manifest_callback 0 $opts(timeout) $opts(callback)]
         } onerror {} {
-            after 0 $opts(callback) [list error 0 $errorResult]
+            after 0 $opts(callback) [list error 0 [twapi::trapresult]
         }
     } else {
         # Synchronous retrieval
