@@ -2420,13 +2420,14 @@ proc wits::widget::showerrordialog {message args} {
 proc wits::widget::errorstackdialog {message edict} {
     variable inside_error_stack
 
+    set error_title "[tk appname] Error"
     # Note we show with -modal none because otherwise user cannot go
     # close a window that is continuously generating an error.
 
     # Protect against recursion
     if {[incr inside_error_stack] == 1} {
         set response [::wits::widget::showconfirmdialog \
-                          -title "[tk appname] Error" \
+                          -title $error_title \
                           -message $message \
                           -detail "Do you want to see a detailed error stack?" \
                           -modal none \
@@ -2437,7 +2438,7 @@ proc wits::widget::errorstackdialog {message edict} {
     
         if {$response eq "yes"} {
             #showerrordialog [string range [dict get $edict -errorinfo] 0 1000] -modal none
-            set dlg [confirmdialog .%AUTO% -message $message -detail [string range [dict get $edict -errorinfo] 0 1000] -modal none -title Error -icon error]
+            set dlg [confirmdialog .%AUTO% -message $message -detail [string range [dict get $edict -errorinfo] 0 1000] -modal none -title $error_title -icon error]
             $dlg add button -text Copy -command [list util::to_clipboard "$message\n[dict get $edict -errorinfo]"]
             $dlg add button -text Save -command [list util::save_file "$message\n[dict get $edict -errorinfo]" -extension .txt]
             $dlg add button -text OK -command [list $dlg close ok]
