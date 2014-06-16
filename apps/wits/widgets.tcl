@@ -2412,7 +2412,7 @@ proc wits::widget::showconfirmdialog {args} {
 #
 # Show an error dialog
 proc wits::widget::showerrordialog {message args} {
-    showconfirmdialog -message $message -title Error -icon error -type ok -modal local {*}$args
+    showconfirmdialog -message $message -title "[tk appname] Error" -icon error -type ok -modal local {*}$args
     return
 }
 
@@ -2426,7 +2426,7 @@ proc wits::widget::errorstackdialog {message edict} {
     # Protect against recursion
     if {[incr inside_error_stack] == 1} {
         set response [::wits::widget::showconfirmdialog \
-                          -title Error \
+                          -title "[tk appname] Error" \
                           -message $message \
                           -detail "Do you want to see a detailed error stack?" \
                           -modal none \
