@@ -14,7 +14,7 @@
   of events.
 </p>
 <p>
-  The <span class="witsmenu">Throttle</span> frame controls
+  The <span class="witsmenu">Display</span> frame controls
   the event monitor display content:
 </p>
 <ul>
@@ -29,6 +29,18 @@
     field is the number of seconds that duplicate events will be
     suppressed. Certain types of events, such as process starts,
     are never suppressed.
+  </li>
+  <li>
+    The <span class="witsmenu">Include</span> and 
+    <span class="witsmenu">Exclude</span> fields can be set to
+    show or suppress event display based on the text in the event.
+    If not empty, the <span class="witsmenu">Include</span> field should be
+    a regular expression that will be matched against event text. Only events
+    that match will be shown. The
+    <span class="witsmenu">Exclude</span> field works in a similar way
+    except in reverse - events that match will be not be shown
+    (even if they match the
+    <span class="witsmenu">Include</span> field).
   </li>
 </ul>
 <p>

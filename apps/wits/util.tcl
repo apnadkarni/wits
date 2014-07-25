@@ -1560,6 +1560,10 @@ proc util::to_clipboard {text} {
     }
 }
 
+# Validate a regexp
+proc util::validate_regexp {r} {
+    return [expr {![catch {regexp $r dummy}]}]
+}
 
 # From Sean Woods on the Tcl chat
 proc util::center_window {w {parent {}}} {
