@@ -1,6 +1,12 @@
 <h1>Version history</h1>
 
 <p>
+  Changes between 3.1 and 3.2
+</p>
+<ul>
+  <li>Added include/exclude text filter to event monitor.
+</ul>
+<p>
   Changes between 3.0 and 3.1
 </p>
 <ul>

@@ -68,9 +68,11 @@ proc ::wits::app::initialize_preferences {} {
         {{TrackServices "Event Monitor"} "Windows services" "Services" "" bool}
         {{TrackShares "Event Monitor"} "Network shares" "Shares" "" bool}
         {{TrackLogonSessions "Event Monitor"} "Logon sessions" "Logon sessions" "" bool}
-        {{MaxEvents "Event Monitor"} "Number of events to display" "Display limit" "" int 500}
+        {{MaxEvents "Event Monitor"} "Display limit" "Display limit" "" int 500}
         {{MonitorInterval "Event Monitor"} "Number of seconds between checks for polled events" "Seconds between checks" "" int 10}
         {{DuplicateHoldbackInterval "Event Monitor"} "Hide duplicates (secs)" "Seconds to hide duplicates" "" int 600}
+        {{IncludeFilter "Event Monitor"} "Include" "Include" "" path ".*"}
+        {{ExcludeFilter "Event Monitor"} "Exclude" "Exclude" "" path ""}
         {{EnableLogFile "Event Monitor"} "Log events to file" "Log events" "" bool}
         {{LogFile "Event Monitor"} "Log file" "Log file" "" path ""}
         {{ShowFilterHelpBalloon "Views/listview"} "Show list view filter help popup" "Filter help" "" bool 1}
@@ -1590,9 +1592,11 @@ proc ::wits::app::configure_preferences {{page ""}} {
     }
 
     set eventmon_tab_throttle {
-        title "Throttle" fattr {cols 2} prefdeflist {
+        title "Display" fattr {cols 2} prefdeflist {
             {wtype entry name MaxEvents wattr {width 4 justify right validate {::string is integer}}}
+            {wtype entry name IncludeFilter wattr {validate ::util::validate_regexp}}
             {wtype entry name DuplicateHoldbackInterval wattr {justify right width 4 validate {::string is integer}}}
+            {wtype entry name ExcludeFilter wattr {validate ::util::validate_regexp}}
         }
     }
 

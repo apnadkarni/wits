@@ -1305,9 +1305,12 @@ snit::type ::wits::app::eventmanager {
     variable _logfd "";              # Descriptor of open log file
     variable _logfile_statusl;       # Logfile status label widget
 
+    # Display filters
+    variable _includefilter ""
+    variable _excludefilter ""
+
     # Scheduler for running regular tasks
     variable _scheduler
-
 
     # Subwidgets
 
@@ -1472,6 +1475,9 @@ snit::type ::wits::app::eventmanager {
 
     # Read preferences and configure event manager accordingly
     method _configure_eventmanager {} {
+        set _includefilter [wits::app::prefs getitem IncludeFilter {Event Monitor}]
+        set _excludefilter [wits::app::prefs getitem ExcludeFilter {Event Monitor}]
+
         set logfile_enabled [::wits::app::prefs getbool EnableLogFile "Event Monitor"]
         set logfile ""
         if {$logfile_enabled} {
@@ -1557,6 +1563,19 @@ snit::type ::wits::app::eventmanager {
     }
 
     method _handleoneevent {event {fileonly false}} {
+        if {$_includefilter ne ""} {
+            # Only events matching include filter are to be logged
+            if {![regexp $_includefilter [lindex $event 1]]} {
+                return
+            }
+        }
+        if {$_excludefilter ne ""} {
+            # events matching exclude filter are to be ignored
+            if {[regexp $_excludefilter [lindex $event 1]]} {
+                return
+            }
+        }
+
         if {! $fileonly} {
             $_lwin log [lindex $event 0] [lindex $event 2] [lindex $event 3] [lindex $event 4]
         }

@@ -3517,6 +3517,11 @@ snit::widget wits::widget::logwindow {
         $_scheduler after1 2000 [mymethod _housekeeping]
     }
 
+    #APN - TBD - for debugging - remove
+    method _getvar {name} {
+        return [set $name]
+    }
+
     delegate method * to _textw
 }
 
@@ -4803,7 +4808,7 @@ snit::widget wits::widget::unmanagedtoplevel  {
                 $vwin insert end $propval
                 if {[twapi::kl_vget $attrs validate validatecmd]} {
                     lappend validatecmd %P
-                    $vwin configure -validate key -validatecommand $validatecmd -invalidcommand ::beep
+                    $vwin configure -validate key -validatecommand $validatecmd -invalidcommand ::twapi::beep
                 }
                 if {[twapi::kl_vget $attrs width width]} {
                     $vwin configure -width $width
@@ -6440,7 +6445,7 @@ snit::widgetadaptor wits::widget::listframe {
                                 -width 3  -justify right \
                                 -validate all \
                                 -validatecommand [mymethod _setrefreshintervalfromui %V %P] \
-                                -invalidcommand ::beep \
+                                -invalidcommand ::twapi::beep \
                          ]
         $_refreshentryw insert 0 [expr {($_refreshinterval+500)/1000}]
         bind $_refreshentryw <Key-Return> [mymethod _setrefreshintervalfromui returnkey]
