@@ -1594,9 +1594,9 @@ proc ::wits::app::configure_preferences {{page ""}} {
     set eventmon_tab_throttle {
         title "Display" fattr {cols 2} prefdeflist {
             {wtype entry name MaxEvents wattr {width 4 justify right validate {::string is integer}}}
-            {wtype entry name IncludeFilter wattr {validate ::util::validate_regexp}}
+            {wtype entry name IncludeFilter}
             {wtype entry name DuplicateHoldbackInterval wattr {justify right width 4 validate {::string is integer}}}
-            {wtype entry name ExcludeFilter wattr {validate ::util::validate_regexp}}
+            {wtype entry name ExcludeFilter}
         }
     }
 
