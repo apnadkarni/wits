@@ -531,7 +531,7 @@ snit::type ::wits::app::eventmanager {
         foreach source {Application System Security} {
             if {![info exists _winlog_handles($source)]} {
                 ::twapi::trap {
-                    set h [::twapi::eventlog_open -source $source]
+                    set handles [::twapi::winlog_subscribe $source]
                 } onerror {TWAPI_WIN32 1314} {
                     # Do not have privileges for this source. Ignore
                     continue
@@ -539,18 +539,19 @@ snit::type ::wits::app::eventmanager {
                     # Access denied. Ignore
                     continue
                 }
-                set _winlog_handles($source) $h
-                # Find the oldest record
-                set oldest [::twapi::eventlog_oldest $h]
-                set count  [::twapi::eventlog_count $h]
-                # to get the latest record and discard it
-                catch {::twapi::eventlog_read $h -seek [expr {$oldest + $count -1}]}
+                set _winlog_handles($source) $handles
             }
-            while {[llength [set reclist [::twapi::eventlog_read $_winlog_handles($source)]]] != 0} {
+            while {1} {
+                set reclist [::twapi::recordarray getlist [::twapi::winlog_read [lindex $_winlog_handles($source) 0]] -format dict]
+                if {[llength $reclist] == 0} {
+                    break
+                }
                 foreach rec $reclist {
-                    set msg [string trim [::twapi::eventlog_format_message $rec -width -1]]
+                    set msg "[dict get $rec -providername]: [string trim [dict get $rec -message]]"
                     $self reportevent $msg $msg \
-                        [dict get $rec -timegenerated] severity winlog
+                        [twapi::large_system_time_to_secs_since_1970 [dict get $rec -timecreated]] \
+                        [dict get $rec -levelname]  \
+                        winlog
                 }
             }
         }
@@ -562,7 +563,8 @@ snit::type ::wits::app::eventmanager {
 
         foreach source {Application System Security} {
             if {[info exists _winlog_handles($source)]} {
-                catch {::twapi::eventlog_close $_winlog_handles($source)}
+                # Note closing the read handle will also close the signal handle
+                catch {::twapi::winlog_close [lindex $_winlog_handles($source) 0]}
                 unset _winlog_handles($source)
             }
         }
