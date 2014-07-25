@@ -1326,6 +1326,8 @@ snit::type ::wits::app::eventmanager {
     ### Methods
 
     constructor {args} {
+        set _scheduler [util::Scheduler new]
+
         install _lwin using ::wits::widget::logwindow $win.lwin -command [mymethod _linkhandler]
         set toolf [ttk::frame $win.f]
         install _toolbar using ::wits::widget::buttonbox $toolf.tb
@@ -1366,7 +1368,6 @@ snit::type ::wits::app::eventmanager {
         bind $win <Escape> [mymethod _confirmdestroy]
         wm protocol $win WM_DELETE_WINDOW [mymethod _confirmdestroy]
 
-        set _scheduler [util::Scheduler new]
         $_scheduler after1 1000 [mymethod _logfile_housekeeping]
     }
 
@@ -1481,6 +1482,25 @@ snit::type ::wits::app::eventmanager {
     method _configure_eventmanager {} {
         set _includefilter [wits::app::prefs getitem IncludeFilter {Event Monitor}]
         set _excludefilter [wits::app::prefs getitem ExcludeFilter {Event Monitor}]
+        set include_valid [util::validate_regexp $_includefilter]
+        set exclude_valid [util::validate_regexp $_excludefilter]
+        if {! ($include_valid && $exclude_valid)} {
+            if {! $include_valid} {
+                lappend detail "Invalid regexp syntax in event monitor include filter '$_includefilter'."
+            }
+            if {! $exclude_valid} {
+                lappend detail "Invalid regexp syntax in event monitor exclude filter '$_excludefilter'."
+            }
+            lappend detail "Display filters will be disabled. Use the preference dialog to correct the filter values."
+            $_scheduler after1 idle [list after 0 [list ::wits::widget::showerrordialog "Invalid event monitor display filters." \
+                                                       -detail [join $detail " "] \
+                                                       -title $::wits::app::dlg_title_config_error \
+                                                     ]]
+            set _includefilter ""
+            set _excludefilter ""
+        }
+            
+
 
         set logfile_enabled [::wits::app::prefs getbool EnableLogFile "Event Monitor"]
         set logfile ""
