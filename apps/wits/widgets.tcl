@@ -3365,8 +3365,13 @@ snit::widget wits::widget::logwindow {
 
         # Generate strings and tags to be inserted into text widget
         # Also timestamp when we added this event
+        # The entire event is tagged with $eventtag - this is used
+        # to highlight the whole event and also to delete it when
+        # events are purged. Because event text may contain newlines,
+        # we cannot just use line count of the text widget for
+        # this purpose
         set eventtag tev$_eventId
-        set taglist [list $eventtag];
+        set taglist [list $eventtag]; # First tag in tag list must be $eventtag - used when deleting event
         set basetags [list $eventtag tplain]
         lappend _newtags [clock seconds] $eventtag
         $_textw tag config $eventtag -background yellow; # Mark new message
@@ -3461,7 +3466,7 @@ snit::widget wits::widget::logwindow {
         lappend inslist "\n" $basetags
 
         eval [list $_textw ins end] $inslist
-        lappend _events [list $taglist $time $severity $type $event]
+        lappend _events [list $taglist $time $severity $type]
 
         # Update text widget to see the new event
         if {$options(-autoscroll)} {
@@ -3476,10 +3481,11 @@ snit::widget wits::widget::logwindow {
                [llength $_events] > $remaining} {
             set oldest [lindex $_events 0]
             set tags  [lindex $oldest 0]
-            if {[llength $tags]} {
-                eval [list $_textw tag delete] $tags
-            }
-            $_textw del 1.0 2.0
+            # First tag applies to entire event. Use it to delete
+            # the text
+            set eventtag [lindex $tags 0]
+            $_textw del $eventtag.first $eventtag.last
+            $_textw tag delete {*}$tags
             set _events [lrange $_events 1 end]
         }
     }
@@ -3502,11 +3508,12 @@ snit::widget wits::widget::logwindow {
     method _housekeeping {} {
         # Fix backgrounds of all message tags that are no longer "new"
         set now [clock seconds]
+        set bg [$_textw cget -background]
         while {[llength $_newtags]} {
             # List is flat list of timestamp tagname pairs
             if {[lindex $_newtags 0] < ($now - 3)} {
                 # Now an "old tag", reset highlights
-                $_textw tag delete [lindex $_newtags 1]
+                $_textw tag configure [lindex $_newtags 1] -background $bg
                 # Remove this entry from list
                 set _newtags [lreplace $_newtags 0 1]
             } else {
