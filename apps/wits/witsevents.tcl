@@ -1472,7 +1472,9 @@ snit::type ::wits::app::eventmanager {
     }
 
     method _prefs_handler {args} {
-        $self _configure_eventmanager
+        # We get multiple notifications when preference dialog is closed -
+        # one per changed item. Only run the configurator once
+        $_scheduler after1 0 [list after idle $self _configure_eventmanager]
     }
 
     # Read preferences and configure event manager accordingly
@@ -1567,13 +1569,13 @@ snit::type ::wits::app::eventmanager {
     method _handleoneevent {event {fileonly false}} {
         if {$_includefilter ne ""} {
             # Only events matching include filter are to be logged
-            if {![regexp $_includefilter [lindex $event 1]]} {
+            if {![regexp -nocase $_includefilter [lindex $event 1]]} {
                 return
             }
         }
         if {$_excludefilter ne ""} {
             # events matching exclude filter are to be ignored
-            if {[regexp $_excludefilter [lindex $event 1]]} {
+            if {[regexp -nocase $_excludefilter [lindex $event 1]]} {
                 return
             }
         }
