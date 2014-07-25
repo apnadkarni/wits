@@ -187,6 +187,7 @@ oo::class create wits::app::wineventlog::Objects {
                 set status updated
                 if {[info exists _events]} {
                     dict for {key eventrec} $_events {
+                        # TBD - NEED TO REPLACE eventlog_format_message WITH winlog VERSION!
                         dict set _events $key -message [::twapi::atomize [string map {\r\n \n} [twapi::eventlog_format_message $eventrec -width -1]]]
                     }
                 }

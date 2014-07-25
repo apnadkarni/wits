@@ -3355,7 +3355,7 @@ snit::widget wits::widget::logwindow {
         if {![string is integer -strict $time]} {
             set time [clock scan $time]
         }
-        set severity [string map {0 information info information 1 warning 2 notice 3 error 4 critical} $severity]
+        set severity [string map {0 information info information 1 warning 2 notice 3 error 4 critical} [string tolower $severity]]
 
         # If we already have too many events, delete enough to have
         # room for one more
