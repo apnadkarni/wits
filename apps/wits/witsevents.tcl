@@ -1384,18 +1384,28 @@ snit::type ::wits::app::eventmanager {
         }
     }
 
-
-    # Called to configure log file
-    method _configurelogfile {filename} {
-        $self _configurelogfile_helper $filename
-        $self _update_statusbar
+    method _start_logfile {} {
+        if {$_logfile ne "" && $_logfd eq ""} {
+            if {[catch {
+                set _logfd [open $_logfile a]
+            } msg]} {
+                after 0 [list ::wits::widget::showerrordialog "Error opening log file. Logging to file will be disabled." -detail $msg -modal none]
+                $self _handleoneevent [list "WiTS logging disabled because of error opening log file." \
+                                           "WiTS logging disabled because of error opening log file." \
+                                           [clock seconds] \
+                                           info \
+                                           general]
+            } else {
+                $self _handleoneevent [list "WiTS logging started. Log file is $_logfile." \
+                                           "WiTS logging started. Log file is $_logfile." \
+                                           [clock seconds] \
+                                           info \
+                                           general]
+            }
+        }
     }
 
-    method _configurelogfile_helper {filename} {
-        if {$filename ne ""} {
-            set filename [file nativename [file normalize $filename]]
-        }
-
+    method _manage_logfiles {} {
         # If running low on diskspace, turn off logging if it is on
         if {$_logfd ne "" || $_logfile ne ""} {
             if {! [twapi::user_drive_space_available [twapi::get_volume_mount_point_for_path $_logfile] $options(-minfreespaceforlog)]} {
@@ -1408,19 +1418,28 @@ snit::type ::wits::app::eventmanager {
                     catch {close $_logfd}
                     set _logfd ""
                 }
-                return
+            } else {
+                # Enough space available. Turn logging back on if it was turned off.
+                $self _start_logfile
             }
         }
+        
+        # Check for rollover
+        catch {$self _check_log_rollover $options(-maxlogfilesize)}
+    }
 
-        # If no changes, just get lost. However, we also need to check
-        # that logging was not turned off previously because of disk
-        # free space limits. If so we will need to reopen down below
-        if {($_logfile eq $filename) &&
-            !($_logfile ne "" && $_logfd eq "")} {
-            # TBD - notify errors in rollover
-            if {$_logfile ne ""} {
-                catch {set rollover [$self _check_log_rollover $options(-maxlogfilesize)]}
-            }
+    # Called to configure log file
+    method _configurelogfile {filename} {
+        $self _configurelogfile_helper $filename
+        $self _update_statusbar
+    }
+
+    method _configurelogfile_helper {filename} {
+        if {$filename ne ""} {
+            set filename [file nativename [file normalize $filename]]
+        }
+
+        if {[string equal -nocase $filename $_logfile]} {
             return
         }
 
@@ -1445,31 +1464,11 @@ snit::type ::wits::app::eventmanager {
                 }
             }
             catch {close $_logfd}
-
             set _logfd ""
         }
 
         set _logfile $filename
-        if {$_logfile eq ""} {
-            return
-        }
-
-        if {[catch {
-            set _logfd [open $_logfile a]
-        } msg]} {
-            after 0 [list ::wits::widget::showerrordialog "Error opening log file. Logging to file will be disabled." -detail $msg -modal none]
-            $self _handleoneevent [list "WiTS logging disabled because of error opening log file." \
-                                       "WiTS logging disabled because of error opening log file." \
-                                       [clock seconds] \
-                                       info \
-                                       general]
-        } else {
-            $self _handleoneevent [list "WiTS logging started. Log file is $_logfile." \
-                                   "WiTS logging started. Log file is $_logfile." \
-                                   [clock seconds] \
-                                   info \
-                                   general]
-        }
+        $self _start_logfile
     }
 
     method _prefs_handler {args} {
@@ -1776,7 +1775,7 @@ snit::type ::wits::app::eventmanager {
     #
     # Called regularly to housekeep logfiles
     method _logfile_housekeeping {} {
-        $self _configurelogfile $_logfile
+        $self _manage_logfiles
 
         # Check after every 10 minutes
         $_scheduler after1 600000 [mymethod _logfile_housekeeping]
