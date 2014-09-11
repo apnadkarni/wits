@@ -3335,6 +3335,15 @@ snit::widget wits::widget::logwindow {
         # Note lmargin2 is later modified when messages are logged
         $_textw tag config tplain -spacing1 5 -lmargin1 5 -lmargin2 5 -rmargin 5
 
+        # Tags to use for *visual* decorations for links
+        $_textw tag config tlink -foreground blue -underline 1
+        $_textw tag bind tlink <Enter> "$_textw config -cursor hand2"
+        $_textw tag bind tlink <Leave> "$_textw config -cursor {}"
+
+        $_textw tag config tshowhide -foreground red -underline 1
+        $_textw tag bind tshowhide <Enter> "$_textw config -cursor hand2"
+        $_textw tag bind tshowhide <Leave> "$_textw config -cursor {}"
+
         $_scroller setwidget $_textw
         pack $_scroller -fill both -expand yes
 
@@ -3462,10 +3471,45 @@ snit::widget wits::widget::logwindow {
         }
         # $event contains left over text
         lappend inslist "${leader}${event}" $basetags
+        $_textw ins end {*}$inslist
 
-        lappend inslist "\n" $basetags
+        # For long lines, show only a summary and allow user to expand
+        set displayed_text [$_textw get $eventtag.first $eventtag.last]
+        set nl [string first \n $displayed_text]
+        if {$nl > 0} {
+            set len $nl
+            set len_limit $nl
+        } else {
+            set len [string length $displayed_text]
+            set twidth [expr {[$_textw cget -width]*2-10}]; # Only approx anyway
+            if {$twidth < $len} {
+                set len_limit $twidth
+            }
+        }
+        if {[info exists len_limit]} {
+            set tag "t[incr _tagId]"
+            lappend taglist $tag
+            $_textw tag add $tag $eventtag.first+${len_limit}c $eventtag.last
+            $_textw tag configure $tag -elide 1
+            set tag2 "t[incr _tagId]"
+            $_textw ins end "... " [linsert $basetags end $tag2] "More" [linsert $basetags end $tag2 tshowhide]
+            set callback [list ::apply {
+                {w targettag linktag basetags}
+                {
+                    if {[$w tag cget $targettag -elide]} {
+                        $w replace $linktag.first $linktag.last " " [linsert $basetags end $linktag] "Less" [linsert $basetags end $linktag tshowhide]
+                        $w tag configure $targettag -elide 0
+                    } else {
+                        $w replace $linktag.first $linktag.last "... " [linsert $basetags end $linktag] "More" [linsert $basetags end $linktag tshowhide]
+                        $w tag configure $targettag -elide 1
+                    }
+                }
+            }]
+            $_textw tag bind $tag2 <ButtonRelease-1> [linsert $callback end $_textw $tag $tag2 $basetags]
+        }
 
-        eval [list $_textw ins end] $inslist
+        $_textw ins end "\n" $basetags
+
         lappend _events [list $taglist $time $severity $type]
 
         # Update text widget to see the new event
