@@ -5,6 +5,7 @@
 </p>
 <ul>
   <li>Added include/exclude text filter to event monitor.
+  <li>Hide/show long lines in event monitor.
 </ul>
 <p>
   Changes between 3.0 and 3.1
