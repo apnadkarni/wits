@@ -3460,11 +3460,8 @@ snit::widget wits::widget::logwindow {
             # Create a link tag and bind it
             set tag "t[incr _tagId]"
             lappend taglist $tag
-            $_textw tag config $tag -foreground blue -underline 1
-            $_textw tag bind $tag <Enter> "$_textw config -cursor hand2"
-            $_textw tag bind $tag <Leave> "$_textw config -cursor {}"
             $_textw tag bind $tag <ButtonRelease-1> [mymethod _click [string map {% %%} $linktext] [string map {% %%} [lindex $placeholder 2]]]
-            lappend inslist $linktext [linsert $basetags 0 $tag]
+            lappend inslist $linktext [linsert $basetags 0 $tag tlink]
 
             # Set up loop to look at remaining string
             set event $after
