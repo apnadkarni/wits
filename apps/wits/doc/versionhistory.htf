@@ -1,6 +1,13 @@
 <h1>Version history</h1>
 
 <p>
+  Changes between 3.2.2 and 3.2.3
+</p>
+<ul>
+  <li>Fixed startup failure when some performance counters are missing on the system.
+</ul>
+
+<p>
   Changes between 3.1 and 3.2
 </p>
 <ul>
