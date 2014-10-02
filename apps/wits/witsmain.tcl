@@ -162,7 +162,12 @@ snit::widgetadaptor ::wits::app::mainview {
 
         #
         # Create the PDH query to retrieve basic system stats
-        set _pdh_query [twapi::pdh_system_performance_query processor_utilization disk_idle_percent memory_free_mb]
+        if {[catch {
+            set _pdh_query [twapi::pdh_system_performance_query processor_utilization disk_idle_percent memory_free_mb]
+        } msg]} {
+            set _system_status_summary "Status: Summary counters unavailable."
+            after idle [list wits::widget::showerrordialog "Some performance counters are missing. These will not be displayed."]
+        }
 
         # For now, background is white in all themes
         set bgcolor white
@@ -505,14 +510,18 @@ snit::widgetadaptor ::wits::app::mainview {
             if {0 && $::wits::app::available_update ne ""} {
                 set _system_status_summary "A new version of the software is available. Update from the Help and Support menu."
             } else {
-                array set data [twapi::pdh_query_get $_pdh_query]
-                set _system_status_summary \
-                    "CPU: [format %5.2f $data(processor_utilization)]%, Free Memory: $data(memory_free_mb)MB, Disk I/O: [format %5.2f [expr {100 - $data(disk_idle_percent)}]]%"
+                if {[llength $_pdh_query]} {
+                    array set data [twapi::pdh_query_get $_pdh_query]
+                    set _system_status_summary \
+                        "CPU: [format %5.2f $data(processor_utilization)]%, Free Memory: $data(memory_free_mb)MB, Disk I/O: [format %5.2f [expr {100 - $data(disk_idle_percent)}]]%"
+                }
             }
         }
 
-        # Reschedule ourselves every 5 seconds - TBD
-        $_scheduler after1 $interval [mymethod _updateStatusBar]
+        # Reschedule ourselves every ? seconds - TBD
+        if {[llength $_pdh_query]} {
+            $_scheduler after1 $interval [mymethod _updateStatusBar]
+        }
     }
 
     delegate method * to hull
@@ -1653,7 +1662,7 @@ proc wits::app::standardactionhandler {viewer action args} {
             if {[llength $objkeys] > 20} {
                 wits::widget::showerrordialog \
                     "Too many items selected. Please select up to 20 items only." \
-                    -title "$::wits::app::name: Too many items selected."
+                    -title "$::wits::app::name : Too many items selected."
                 return
             }
             if {[llength $objkeys] > 5} {
