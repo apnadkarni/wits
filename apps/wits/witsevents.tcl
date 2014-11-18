@@ -895,7 +895,7 @@ snit::type ::wits::app::eventmanager {
                 if {[string equal $aconn(-remoteportname) $aconn(-localportname)]} {
                     # Can't tell if server or client since both ports same
                     set portstr "$aconn(-protocol)/$aconn(-remoteportname)"
-                    set remotestr " with $aconn(remote_hostname)"
+                    set remotestr " with $aconn(-remotehostname)"
                     if {$pidstr ne ""} {
                         set localstr " for $pidstr"
                     }
