@@ -417,6 +417,14 @@ proc ctcl::write_icon_resource {path icopath args} {
         # No resource section, that's ok. TBD test
     }
 
+    if {$opts(lang) == 0} {
+        if {[info exists matched_lang]} {
+            set opts(lang) $matched_lang
+        } else {
+            set opts(lang) 1033
+        }
+    }
+
     # We will need a list of all icons id's later to prevent name clashes
     # We don't care about the language
     set orig_icon_ids {}
@@ -434,7 +442,7 @@ proc ctcl::write_icon_resource {path icopath args} {
         set libh [twapi::load_library $path -datafile]
         twapi::trap {
             # 14 -> RT_GROUP_ICON
-            set res [twapi::read_resource $libh 14 $matched_name $matched_lang]
+            set res [twapi::read_resource $libh 14 $matched_name $opts(lang)]
             lassign [binary scan $res ttt reserved type count]
             if {$type != 1} {
                 error "RT_GROUP_ICON idType is not 1 as expected."
@@ -453,15 +461,6 @@ proc ctcl::write_icon_resource {path icopath args} {
         }
     }
 
-    if {$opts(lang) == 0} {
-        if {[info exists matched_lang]} {
-            set opts(lang) $matched_lang
-        } else {
-            set opts(lang) 1033
-        }
-    }
-
-
     # Read the icon file
     set fd [open $icopath {RDONLY BINARY}]
     set icodata [read $fd]
@@ -479,10 +478,10 @@ proc ctcl::write_icon_resource {path icopath args} {
     if {[catch {
         # Delete existing icon resources if any
         if {[info exists matched_name]} {
-            twapi::delete_resource $libh 14 $matched_name $matched_lang
+            twapi::delete_resource $libh 14 $matched_name $opts(lang)
         }
         foreach resid $icons_to_delete {
-            twapi::delete_resource $libh 3 $resid $matched_lang
+            twapi::delete_resource $libh 3 $resid $opts(lang)
         }
 
         # Loop and copy icons. We will first use up the icon id's
@@ -510,11 +509,14 @@ proc ctcl::write_icon_resource {path icopath args} {
             # Format the directory entry for the icon
             append groupres [binary format "cu cu cu cu tu tu nu tu" $width $height $colorcount $reserved $places $bitcount $bytesinres $icoid]
             # Write out the icon itself
-            twapi::update_resource $libh 3 $icoid $matched_lang [string range $icodata $imageoffset [expr {$imageoffset+$bytesinres-1}]]
+            twapi::update_resource $libh 3 $icoid $opts(lang) [string range $icodata $imageoffset [expr {$imageoffset+$bytesinres-1}]]
         }
 
         # Write out the group icon resource
-        twapi::update_resource $libh 14 $matched_name $matched_lang $groupres
+        if {![info exists matched_name]} {
+            set matched_name 1
+        }
+        twapi::update_resource $libh 14 $matched_name $opts(lang) $groupres
 
     } msg]} {
         twapi::end_resource_update $libh -discard
