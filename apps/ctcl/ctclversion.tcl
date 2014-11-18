@@ -2,6 +2,6 @@
 namespace eval ::ctcl::app { 
 variable name "ctcl" 
 variable long_name "ctcl" 
-variable version "0.3.0" 
+variable version "0.3.1" 
 variable release_type "a" 
 } 
