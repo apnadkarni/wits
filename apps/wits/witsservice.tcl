@@ -125,8 +125,11 @@ proc wits::app::service::get_property_defs {} {
                  shortdesc "Type" \
                  objtype "" \
                  displayformat [list map [dict create {*}{
+                     win32               "Windows process"
                      win32_share_process "Shared process"
                      win32_own_process   "Dedicated process"
+                     user_own_process    "User dedicated process"
+                     user_share_process  "User shared process"
                      kernel_driver       "Kernel driver"
                      file_system_driver  "File system driver"
                  }]]]
