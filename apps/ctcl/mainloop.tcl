@@ -23,7 +23,7 @@ proc ::mainloop::prompt {} {
                 if { $status != 0 } {
                     puts stderr $result
                     if {[regexp -nocase {couldn't open ".*[[:cntrl:]].*"} $result]} {
-                        puts stderr "Note: The \\ character is treated as an escape character in Tcl. Use either / or \\\\ as path separatoror for file paths."
+                        puts stderr "Note: The \\ character is treated as an escape character in Tcl. Use either / or \\\\ as path separator for file paths."
                     }
                 } else {
                     puts stdout $result
