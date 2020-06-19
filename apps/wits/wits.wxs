@@ -70,8 +70,8 @@
     
     <!-- PROPERTIES SHOWN IN ADD/REMOVE PROGRAMS --> 
 
-    <Property Id='ARPURLINFOABOUT' Value='http://wits.magicsplat.com' />
-    <Property Id='ARPHELPLINK' Value='http://wits.magicsplat.com/support.html' />
+    <Property Id='ARPURLINFOABOUT' Value='https://windowstoolset.magicsplat.com' />
+    <Property Id='ARPHELPLINK' Value='https://windowstoolset.magicsplat.com/support.html' />
     <Property Id='ARPCOMMENTS' Value='Utility for inspecting Windows components' />
     <Property Id='ARPPRODUCTICON' Value='wits.ico' />
 
@@ -158,9 +158,9 @@
                   Source='License.rtf'>
             </File>
             <File Id='TreectrlDLL'
-                  Name='treectrl24.dll'
+                  Name='treectrl243t.dll'
                   DiskId='1'
-                  Source='treectrl24.dll'
+                  Source='treectrl243t.dll'
 		  KeyPath='no'
                   Vital='yes'>
 	    </File>

@@ -3,7 +3,7 @@ UILONGNAME=Windows Inspection Tool Set
 UISHORTNAME=WiTS
 APPVERSIONMAJOR=3
 APPVERSIONMINOR=2
-APPVERSIONPATCH=3
+APPVERSIONPATCH=4
 RELEASETYPE=
 # NOTE - the order of files here is important. It must be the same order
 # as required to be stored in the concatenated .tm file
@@ -103,14 +103,14 @@ witslibraries: "$(VFSDIR)\lib\snit-$(SNITVER)" \
 	copy "$(THIRDPARTYDIR)\struct-2.2.3\sets_tcl.tcl" $@
 
 
-TREECTRLDIR=$(THIRDPARTYDIR)\treectrl-2.4.2\$(PLATFORM)
+TREECTRLDIR=$(THIRDPARTYDIR)\treectrl-2.4.3\$(PLATFORM)
 
 "$(VFSDIR)\lib\treectrl": 
 	-mkdir $@
 	copy "$(TREECTRLDIR)\pkgIndex.tcl" $@
 	copy "$(TREECTRLDIR)\treectrl.tcl" $@
 	copy "$(TREECTRLDIR)\filelist-bindings.tcl" $@
-#	copy "$(TREECTRLDIR)\treectrl24.dll" $@
+#	copy "$(TREECTRLDIR)\treectrl243t.dll" $@
 
 "$(VFSDIR)\lib\widget": 
 	-mkdir $@
@@ -149,10 +149,10 @@ MSIPATH="$(DISTBUILDDIR)\$(MSINAME)"
         cd $(DISTBUILDDIR) && $(ZIP) -r nuvola.zip nuvola
 
 
-$(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" wits.wxs witsinstallui.wxs $(APPICO) binary-license.rtf "$(TREECTRLDIR)\treectrl24.dll" images\icons\witsinstalldialog.bmp images\icons\witsinstallbanner.bmp
+$(MSIPATH): "$(BUILDDIR)\$(APPTARGET).exe" wits.wxs witsinstallui.wxs $(APPICO) binary-license.rtf "$(TREECTRLDIR)\treectrl243t.dll" images\icons\witsinstalldialog.bmp images\icons\witsinstallbanner.bmp
 	-mkdir "$(DISTBUILDDIR)"
 	copy /b /y "$(BUILDDIR)\$(APPTARGET).exe" "$(DISTBUILDDIR)\$(APPNAME).exe"
-	copy "$(TREECTRLDIR)\treectrl24.dll" "$(DISTBUILDDIR)"
+	copy "$(TREECTRLDIR)\treectrl243t.dll" "$(DISTBUILDDIR)"
         copy /y $(APPICO) "$(DISTBUILDDIR)"
         copy /y binary-license.rtf "$(DISTBUILDDIR)\License.rtf"
         copy /y images\icons\witsinstalldialog.bmp "$(DISTBUILDDIR)"
