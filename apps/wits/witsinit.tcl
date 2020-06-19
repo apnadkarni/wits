@@ -9,7 +9,7 @@
 
 namespace eval ::wits::app {
 
-    variable copyright "\u00a9 2014 Ashok P. Nadkarni. All rights reserved."
+    variable copyright "\u00a9 2014,2020 Ashok P. Nadkarni. All rights reserved."
 
     # Where the script is stored
     variable script_dir [file dirname [info script]]
@@ -36,7 +36,7 @@ namespace eval ::wits::app {
     }
 
     # Our home on the web
-    variable wwwHomePage "http://wits.magicsplat.com"
+    variable wwwHomePage "https://windowstoolset.magicsplat.com"
 
     # Our version-specific home page
     variable wwwHomeVersionPage $wwwHomePage

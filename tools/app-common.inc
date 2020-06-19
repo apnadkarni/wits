@@ -130,8 +130,8 @@ CTCL="$(TOOLDIR)\ctcl.exe"
 SDX="$(TOOLDIR)\sdx-20100310.kit"
 !endif
 
-KITCLI_RUNTIME="$(THIRDPARTYDIR)\tclkits\tclkit-cli-$(PLATFORM).exe"
-KITGUI_RUNTIME="$(THIRDPARTYDIR)\tclkits\tclkit-gui-$(PLATFORM).exe"
+KITCLI_RUNTIME="$(THIRDPARTYDIR)\tclkits\tclkit-cli-8_6_10-twapi-4_3_8-$(PLATFORM).exe"
+KITGUI_RUNTIME="$(THIRDPARTYDIR)\tclkits\tclkit-gui-8_6_10-twapi-4_3_8-$(PLATFORM).exe"
 
 !ifndef KITTYPE
 KITTYPE=cli
@@ -149,12 +149,17 @@ ZIP="$(TOOLDIR)\zip.exe"
 !endif
 
 !ifndef WIXDIR
+!ifdef WIX
+WIXDIR=$(WIX)
+!else
 WIXDIR=$(PROGRAMFILES)\WiX Toolset v3.7
+!endif
 !endif
 
 !ifndef MT
 # MT="$(PROGRAMFILES)\Microsoft SDKs\Windows\v7.0\bin\mt.exe"
-MT = "c:\src\Microsoft SDKs\Windows\v7.0\bin\mt.exe"
+# MT = "c:\src\Microsoft SDKs\Windows\v7.0\bin\mt.exe"
+MT = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.15063.0\x64\mt.exe"
 !endif
 
 !ifndef 7ZIPDIR
