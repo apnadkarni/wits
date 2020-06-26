@@ -130,8 +130,8 @@ CTCL="$(TOOLDIR)\ctcl.exe"
 SDX="$(TOOLDIR)\sdx-20100310.kit"
 !endif
 
-KITCLI_RUNTIME="$(THIRDPARTYDIR)\tclkits\tclkit-cli-8_6_10-twapi-4_3_8-$(PLATFORM).exe"
-KITGUI_RUNTIME="$(THIRDPARTYDIR)\tclkits\tclkit-gui-8_6_10-twapi-4_3_8-$(PLATFORM).exe"
+KITCLI_RUNTIME="$(THIRDPARTYDIR)\tclkits\tclkit-cli-8_6_10-twapi-4_3_9-$(PLATFORM)-max.exe"
+KITGUI_RUNTIME="$(THIRDPARTYDIR)\tclkits\tclkit-gui-8_6_10-twapi-4_3_9-$(PLATFORM)-max.exe"
 
 !ifndef KITTYPE
 KITTYPE=cli

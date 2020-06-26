@@ -1081,6 +1081,7 @@ proc ::wits::app::taskbar_handler {id msg msgpos ticks} {
 # Either minimizes window or withdraws so it does not show up as icon
 # depending on whether taskbar tray support is enabled
 proc ::wits::app::minimize {win args} {
+    variable _running_background_display_shown
 
     # Ignore unless it is for the top window (should not happen
     # since we now bind to the window class tag but...)
@@ -1095,7 +1096,12 @@ proc ::wits::app::minimize {win args} {
         # Only want to show up in taskbar tray. Withdraw window so icon
         # does not show up
         wm withdraw $::wits::app::mainWin
-        taskbar_balloon "$long_name is running in the background. Click the icon to restore." "" info
+        # It's irritating on Win 10 to see this every time so only show
+        # it once.
+        if {[info exists _running_background_display_shown]} {
+            set _running_background_display_shown
+            taskbar_balloon "$long_name is running in the background. Click the icon to restore." "" info
+        }
     }
 }
 
