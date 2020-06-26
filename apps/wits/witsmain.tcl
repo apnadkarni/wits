@@ -1410,8 +1410,15 @@ proc ::wits::app::goto_sourceforge_tracker {pageid} {
 proc ::wits::app::goto_url {url args} {
     # Apparently rundll does not like htm extensions. So we replace it with
     # its hex code. See http://mini.net/tcl/557
-    set url [regsub -all -nocase {htm} $url {ht%6D}]
-    exec rundll32 url.dll,FileProtocolHandler $url &
+    set shell [twapi::comobj WScript.Shell]
+    try {
+        $shell run $url
+    } finally {
+        $shell -destroy
+    }
+    #Old method - did not wrk with help link
+    #set url [regsub -all -nocase {htm} $url {ht%6D}]
+    #exec rundll32 url.dll,FileProtocolHandler $url &
 }
 
 
