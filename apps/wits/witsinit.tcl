@@ -36,7 +36,7 @@ namespace eval ::wits::app {
     }
 
     # Our home on the web
-    variable wwwHomePage "https://windowstoolset.magicsplat.com"
+    variable wwwHomePage "https://wits.magicsplat.com"
 
     # Our version-specific home page
     variable wwwHomeVersionPage $wwwHomePage

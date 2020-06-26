@@ -70,8 +70,8 @@
     
     <!-- PROPERTIES SHOWN IN ADD/REMOVE PROGRAMS --> 
 
-    <Property Id='ARPURLINFOABOUT' Value='https://windowstoolset.magicsplat.com' />
-    <Property Id='ARPHELPLINK' Value='https://windowstoolset.magicsplat.com/support.html' />
+    <Property Id='ARPURLINFOABOUT' Value='https://wits.magicsplat.com' />
+    <Property Id='ARPHELPLINK' Value='https://wits.magicsplat.com/support.html' />
     <Property Id='ARPCOMMENTS' Value='Utility for inspecting Windows components' />
     <Property Id='ARPPRODUCTICON' Value='wits.ico' />
 

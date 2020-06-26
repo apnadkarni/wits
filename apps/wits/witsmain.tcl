@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011-2014 Ashok P. Nadkarni
+# Copyright (c) 2011-2020 Ashok P. Nadkarni
 # All rights reserved.
 #
 # See the file LICENSE for license
@@ -1408,15 +1408,10 @@ proc ::wits::app::goto_sourceforge_tracker {pageid} {
 # Show the web page. $args is just so this function can be used in
 # some callbacks which pass additional info that this function does not need.
 proc ::wits::app::goto_url {url args} {
+    twapi::shell_execute -path $url
+    #Old method - did not wrk with help link
     # Apparently rundll does not like htm extensions. So we replace it with
     # its hex code. See http://mini.net/tcl/557
-    set shell [twapi::comobj WScript.Shell]
-    try {
-        $shell run $url
-    } finally {
-        $shell -destroy
-    }
-    #Old method - did not wrk with help link
     #set url [regsub -all -nocase {htm} $url {ht%6D}]
     #exec rundll32 url.dll,FileProtocolHandler $url &
 }
