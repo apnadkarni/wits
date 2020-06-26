@@ -1098,8 +1098,8 @@ proc ::wits::app::minimize {win args} {
         wm withdraw $::wits::app::mainWin
         # It's irritating on Win 10 to see this every time so only show
         # it once.
-        if {[info exists _running_background_display_shown]} {
-            set _running_background_display_shown
+        if {![info exists _running_background_display_shown]} {
+            set _running_background_display_shown 1
             taskbar_balloon "$long_name is running in the background. Click the icon to restore." "" info
         }
     }

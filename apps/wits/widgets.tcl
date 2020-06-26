@@ -3946,7 +3946,7 @@ snit::widgetadaptor wits::widget::balloon {
 
         pack $_titlesepw -side top -fill x -expand false -padx 5 -pady 5
         if {$options(-checkboxvar) ne "" && $options(-checkboxlabel) ne ""} {
-            pack $_cbw -expand false -fill x -padx 10 -pady 10 -side bottom
+            pack $_cbw -expand false -fill x -padx 5 -pady 5 -side top
         }
 
         if {$options(-icon) ne ""} {
