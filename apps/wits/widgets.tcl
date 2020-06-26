@@ -5583,7 +5583,15 @@ snit::widgetadaptor wits::widget::listframe {
             foreach col_id [$_treectrl column list] val $row {
                 lappend vals $col_id $val
             }
-            $_treectrl item text $item {*}$vals
+            if {[catch {
+                $_treectrl item text $item {*}$vals
+            } msg]} {
+                # TBD - why is this catch block neeeded? Means our logic
+                # for _actually_displayed_items is not correct?
+                # Set style and retry
+                $_treectrl item style set $item {*}$_item_style_phrase
+                $_treectrl item text $item {*}$vals
+            }
         }
 
         if {$options(-showchangesonly)} {
