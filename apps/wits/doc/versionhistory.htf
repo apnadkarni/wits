@@ -1,6 +1,16 @@
 <h1>Version history</h1>
 
 <p>
+  Changes between 3.2.3 and 3.2.5
+</p>
+<ul>
+  <li>Display service interactive and delayed start setting.
+  <li>Fixed memory leak.
+  <li>Fixed "Column style not configured." error.
+  <li>Fixed "User not found." error.
+</ul>
+
+<p>
   Changes between 3.2.2 and 3.2.3
 </p>
 <ul>

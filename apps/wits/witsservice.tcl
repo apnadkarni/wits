@@ -37,7 +37,9 @@ namespace eval wits::app::service {
                 "Run " {
                     frame {
                         {label -starttype}
+                        {label -delayedstart}
                         {label -command}
+                        {label interactive}
                         {label -account}
                     }
                 }
@@ -96,6 +98,7 @@ proc wits::app::service::get_property_defs {} {
             displayname "Service display name" "Display name" "" text
             -description "Service Description" "Description" "" text
             -errorcontrol "Startup error control" "Error control" "" text
+            -delayedstart "Delayed start" "Delayed" "" bool
             interactive "Interacts with the desktop" "Interactive" "" bool
             -loadordergroup "Load order group" "Group" "" text
             -command     "Command line" "Command" "" text

@@ -1,8 +1,8 @@
 <div class='news'>
 <h2 class='news'>Latest news</h2>
 <dl>
-<dt>Oct 5, 2014:</dt>
-<dd>Windows Inspection Tool Set 3.2.3 released. 
+<dt>Jul 2, 2020:</dt>
+<dd>Windows Inspection Tool Set 3.2.5 released. 
 See <a href='versionhistory.html'>changes</a>.</dd>
 </dl>
 </div>
@@ -47,8 +47,6 @@ See <a href='versionhistory.html'>changes</a>.</dd>
 
     <h2>Download</h2>
     <p>
-      Ready to give it a spin? WiTS supports Windows XP (SP2 or later),
-      Windows 2003, Windows Vista, Windows Server 2008, Windows Server 2008R2
-      and Windows 7.
+      Ready to give it a spin? WiTS supports Windows 7 through Windows 10.
       <a href="download.html">Download</a> an installer.
     </p>

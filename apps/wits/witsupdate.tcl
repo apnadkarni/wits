@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007-2011 Ashok P. Nadkarni
+# Copyright (c) 2007-2020 Ashok P. Nadkarni
 # All rights reserved.
 #
 # See the file LICENSE for license
@@ -8,13 +8,14 @@
 # Program update related code
 
 package require http
+http::register https 443 twapi::tls_socket
 package require uri
 
 namespace eval ::wits::app {
     # Update file used to be wits-update.txt. Sadly, in V3 betas, an error
     # is generated when updating the status bar if the update available
     # is displayed. Changed file name so betas will ignore.
-    variable update_url "http://wits.magicsplat.com/wits-update-meta.txt"
+    variable update_url "https://wits.magicsplat.com/wits-update-meta.txt"
 
     # Section/name of prefs/registry where we store the version updates
     # that user has already responded to and does not want to be asked again

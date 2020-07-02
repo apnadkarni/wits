@@ -1,8 +1,8 @@
-Version 3.1.6 Beta of Windows Inspection Tool Set (WiTS)
+Version 3.2.5 of Windows Inspection Tool Set (WiTS)
 has been released.
 
-  * Home page -  http://windowstoolset.sourceforge.net
-  * Project page - http://sourceforge.net/projects/windowstoolset.
+  * Home page -  https://wits.magicsplat.com
+  * Project page - https://sourceforge.net/projects/windowstoolset.
   * Screen shot - https://a.fsdn.com/con/app/proj/windowstoolset/screenshots/screenshot.png
 
 What is WiTS
@@ -27,17 +27,9 @@ Windows components.
   * Quickly access functions via the taskbar and hotkeys
 
 
-WiTS started out as a demo for TWAPI (http://twapi.sf.net) 
-but is now an independent project on sourceforge.
-
 System Requirements
 -------------------
 
-   * Desktop: Windows XP SP2 or later
-   * Server:  Windows Server 2003 or later.
+   * Desktop: Windows 7 or later.
+   * Server:  Windows Server 2008 or later.
 
-Changes since V3.0
-------------------
-
-   * Support for new Windows event log message formats
-   * Support for Windows 8
